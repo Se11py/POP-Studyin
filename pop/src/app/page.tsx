@@ -2,16 +2,59 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { Calendar, MessageCircle, Clock, CheckCircle2, ChevronRight, Play, BookOpen, Video, FileText, ArrowRight, Award, GraduationCap, Library, LayoutGrid, Globe, Brain } from 'lucide-react';
 
 export default function CourseraLandingPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('node-3');
 
-  const readinessStats = [
-    { subject: 'Math Paper 2', score: '92%', status: 'On track', icon: <Library className="w-5 h-5 text-blue-600" /> },
-    { subject: 'Physics HL', score: '88%', status: 'Reviewed', icon: <Brain className="w-5 h-5 text-blue-600" /> },
-    { subject: 'Chemistry ATP', score: '86%', status: 'Needs recap', icon: <Globe className="w-5 h-5 text-blue-600" /> }
+  const mapNodes = [
+    {
+      id: 'node-1',
+      title: 'Kinematics & Forces',
+      status: 'completed',
+      score: '94%',
+      topics: ['Vectors', 'Acceleration', 'Newton\'s Laws', 'Friction & Weight'],
+      icon: <Brain className="w-5 h-5" />,
+      detail: 'Formulas and free-body diagrams completed. 94% average accuracy across 4 practice quizzes.'
+    },
+    {
+      id: 'node-2',
+      title: 'Thermal Physics',
+      status: 'completed',
+      score: '89%',
+      topics: ['Latent Heat', 'Specific Heat Capacity', 'Gas Laws'],
+      icon: <Globe className="w-5 h-5" />,
+      detail: 'State changes & heating curves reviewed. Solid understanding of particle models and thermal transfer methods.'
+    },
+    {
+      id: 'node-3',
+      title: 'Waves & Optics',
+      status: 'active',
+      score: 'In Progress',
+      topics: ['Refraction Index', 'Diffraction Waves', 'Snell\'s Law'],
+      icon: <Library className="w-5 h-5" />,
+      detail: 'Current active module. Focus on wave equation calculations and optical refraction experiments.'
+    },
+    {
+      id: 'node-4',
+      title: 'Electromagnetism',
+      status: 'locked',
+      score: 'Locked',
+      topics: ['Magnetic Induction', 'Transformer Ratios', 'Resistor Circuits'],
+      icon: <LayoutGrid className="w-5 h-5" />,
+      detail: 'Requires completion of Waves & Optics to unlock. Covers electromagnetic induction, field lines, and circuit algebra.'
+    },
+    {
+      id: 'node-5',
+      title: 'Final Mock Exam',
+      status: 'milestone',
+      score: 'Locked',
+      topics: ['Comprehensive IGCSE Paper 2 & 4'],
+      icon: <Award className="w-5 h-5" />,
+      detail: 'Ultimate preparation assessment. A 40-question multiple choice & short-answer simulation under standard exam constraints.'
+    }
   ];
   
   const focusBlocks = [
@@ -211,7 +254,7 @@ export default function CourseraLandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right Column - Academic Interface */}
+            {/* Right Column - Interactive Syllabus Mastery Map */}
             <motion.div 
               className="md:col-span-6 relative hidden md:block"
               initial={{ opacity: 0, y: 30 }}
@@ -224,48 +267,154 @@ export default function CourseraLandingPage() {
               <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden flex flex-col">
                 <div className="bg-blue-900 text-white p-6 border-b border-blue-800 flex justify-between items-center">
                   <div>
-                    <h3 className="text-xl font-bold">Student Dashboard</h3>
-                    <p className="text-blue-200 text-sm mt-1">Mock Examination Progress</p>
+                    <h3 className="text-xl font-bold">ANS Syllabus Mastery Map</h3>
+                    <p className="text-blue-200 text-sm mt-1">IGCSE Co-ordinated Sciences (0654)</p>
                   </div>
-                  <Award className="w-8 h-8 text-blue-300 opacity-50" />
+                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-800 text-blue-200 text-xs font-bold uppercase rounded border border-blue-700">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    <span>Active Study</span>
+                  </div>
                 </div>
                 
-                <div className="p-8 flex-1 bg-gray-50">
-                  <div className="bg-white border border-gray-200 rounded p-6 shadow-sm mb-6">
-                    <div className="flex justify-between items-end mb-4 border-b border-gray-100 pb-4">
-                      <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Current Cohort</span>
-                      <span className="text-blue-700 font-bold bg-blue-50 px-3 py-1 rounded text-xs">IB Diploma Program</span>
-                    </div>
+                <div className="p-8 bg-gray-50 flex flex-col lg:flex-row gap-6">
+                  {/* Timeline Map Side */}
+                  <div className="lg:w-1/2 relative pr-4">
+                    {/* Visual Vertical Connection Line */}
+                    <div className="absolute left-[29px] top-6 bottom-6 w-0.5 bg-gray-200 -z-0"></div>
                     
-                    <div className="space-y-6">
-                      {readinessStats.map((stat, idx) => (
-                        <div key={idx} className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-gray-50 rounded flex items-center justify-center border border-gray-100">
-                            {stat.icon}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between mb-1">
-                              <span className="font-bold text-gray-800">{stat.subject}</span>
-                              <span className="font-bold text-gray-800">{stat.score}</span>
+                    <div className="space-y-4 relative z-10">
+                      {mapNodes.map((node) => {
+                        const isSelected = selectedNodeId === node.id;
+                        const isActive = node.status === 'active';
+                        const isCompleted = node.status === 'completed';
+                        const isLocked = node.status === 'locked';
+                        const isMilestone = node.status === 'milestone';
+                        
+                        return (
+                          <div 
+                            key={node.id} 
+                            onClick={() => setSelectedNodeId(node.id)}
+                            className={`flex items-center gap-4 p-3 rounded-lg border transition-all cursor-pointer group ${
+                              isSelected 
+                                ? 'bg-blue-50 border-blue-300 shadow-sm' 
+                                : 'bg-white border-gray-200 hover:border-gray-300'
+                            }`}
+                          >
+                            {/* Node icon / indicator */}
+                            <div className="relative">
+                              <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
+                                isCompleted 
+                                  ? 'bg-green-50 border-green-200 text-green-600 shadow-sm' 
+                                  : isActive
+                                    ? 'bg-blue-600 border-blue-700 text-white shadow-lg ring-4 ring-blue-100'
+                                    : isMilestone
+                                      ? 'bg-yellow-50 border-yellow-200 text-yellow-600'
+                                      : 'bg-gray-50 border-gray-200 text-gray-400'
+                              }`}>
+                                {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : React.cloneElement(node.icon as React.ReactElement<{ size?: number }>, { size: 16 })}
+                              </div>
+                              
+                              {/* Pulsing indicator for active node */}
+                              {isActive && (
+                                <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500 border border-white"></span>
+                                </span>
+                              )}
                             </div>
-                            <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                              <div className="bg-blue-600 h-full rounded-full" style={{ width: stat.score }}></div>
+                            
+                            <div className="flex-1 min-w-0">
+                              <h4 className={`font-bold text-xs truncate ${
+                                isLocked ? 'text-gray-400' : 'text-gray-900'
+                              }`}>
+                                {node.title}
+                              </h4>
+                              <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">
+                                {isCompleted ? 'Completed' : isActive ? 'In Progress' : isMilestone ? 'Exam Clinic' : 'Locked'}
+                              </p>
+                            </div>
+                            
+                            {/* Score/Badge */}
+                            <div className="text-right shrink-0">
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-widest ${
+                                isCompleted 
+                                  ? 'bg-green-50 text-green-700 border-green-200'
+                                  : isActive
+                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                    : 'bg-gray-100 text-gray-400 border-gray-200'
+                              }`}>
+                                {node.score}
+                              </span>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                   
-                  <div className="bg-white border border-gray-200 rounded p-6 shadow-sm">
-                    <h4 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <GraduationCap className="w-5 h-5 text-blue-700" />
-                      Recent Academic Feedback
-                    </h4>
-                    <p className="text-gray-600 text-sm leading-relaxed italic border-l-4 border-blue-200 pl-4 py-1">
-                      &quot;The student has shown remarkable improvement in the application of energetic principles. Recommend reviewing stoichiometry limits before the next mock assessment.&quot;
-                      <span className="block mt-2 font-bold text-gray-500 not-italic text-xs">— Senior Mentor, Chemistry Faculty</span>
-                    </p>
+                  {/* Inspector Panel Side */}
+                  <div className="lg:w-1/2 flex flex-col justify-between">
+                    <AnimatePresence mode="wait">
+                      {(() => {
+                        const selectedNode = mapNodes.find(n => n.id === selectedNodeId) || mapNodes[2];
+                        return (
+                          <motion.div
+                            key={selectedNode.id}
+                            initial={{ opacity: 0, x: 10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -10 }}
+                            transition={{ duration: 0.2 }}
+                            className="bg-white border border-gray-200 rounded p-5 shadow-sm flex-1 flex flex-col justify-between space-y-4"
+                          >
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-start">
+                                <span className={`text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${
+                                  selectedNode.status === 'completed'
+                                    ? 'bg-green-50 text-green-700 border-green-200'
+                                    : selectedNode.status === 'active'
+                                      ? 'bg-blue-50 text-blue-700 border-blue-200'
+                                      : 'bg-gray-50 text-gray-500 border-gray-200'
+                                }`}>
+                                  {selectedNode.status === 'completed' ? 'Module Complete' : selectedNode.status === 'active' ? 'Active Topic' : 'Up Next'}
+                                </span>
+                                {selectedNode.status === 'completed' && (
+                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                    Readiness: <strong className="text-green-600">{selectedNode.score}</strong>
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <h3 className="text-base font-bold text-gray-900">{selectedNode.title}</h3>
+                              <p className="text-gray-600 text-xs leading-relaxed">{selectedNode.detail}</p>
+                              
+                              <div className="space-y-1.5 pt-1.5">
+                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Syllabus Key Focus Areas:</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {selectedNode.topics.map((topic, i) => (
+                                    <span key={i} className="text-[10px] font-medium bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded text-gray-600">
+                                      {topic}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {selectedNode.status !== 'locked' && (
+                              <Link 
+                                href={selectedNode.id === 'node-5' ? '/classes/mock/igcse-physics' : `/classes`}
+                                className="mt-2 w-full py-2 bg-blue-700 text-white rounded font-bold text-[10px] hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-1.5 group"
+                              >
+                                <span>{selectedNode.id === 'node-5' ? 'Enter Assessment' : 'Open Study Guide'}</span>
+                                <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+                              </Link>
+                            )}
+                          </motion.div>
+                        );
+                      })()}
+                    </AnimatePresence>
                   </div>
                 </div>
               </div>
