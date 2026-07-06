@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# POP Studying 🎓
 
-## Getting Started
+An all-in-one Educational Platform designed for secondary students at **Amnuay Silpa School (ANS)** in Bangkok, Thailand, to prepare for IGCSE and A-Level examinations. 
 
-First, run the development server:
+Built to prioritize zero-distraction active learning, **POP Studying** replaces generic revision summaries with high-fidelity visual simulations, rigorous curriculum-aligned topic journeys, and real-time mock exam environments.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 🚀 Key Features
+
+### 1. Interactive Laboratories & Visualizers
+* **Kinematics & Force Simulators**: Interactive graphing and object movement models driven by physics variables.
+* **Equation Rearrangement Solver**: A step-by-step algebraic breakdown that isolates any chosen variable (e.g., solving for $u$, $a$, or $t$ in kinematics equations) dynamically.
+* **Core Science Laboratories**: Interactive simulations (vector addition, Archimedes' buoyant force blocks, unit circle trigonometrics, titration curves, Bohr atomic builders) with slider parameter adjustments and real-time coordinate plotting.
+
+### 2. Curriculum-Aligned Classes
+* Mapped to **ANS Syllabus Standards** across Mathematics, Physics, Chemistry, Biology, and Computer Science.
+* Organized by three core difficulty tiers:
+  * **Beginner** (Grades 1-3) — Core foundational concepts.
+  * **Intermediate** (Grades 4-6) — Deeper application-level learning.
+  * **Advance** (Grades 7-9) — Rigorous exam prep questions.
+
+### 3. Mini Mock Exam Simulator
+* Timed exam simulators that replicate CIE/Edexcel formats.
+* Supports both multiple-choice and short-answer text grading.
+* Equipped with digital scratchpad utilities, formula reference sheets, and interactive periodic tables directly inside the exam view.
+
+### 4. Searchable Academic Dictionary & Flashcards
+* Exhaustive technical glossary containing over **254+ core terms** with zero abbreviations or simplified terms.
+* Each definition contains a 6-attribute analysis: Definition, Primary Classroom Methodology, Mathematical Model (equations & units), Real-world Contextual Applications, Common Misconceptions/Examiner Insights, and Relational Schema connections.
+
+---
+
+## 🛠️ Architecture & Tech Stack
+
+The application is built on a serverless, reactive structure optimized for speed, cost efficiency, and high interactivity.
+
+```mermaid
+graph TD
+    %% User Interface
+    UI[Next.js Frontend: App Router]
+    
+    %% Services
+    Clerk[Clerk: Auth & Profiles]
+    Convex[Convex: Reactive DB]
+    Bunny[Bunny.net: Static CDN]
+    
+    %% Root App Routes
+    Landing[Root Landing Page]
+    Classes[Classes Hub]
+    Mock[Mock Exam Simulator]
+    Labs[Interactive Labs]
+    Dict[Academic Dictionary]
+    Flash[Flashcards]
+    
+    %% Connections
+    UI -->|Render Routes| Landing & Classes & Mock & Labs & Dict & Flash
+    UI -->|Secure Auth| Clerk
+    UI -->|Reactive JSON Sync| Convex
+    UI -->|Static PDF/Image Assets| Bunny
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+* **Frontend Framework**: **Next.js (v16.2.3)** App Router & **React (v19.2.4)**
+* **Styling**: **Tailwind CSS (v4)** & **Framer Motion (v12)**
+* **Backend Database**: **Convex (v1.34.1)** Serverless Reactive DB
+* **Authentication**: **Clerk Auth (@clerk/nextjs v7)**
+* **Asset CDN**: **Bunny.net** (PDF worksheets, formula sheets, static graphics)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Project Directory Structure
 
-## Learn More
+```plaintext
+pop/
+├── convex/                      # Convex schema definitions and mutations
+├── public/                      # Static assets (images, icons)
+├── src/
+│   ├── app/                     # Next.js App Router (Root-Level Routes)
+│   │   ├── (auth)/              # Clerk login and signup paths
+│   │   ├── classes/             # Study courses & mock exam environments
+│   │   ├── dictionary/          # Searchable technical dictionary
+│   │   ├── flashcards/          # Revision cards & study modules
+│   │   ├── interactives/        # Authoritative simulation laboratories
+│   │   ├── learn/               # Main lessons text viewer
+│   │   ├── physics-rush/        # Physics module board and kinematics visualizer
+│   │   ├── globals.css          # Tailwind CSS global variables
+│   │   ├── layout.tsx           # Global HTML wrapper & provider registry
+│   │   └── page.tsx             # Main Landing Page
+│   └── components/              # Shared reusable components
+│       └── ConvexClientProvider.tsx
+├── package.json                 # Dependencies and npm scripts
+└── tsconfig.json                # TypeScript compiler config
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 💻 Developer Guide & Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prerequisites
+Ensure you have **Node.js (v18+)** and **npm** installed on your system.
 
-## Deploy on Vercel
+### Installation
+1. Clone the repository and navigate to the project directory:
+   ```bash
+   cd documents/POP/pop
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Running Locally
+1. Start the serverless backend database:
+   ```bash
+   npx convex dev
+   ```
+2. Start the Next.js development server:
+   ```bash
+   npm run dev
+   ```
+3. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Quality Verification
+Run the compiler type-checks and code formatting linter:
+```bash
+npm run lint
+```
+To run a full production build:
+```bash
+npm run build
+```
