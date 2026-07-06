@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ArrowLeft, BookOpen, Compass, ChevronRight, Stethoscope, Landmark, 
   Cpu, Rocket, Briefcase, Award, ArrowRight, ShieldAlert, Sparkles,
-  Play, CheckCircle2, FlaskConical, Target
+  Play, CheckCircle2, FlaskConical, Target, Leaf, Coins, PenTool
 } from 'lucide-react';
 
 interface RecommendedCourse {
@@ -44,10 +44,10 @@ export default function CareerPathwaysPage() {
   const blueprints: Blueprint[] = [
     {
       id: 'stem-aero',
-      name: 'Physical Engineering & Aerospace',
+      name: 'Aerospace & Robotics Engineering',
       industry: 'stem',
-      careerGoal: 'Aerospace Engineer, Robotics Specialist, Civil Developer',
-      description: 'Built for analytical minds aiming to master Newtonian mechanics, calculus applications, and materials science needed for structural and mechanical design.',
+      careerGoal: 'Aerospace Engineer, Robotics Specialist, Control Systems Engineer',
+      description: 'Built for analytical minds aiming to master Newtonian mechanics, fluid dynamics, and automated control systems needed for spacecraft and robotic design.',
       icon: <Rocket className="w-6 h-6" />,
       theme: 'border-blue-100 bg-blue-50/20 hover:border-blue-300',
       accentColor: 'bg-blue-600',
@@ -55,73 +55,138 @@ export default function CareerPathwaysPage() {
       requiredCourses: [
         { name: 'Physics', level: 'IGCSE / A-Level', topics: ['Kinematics & Dynamics', 'Forces & Friction', 'Thermal energy transfer'] },
         { name: 'Mathematics', level: 'Core & Extended', topics: ['Calculus', 'Vector Transformations', 'Algebraic Equations'] },
-        { name: 'Chemistry', level: 'IGCSE Core', topics: ['Periodic Table Reactivity', 'Bonding & Structures'] }
+        { name: 'Chemistry', level: 'IGCSE Core', topics: ['Combustion Chemistry', 'Material Reactivity'] }
       ],
       recommendedLabs: [
         { name: 'Kinematics & Vectors Visualizer', url: '/physics-rush/visualizer' },
-        { name: 'Circuit Assembly Lab', url: '/interactives/physics-circuit-assembly' }
+        { name: 'Archimedes Buoyant Force Blocks', url: '/interactives/physics-density-archimedes' }
       ],
       universityPrereqs: ['Physics A-Level (Grade A)', 'Mathematics A-Level (Grade A)', 'Chemistry IGCSE (Grade B)']
     },
     {
-      id: 'medical-clinical',
-      name: 'Medical & Clinical Sciences',
-      industry: 'medical',
-      careerGoal: 'Doctor, Surgeon, Medical Researcher, Pharmacist',
-      description: 'Provides the rigorous chemical biology training necessary for clinical thinking, research methodologies, and university medical school examinations.',
-      icon: <Stethoscope className="w-6 h-6" />,
-      theme: 'border-emerald-100 bg-emerald-50/20 hover:border-emerald-300',
-      accentColor: 'bg-emerald-600',
-      textAccent: 'text-emerald-700',
-      requiredCourses: [
-        { name: 'Chemistry', level: 'IGCSE / A-Level', topics: ['Acid-Base Neutralization', 'Organic Nomenclature', 'Redox Reactions'] },
-        { name: 'Biology', level: 'IGCSE / A-Level', topics: ['Enzyme Kinetics', 'Homeostasis & Nervous systems', 'Genetics & Punnett Squares'] },
-        { name: 'Mathematics', level: 'Core Syllabus', topics: ['Statistics & Distributions', 'Probability Trees'] }
-      ],
-      recommendedLabs: [
-        { name: 'Acid-Base Titration Lab', url: '/interactives/chemistry-titration-neutralization' },
-        { name: 'Enzyme Kinetics Simulator', url: '/interactives/biology-enzyme-kinetics' }
-      ],
-      universityPrereqs: ['Chemistry A-Level (Grade A)', 'Biology A-Level (Grade A)', 'Mathematics IGCSE (Grade A)']
-    },
-    {
-      id: 'legal-corporate',
-      name: 'Jurisprudence & Corporate Law',
-      industry: 'legal',
-      careerGoal: 'Corporate Lawyer, Legal Adviser, Policy Advocate',
-      description: 'Focuses heavily on deep document review, critical analysis of historical timelines, and logic frameworks needed to succeed in legal studies.',
-      icon: <Landmark className="w-6 h-6" />,
-      theme: 'border-purple-100 bg-purple-50/20 hover:border-purple-300',
-      accentColor: 'bg-purple-600',
-      textAccent: 'text-purple-700',
-      requiredCourses: [
-        { name: 'History', level: 'IGCSE / A-Level', topics: ['International Relations', 'Twentieth Century Diplomacy'] },
-        { name: 'English Literature', level: 'IGCSE / A-Level', topics: ['Socio-Political Themes', 'Comparative Essay Writing'] },
-        { name: 'Economics', level: 'IGCSE Core', topics: ['Microeconomics & Allocation', 'Market Failures'] }
-      ],
-      recommendedLabs: [],
-      universityPrereqs: ['English Literature A-Level (Grade A)', 'History A-Level (Grade A)', 'Economics IGCSE (Grade B)']
-    },
-    {
-      id: 'stem-cs',
-      name: 'Computational Systems & AI',
+      id: 'stem-electrical',
+      name: 'Electrical & Hardware Engineering',
       industry: 'stem',
-      careerGoal: 'Software Engineer, Systems Architect, Data Scientist',
-      description: 'Tailored for computational engineering, focusing on algorithms, numeric mathematics, logical gates, and the electrical foundations of modern computing.',
+      careerGoal: 'Electrical Engineer, Microchip Designer, Circuit Architect',
+      description: 'Focuses on electrical circuit systems, voltage dynamics, magnetism, and binary computing logic, preparing students for microchip and power infrastructure engineering.',
       icon: <Cpu className="w-6 h-6" />,
       theme: 'border-indigo-100 bg-indigo-50/20 hover:border-indigo-300',
       accentColor: 'bg-indigo-600',
       textAccent: 'text-indigo-700',
       requiredCourses: [
-        { name: 'Computer Science', level: 'IGCSE / A-Level', topics: ['Algorithms & Data Types', 'Logic Gates & Binary Systems'] },
-        { name: 'Mathematics', level: 'Core & Extended', topics: ['Numerical Calculus', 'Sets & Venn Diagrams', 'Probability Theory'] },
-        { name: 'Physics', level: 'IGCSE Core', topics: ['Resistor Networks', 'Electromagnetic Induction'] }
+        { name: 'Physics', level: 'IGCSE / A-Level', topics: ['Resistor Networks', 'Electromagnetic Induction', 'Electrical Charge & Fields'] },
+        { name: 'Mathematics', level: 'Core & Extended', topics: ['Trigonometrics', 'Complex Coordinates', 'Linear Algebra'] },
+        { name: 'Computer Science', level: 'IGCSE Core', topics: ['Logic Gates & Binary Systems', 'Computer Hardware Foundations'] }
       ],
       recommendedLabs: [
-        { name: 'Logic Gates & Sets Venn Lab', url: '/interactives/math-sets-venn' },
-        { name: 'Resistor Ohms Law Network', url: '/interactives/physics-resistor-networks' }
+        { name: 'Resistor Ohms Law Network', url: '/interactives/physics-resistor-networks' },
+        { name: 'Circuit Assembly Lab', url: '/interactives/physics-circuit-assembly' }
       ],
-      universityPrereqs: ['Mathematics A-Level (Grade A)', 'Computer Science A-Level (Grade A)', 'Physics IGCSE (Grade B)']
+      universityPrereqs: ['Mathematics A-Level (Grade A)', 'Physics A-Level (Grade A)', 'Computer Science IGCSE (Grade A)']
+    },
+    {
+      id: 'medical-clinical',
+      name: 'Clinical Medicine & Surgery',
+      industry: 'medical',
+      careerGoal: 'Doctor, Surgeon, Clinical General Practitioner',
+      description: 'Provides the rigorous chemical biology foundations necessary for clinical thinking, metabolic processes, and university medical school admissions.',
+      icon: <Stethoscope className="w-6 h-6" />,
+      theme: 'border-emerald-100 bg-emerald-50/20 hover:border-emerald-300',
+      accentColor: 'bg-emerald-600',
+      textAccent: 'text-emerald-700',
+      requiredCourses: [
+        { name: 'Chemistry', level: 'IGCSE / A-Level', topics: ['Acid-Base Neutralization', 'Organic Nomenclature', 'Stoichiometry & Yields'] },
+        { name: 'Biology', level: 'IGCSE / A-Level', topics: ['Homeostasis & Coordination', 'Cell Structure & Organelles', 'Respiration & Metabolic Loops'] },
+        { name: 'Physics', level: 'IGCSE Core', topics: ['Pressure & Depth', 'Radioactive Decay half-lives'] }
+      ],
+      recommendedLabs: [
+        { name: 'Acid-Base Titration Lab', url: '/interactives/chemistry-titration-neutralization' },
+        { name: 'Cell Scale Visualizer', url: '/interactives/biology-cell-structure-scale' }
+      ],
+      universityPrereqs: ['Chemistry A-Level (Grade A*)', 'Biology A-Level (Grade A)', 'Physics A-Level or IGCSE (Grade A)']
+    },
+    {
+      id: 'medical-biotech',
+      name: 'Bio-Technology & Environmental Sciences',
+      industry: 'medical',
+      careerGoal: 'Biotechnologist, Genetic Engineer, Conservation Scientist',
+      description: 'Explores organic biochemistry, ecosystems models, cell GM mutations, and sustainability dynamics to prepare for environmental and genetic sciences.',
+      icon: <Leaf className="w-6 h-6" />,
+      theme: 'border-teal-100 bg-teal-50/20 hover:border-teal-300',
+      accentColor: 'bg-teal-600',
+      textAccent: 'text-teal-700',
+      requiredCourses: [
+        { name: 'Biology', level: 'IGCSE / A-Level', topics: ['Genetics & Inheritance', 'Ecology Food Webs', 'Industrial Fermenters & GM'] },
+        { name: 'Chemistry', level: 'IGCSE / A-Level', topics: ['Electrolysis Cells', 'Polymers & Organic Functional Groups'] },
+        { name: 'Mathematics', level: 'Core Syllabus', topics: ['Statistics & Distributions', 'Data Modeling'] }
+      ],
+      recommendedLabs: [
+        { name: 'Ecology Food Web Simulator', url: '/interactives/biology-ecology-food-web' },
+        { name: 'Electrolysis Virtual Cell', url: '/interactives/chemistry-electrolysis-cell' }
+      ],
+      universityPrereqs: ['Biology A-Level (Grade A)', 'Chemistry A-Level (Grade B)', 'Mathematics IGCSE (Grade A)']
+    },
+    {
+      id: 'business-finance',
+      name: 'Actuarial Science & Finance',
+      industry: 'business',
+      careerGoal: 'Actuary, Financial Engineer, Quantitative Analyst',
+      description: 'Combines microeconomics principles, quantitative statistics, database querying, and advanced calculus to model financial risks and market dynamics.',
+      icon: <Coins className="w-6 h-6" />,
+      theme: 'border-amber-100 bg-amber-50/20 hover:border-amber-300',
+      accentColor: 'bg-amber-600',
+      textAccent: 'text-amber-700',
+      requiredCourses: [
+        { name: 'Mathematics', level: 'Core & Extended', topics: ['Probability Trees & distributions', 'Calculus slopes & derivatives', 'Sets & Venn Diagrams'] },
+        { name: 'Economics', level: 'IGCSE / A-Level', topics: ['Microeconomics Allocation', 'Market Failures & GDP'] },
+        { name: 'Computer Science', level: 'IGCSE Core', topics: ['Database design & SQL queries', 'Structured Data Types'] }
+      ],
+      recommendedLabs: [
+        { name: 'Venn Diagram & Sets Shading', url: '/interactives/math-sets-venn' },
+        { name: 'Probability Spinners Tree', url: '/interactives/math-probability-spinners' }
+      ],
+      universityPrereqs: ['Mathematics A-Level (Grade A*)', 'Economics A-Level (Grade A)', 'Computer Science IGCSE (Grade B)']
+    },
+    {
+      id: 'legal-ip',
+      name: 'Intellectual Property & Legal Tech',
+      industry: 'legal',
+      careerGoal: 'Patent Attorney, Corporate Counsel, Legal Tech Innovator',
+      description: 'Synthesizes analytical document review with binary logic principles to prepare for corporate structures, patent drafting, and computational jurisprudence.',
+      icon: <Landmark className="w-6 h-6" />,
+      theme: 'border-purple-100 bg-purple-50/20 hover:border-purple-300',
+      accentColor: 'bg-purple-600',
+      textAccent: 'text-purple-700',
+      requiredCourses: [
+        { name: 'English Literature', level: 'IGCSE / A-Level', topics: ['Comparative Essay Writing', 'Textual Analysis'] },
+        { name: 'History', level: 'IGCSE / A-Level', topics: ['Socio-Political Treaties', 'International Disputes'] },
+        { name: 'Computer Science', level: 'IGCSE Core', topics: ['Logic Gates & Boolean algebra', 'Data Encryption & Security'] }
+      ],
+      recommendedLabs: [
+        { name: 'Sets & Boolean Venn Shading', url: '/interactives/math-sets-venn' }
+      ],
+      universityPrereqs: ['English Literature A-Level (Grade A)', 'History A-Level (Grade A)', 'Computer Science IGCSE (Grade B)']
+    },
+    {
+      id: 'stem-architecture',
+      name: 'Architectural & Spatial Design',
+      industry: 'stem',
+      careerGoal: 'Architect, Urban Planner, Structural Designer',
+      description: 'Integrates physics equilibrium principles, geometry, and historical contextual study to model spatial environments, structures, and building dynamics.',
+      icon: <PenTool className="w-6 h-6" />,
+      theme: 'border-rose-100 bg-rose-50/20 hover:border-rose-300',
+      accentColor: 'bg-rose-600',
+      textAccent: 'text-rose-700',
+      requiredCourses: [
+        { name: 'Mathematics', level: 'Core & Extended', topics: ['Trigonometrics & Unit Circle', 'Function Transformations & scaling', 'Geometry scaling & proportions'] },
+        { name: 'Physics', level: 'IGCSE / A-Level', topics: ['Moments & Balance Beams', 'Forces in Equilibrium', 'Density & Pressure'] },
+        { name: 'History', level: 'IGCSE Core', topics: ['Historical Civilizations & Art', 'Industrial Revolution planning'] }
+      ],
+      recommendedLabs: [
+        { name: 'Trigonometrics Unit Circle', url: '/interactives/math-trig-circle' },
+        { name: 'Moments Balance Beam Lab', url: '/interactives/physics-moments-beam' }
+      ],
+      universityPrereqs: ['Mathematics A-Level (Grade A)', 'Physics A-Level (Grade B)', 'History IGCSE (Grade B)']
     }
   ];
 
