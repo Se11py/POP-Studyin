@@ -7,55 +7,7 @@ import { Calendar, MessageCircle, Clock, CheckCircle2, ChevronRight, Play, BookO
 
 export default function CourseraLandingPage() {
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
-  const [selectedNodeId, setSelectedNodeId] = useState<string>('node-3');
 
-  const mapNodes = [
-    {
-      id: 'node-1',
-      title: 'Kinematics & Forces',
-      status: 'completed',
-      score: '94%',
-      topics: ['Vectors', 'Acceleration', 'Newton\'s Laws', 'Friction & Weight'],
-      icon: <Brain className="w-5 h-5" />,
-      detail: 'Formulas and free-body diagrams completed. 94% average accuracy across 4 practice quizzes.'
-    },
-    {
-      id: 'node-2',
-      title: 'Thermal Physics',
-      status: 'completed',
-      score: '89%',
-      topics: ['Latent Heat', 'Specific Heat Capacity', 'Gas Laws'],
-      icon: <Globe className="w-5 h-5" />,
-      detail: 'State changes & heating curves reviewed. Solid understanding of particle models and thermal transfer methods.'
-    },
-    {
-      id: 'node-3',
-      title: 'Waves & Optics',
-      status: 'active',
-      score: 'In Progress',
-      topics: ['Refraction Index', 'Diffraction Waves', 'Snell\'s Law'],
-      icon: <Library className="w-5 h-5" />,
-      detail: 'Current active module. Focus on wave equation calculations and optical refraction experiments.'
-    },
-    {
-      id: 'node-4',
-      title: 'Electromagnetism',
-      status: 'locked',
-      score: 'Locked',
-      topics: ['Magnetic Induction', 'Transformer Ratios', 'Resistor Circuits'],
-      icon: <LayoutGrid className="w-5 h-5" />,
-      detail: 'Requires completion of Waves & Optics to unlock. Covers electromagnetic induction, field lines, and circuit algebra.'
-    },
-    {
-      id: 'node-5',
-      title: 'Final Mock Exam',
-      status: 'milestone',
-      score: 'Locked',
-      topics: ['Comprehensive IGCSE Paper 2 & 4'],
-      icon: <Award className="w-5 h-5" />,
-      detail: 'Ultimate preparation assessment. A 40-question multiple choice & short-answer simulation under standard exam constraints.'
-    }
-  ];
   
   const focusBlocks = [
     { title: 'Functions', detail: 'IB Math AA', time: '08:30' },
@@ -254,169 +206,22 @@ export default function CourseraLandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right Column - Interactive Syllabus Mastery Map */}
+            {/* Right Column - Academic Art Illustration */}
             <motion.div 
               className="md:col-span-6 relative hidden md:block"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
             >
               {/* Background texture block */}
               <div className="absolute inset-0 bg-blue-50 -translate-x-6 translate-y-6 rounded-lg -z-10 border border-blue-100"></div>
               
-              <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden flex flex-col">
-                <div className="bg-blue-900 text-white p-6 border-b border-blue-800 flex justify-between items-center">
-                  <div>
-                    <h3 className="text-xl font-bold">ANS Syllabus Mastery Map</h3>
-                    <p className="text-blue-200 text-sm mt-1">IGCSE Co-ordinated Sciences (0654)</p>
-                  </div>
-                  <div className="flex items-center gap-2 px-3 py-1 bg-blue-800 text-blue-200 text-xs font-bold uppercase rounded border border-blue-700">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    <span>Active Study</span>
-                  </div>
-                </div>
-                
-                <div className="p-8 bg-gray-50 flex flex-col lg:flex-row gap-6">
-                  {/* Timeline Map Side */}
-                  <div className="lg:w-1/2 relative pr-4">
-                    {/* Visual Vertical Connection Line */}
-                    <div className="absolute left-[29px] top-6 bottom-6 w-0.5 bg-gray-200 -z-0"></div>
-                    
-                    <div className="space-y-4 relative z-10">
-                      {mapNodes.map((node) => {
-                        const isSelected = selectedNodeId === node.id;
-                        const isActive = node.status === 'active';
-                        const isCompleted = node.status === 'completed';
-                        const isLocked = node.status === 'locked';
-                        const isMilestone = node.status === 'milestone';
-                        
-                        return (
-                          <div 
-                            key={node.id} 
-                            onClick={() => setSelectedNodeId(node.id)}
-                            className={`flex items-center gap-4 p-3 rounded-lg border transition-all cursor-pointer group ${
-                              isSelected 
-                                ? 'bg-blue-50 border-blue-300 shadow-sm' 
-                                : 'bg-white border-gray-200 hover:border-gray-300'
-                            }`}
-                          >
-                            {/* Node icon / indicator */}
-                            <div className="relative">
-                              <div className={`w-9 h-9 rounded-full flex items-center justify-center border transition-all ${
-                                isCompleted 
-                                  ? 'bg-green-50 border-green-200 text-green-600 shadow-sm' 
-                                  : isActive
-                                    ? 'bg-blue-600 border-blue-700 text-white shadow-lg ring-4 ring-blue-100'
-                                    : isMilestone
-                                      ? 'bg-yellow-50 border-yellow-200 text-yellow-600'
-                                      : 'bg-gray-50 border-gray-200 text-gray-400'
-                              }`}>
-                                {isCompleted ? <CheckCircle2 className="w-4 h-4" /> : React.cloneElement(node.icon as React.ReactElement<{ size?: number }>, { size: 16 })}
-                              </div>
-                              
-                              {/* Pulsing indicator for active node */}
-                              {isActive && (
-                                <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500 border border-white"></span>
-                                </span>
-                              )}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <h4 className={`font-bold text-xs truncate ${
-                                isLocked ? 'text-gray-400' : 'text-gray-900'
-                              }`}>
-                                {node.title}
-                              </h4>
-                              <p className="text-[10px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">
-                                {isCompleted ? 'Completed' : isActive ? 'In Progress' : isMilestone ? 'Exam Clinic' : 'Locked'}
-                              </p>
-                            </div>
-                            
-                            {/* Score/Badge */}
-                            <div className="text-right shrink-0">
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-widest ${
-                                isCompleted 
-                                  ? 'bg-green-50 text-green-700 border-green-200'
-                                  : isActive
-                                    ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                    : 'bg-gray-100 text-gray-400 border-gray-200'
-                              }`}>
-                                {node.score}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Inspector Panel Side */}
-                  <div className="lg:w-1/2 flex flex-col justify-between">
-                    <AnimatePresence mode="wait">
-                      {(() => {
-                        const selectedNode = mapNodes.find(n => n.id === selectedNodeId) || mapNodes[2];
-                        return (
-                          <motion.div
-                            key={selectedNode.id}
-                            initial={{ opacity: 0, x: 10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="bg-white border border-gray-200 rounded p-5 shadow-sm flex-1 flex flex-col justify-between space-y-4"
-                          >
-                            <div className="space-y-3">
-                              <div className="flex justify-between items-start">
-                                <span className={`text-[8px] font-bold px-2 py-0.5 rounded uppercase tracking-widest border ${
-                                  selectedNode.status === 'completed'
-                                    ? 'bg-green-50 text-green-700 border-green-200'
-                                    : selectedNode.status === 'active'
-                                      ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                      : 'bg-gray-50 text-gray-500 border-gray-200'
-                                }`}>
-                                  {selectedNode.status === 'completed' ? 'Module Complete' : selectedNode.status === 'active' ? 'Active Topic' : 'Up Next'}
-                                </span>
-                                {selectedNode.status === 'completed' && (
-                                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                    Readiness: <strong className="text-green-600">{selectedNode.score}</strong>
-                                  </span>
-                                )}
-                              </div>
-                              
-                              <h3 className="text-base font-bold text-gray-900">{selectedNode.title}</h3>
-                              <p className="text-gray-600 text-xs leading-relaxed">{selectedNode.detail}</p>
-                              
-                              <div className="space-y-1.5 pt-1.5">
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest block">Syllabus Key Focus Areas:</span>
-                                <div className="flex flex-wrap gap-1">
-                                  {selectedNode.topics.map((topic, i) => (
-                                    <span key={i} className="text-[10px] font-medium bg-gray-50 border border-gray-200 px-1.5 py-0.5 rounded text-gray-600">
-                                      {topic}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {selectedNode.status !== 'locked' && (
-                              <Link 
-                                href={selectedNode.id === 'node-5' ? '/classes/mock/igcse-physics' : `/classes`}
-                                className="mt-2 w-full py-2 bg-blue-700 text-white rounded font-bold text-[10px] hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-1.5 group"
-                              >
-                                <span>{selectedNode.id === 'node-5' ? 'Enter Assessment' : 'Open Study Guide'}</span>
-                                <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-                              </Link>
-                            )}
-                          </motion.div>
-                        );
-                      })()}
-                    </AnimatePresence>
-                  </div>
-                </div>
+              <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden p-2 flex items-center justify-center">
+                <img 
+                  src="/hero_illustration.jpg" 
+                  alt="POP Studying Academic Physics Lab & Visualizer Illustration" 
+                  className="rounded w-full h-auto object-cover"
+                />
               </div>
             </motion.div>
           </div>
