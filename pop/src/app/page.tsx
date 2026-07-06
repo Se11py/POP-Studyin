@@ -206,7 +206,7 @@ export default function CourseraLandingPage() {
               </motion.div>
             </motion.div>
 
-            {/* Right Column - Academic Art Illustration */}
+            {/* Right Column - Coursera-Style Flat Vector Illustration */}
             <motion.div 
               className="md:col-span-6 relative hidden md:block"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -216,12 +216,142 @@ export default function CourseraLandingPage() {
               {/* Background texture block */}
               <div className="absolute inset-0 bg-blue-50 -translate-x-6 translate-y-6 rounded-lg -z-10 border border-blue-100"></div>
               
-              <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden p-2 flex items-center justify-center">
-                <img 
-                  src="/hero_illustration.jpg" 
-                  alt="POP Studying Academic Physics Lab & Visualizer Illustration" 
-                  className="rounded w-full h-auto object-cover"
-                />
+              <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden p-6 flex items-center justify-center">
+                <svg viewBox="0 0 600 450" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
+                  {/* Decorative background grid */}
+                  <g opacity="0.3">
+                    <line x1="50" y1="0" x2="50" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="150" y1="0" x2="150" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="250" y1="0" x2="250" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="350" y1="0" x2="350" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="450" y1="0" x2="450" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="550" y1="0" x2="550" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    
+                    <line x1="0" y1="50" x2="600" y2="50" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="0" y1="150" x2="600" y2="150" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="0" y1="255" x2="600" y2="255" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                    <line x1="0" y1="350" x2="600" y2="350" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
+                  </g>
+                  
+                  {/* Outer circle orbits for aesthetic depth */}
+                  <circle cx="300" cy="225" r="180" fill="none" stroke="#EFF6FF" strokeWidth="2" />
+                  <circle cx="300" cy="225" r="120" fill="none" stroke="#EFF6FF" strokeWidth="1" />
+
+                  {/* Biology (Green Leaf Node) */}
+                  <motion.g 
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <path d="M 300,50 C 318,70 318,95 300,105 C 282,95 282,70 300,50 Z" fill="#ECFDF5" stroke="#10B981" strokeWidth="4" />
+                    <line x1="300" y1="50" x2="300" y2="105" stroke="#10B981" strokeWidth="3" />
+                    <line x1="300" y1="68" x2="310" y2="63" stroke="#10B981" strokeWidth="2" />
+                    <line x1="300" y1="80" x2="290" y2="75" stroke="#10B981" strokeWidth="2" />
+                    <line x1="300" y1="90" x2="308" y2="85" stroke="#10B981" strokeWidth="2" />
+                  </motion.g>
+
+                  {/* Chemistry (Flask Node) */}
+                  <motion.g 
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  >
+                    {/* Flask Outline */}
+                    <path d="M 115,100 L 135,100 L 135,125 L 160,170 A 5,5 0 0 1 155,178 L 95,178 A 5,5 0 0 1 90,170 L 115,125 Z" fill="#F8FAFC" stroke="#0056D2" strokeWidth="4" strokeLinejoin="round" />
+                    {/* Liquid */}
+                    <path d="M 96,160 L 154,160 L 156,170 A 4,4 0 0 1 152,174 L 98,174 A 4,4 0 0 1 94,170 Z" fill="#0056D2" opacity="0.85" />
+                    {/* Bubbles */}
+                    <circle cx="125" cy="85" r="4" fill="#0056D2" />
+                    <circle cx="112" cy="70" r="3" fill="#0056D2" opacity="0.6" />
+                    <circle cx="132" cy="55" r="5" fill="#F7D046" />
+                  </motion.g>
+
+                  {/* Physics (Atom Node) */}
+                  <motion.g 
+                    animate={{ y: [0, -7, 0] }}
+                    transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  >
+                    <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#0056D2" strokeWidth="4" transform="rotate(-30, 480, 130)" />
+                    <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#F7D046" strokeWidth="4" transform="rotate(30, 480, 130)" strokeDasharray="6,4" />
+                    <circle cx="480" cy="130" r="10" fill="#0056D2" />
+                    <circle cx="442" cy="108" r="4" fill="#F7D046" />
+                    <circle cx="510" cy="112" r="4" fill="#0056D2" />
+                  </motion.g>
+
+                  {/* Mathematics (Triangle Ruler Node) */}
+                  <motion.g 
+                    animate={{ y: [0, -9, 0] }}
+                    transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                  >
+                    <path d="M 90,340 L 165,340 L 90,265 Z" fill="#FEF3C7" stroke="#F7D046" strokeWidth="4" strokeLinejoin="round" />
+                    <path d="M 102,328 L 138,328 L 102,292 Z" fill="#FFFFFF" stroke="#F7D046" strokeWidth="3" />
+                  </motion.g>
+
+                  {/* Computer Science (Terminal Node) */}
+                  <motion.g 
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                  >
+                    <rect x="420" y="270" width="100" height="75" rx="6" fill="#1E293B" stroke="#0056D2" strokeWidth="4" />
+                    {/* Console Bar */}
+                    <line x1="420" y1="285" x2="520" y2="285" stroke="#0056D2" strokeWidth="2" />
+                    <circle cx="430" cy="277.5" r="2.5" fill="#EF4444" />
+                    <circle cx="440" cy="277.5" r="2.5" fill="#F59E0B" />
+                    <circle cx="450" cy="277.5" r="2.5" fill="#10B981" />
+                    {/* Code Symbol */}
+                    <path d="M 440,302 L 432,310 L 440,318 M 475,302 L 483,310 L 475,318" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                    <line x1="462" y1="300" x2="452" y2="320" stroke="#F7D046" strokeWidth="3" strokeLinecap="round" />
+                  </motion.g>
+
+                  {/* Central Element: Coursera-Style Open Notebook */}
+                  <g transform="translate(150, 125)">
+                    {/* Shadow */}
+                    <rect x="0" y="10" width="300" height="210" rx="8" fill="#E2E8F0" opacity="0.8" />
+                    
+                    {/* Blue Cover */}
+                    <rect x="0" y="0" width="300" height="210" rx="8" fill="#0056D2" />
+                    
+                    {/* Left Page */}
+                    <rect x="10" y="8" width="135" height="194" rx="4" fill="#FFFFFF" />
+                    
+                    {/* Right Page */}
+                    <rect x="155" y="8" width="135" height="194" rx="4" fill="#FFFFFF" />
+                    
+                    {/* Left Page Writing Lines */}
+                    <line x1="25" y1="35" x2="130" y2="35" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
+                    <line x1="25" y1="65" x2="110" y2="65" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
+                    
+                    <line x1="25" y1="95" x2="120" y2="95" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
+                    <line x1="25" y1="110" x2="80" y2="110" stroke="#EFF6FF" strokeWidth="6" strokeLinecap="round" />
+
+                    <line x1="25" y1="140" x2="115" y2="140" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
+                    <line x1="25" y1="170" x2="125" y2="170" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
+
+                    {/* Right Page: High-contrast Plot/Math Grid */}
+                    <rect x="170" y="25" width="105" height="85" fill="#F8FAFC" rx="4" stroke="#E2E8F0" strokeWidth="1" />
+                    {/* Grid inner mesh */}
+                    <line x1="170" y1="46" x2="275" y2="46" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="170" y1="67" x2="275" y2="67" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="170" y1="88" x2="275" y2="88" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="191" y1="25" x2="191" y2="110" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="212" y1="25" x2="212" y2="110" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="233" y1="25" x2="233" y2="110" stroke="#F1F5F9" strokeWidth="1" />
+                    <line x1="254" y1="25" x2="254" y2="110" stroke="#F1F5F9" strokeWidth="1" />
+                    
+                    {/* Plotted Sine Wave Curve */}
+                    <path d="M 170,67 Q 196.25,25 222.5,67 T 275,67" fill="none" stroke="#0056D2" strokeWidth="4" strokeLinecap="round" />
+                    
+                    {/* Right Page Study Text */}
+                    <line x1="170" y1="135" x2="275" y2="135" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
+                    <line x1="170" y1="165" x2="240" y2="165" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
+
+                    {/* Book Spine Rings */}
+                    <rect x="145" y="20" width="10" height="8" rx="2" fill="#CBD5E1" />
+                    <rect x="145" y="50" width="10" height="8" rx="2" fill="#CBD5E1" />
+                    <rect x="145" y="80" width="10" height="8" rx="2" fill="#CBD5E1" />
+                    <rect x="145" y="110" width="10" height="8" rx="2" fill="#CBD5E1" />
+                    <rect x="145" y="140" width="10" height="8" rx="2" fill="#CBD5E1" />
+                    <rect x="145" y="170" width="10" height="8" rx="2" fill="#CBD5E1" />
+                  </g>
+                </svg>
               </div>
             </motion.div>
           </div>
