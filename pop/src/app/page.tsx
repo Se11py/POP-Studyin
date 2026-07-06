@@ -144,6 +144,7 @@ export default function CourseraLandingPage() {
               <Link href="/flashcards" className="hover:text-blue-700 transition-colors">Flashcards</Link>
               <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
               <Link href="/dictionary" className="hover:text-blue-700 transition-colors">Dictionary</Link>
+              <Link href="/pathways" className="hover:text-blue-700 transition-colors">Blueprints</Link>
             </div>
           </div>
 
