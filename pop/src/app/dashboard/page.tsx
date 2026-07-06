@@ -240,21 +240,21 @@ export default function StudentDashboard() {
                   className="space-y-8"
                 >
                   {/* Continue Learning Grid */}
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <h3 className="text-xl font-bold text-gray-900 font-serif">Continue Learning</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       {activeCourses.map((course, idx) => (
-                        <div key={idx} className={`p-6 rounded-lg border flex flex-col justify-between ${course.theme} shadow-sm group hover:shadow-md transition-shadow h-52`}>
-                          <div className="space-y-2">
-                            <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white border uppercase tracking-widest text-gray-500 shadow-sm">Active Class</span>
-                            <h4 className="text-lg font-bold text-gray-900">{course.name}</h4>
-                            <p className="text-xs text-gray-400 font-medium truncate">{course.subtitle}</p>
+                        <div key={idx} className={`p-8 rounded-lg border flex flex-col justify-between ${course.theme} shadow-sm group hover:shadow-md transition-shadow min-h-[260px]`}>
+                          <div className="space-y-3">
+                            <h4 className="text-xl font-bold text-gray-900 leading-snug">{course.name}</h4>
+                            <p className="text-xs text-gray-400 font-medium tracking-wide truncate">{course.subtitle}</p>
+                            <span className="text-[10px] text-blue-700 font-bold bg-blue-50 px-2.5 py-1 rounded inline-block uppercase tracking-wider">{course.currentTopic}</span>
                           </div>
-                          <div className="space-y-4">
+                          <div className="space-y-5 pt-4">
                             <div>
-                              <div className="flex justify-between text-xs font-bold text-gray-500 uppercase tracking-widest mb-1.5">
+                              <div className="flex justify-between text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">
                                 <span>Progress</span>
-                                <span>{course.progress}%</span>
+                                <span className="text-gray-700">{course.progress}%</span>
                               </div>
                               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                                 <div className={`h-full ${course.barColor}`} style={{ width: `${course.progress}%` }}></div>
@@ -262,7 +262,7 @@ export default function StudentDashboard() {
                             </div>
                             <Link 
                               href={`/classes/${course.id}`} 
-                              className="py-2.5 bg-blue-700 text-white rounded font-bold text-xs hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 group-hover:bg-blue-800"
+                              className="py-3 bg-blue-700 text-white rounded font-bold text-xs hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-2 group-hover:bg-blue-800"
                             >
                               <span>Resume Study</span>
                               <ChevronRight size={14} />
