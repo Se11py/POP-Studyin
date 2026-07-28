@@ -6,6 +6,12 @@ export default defineSchema({
     clerkId: v.string(),
     email: v.optional(v.string()),
     name: v.optional(v.string()),
+    yearGroup: v.optional(v.string()),
+    school: v.optional(v.string()),
+    subjects: v.optional(v.array(v.string())),
+    instagram: v.optional(v.string()),
+    wantsToContribute: v.optional(v.boolean()),
+    onboardingCompleted: v.optional(v.boolean()),
   }).index("by_clerkId", ["clerkId"]),
   
   subjects: defineTable({

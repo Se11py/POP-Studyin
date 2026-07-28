@@ -72,8 +72,8 @@ const classesData: Record<string, ClassData> = {
     theme: "border-blue-100 bg-white",
     textColor: "text-blue-700",
     barColor: "bg-blue-600",
-    description: 'A rigorous exploration of forces, electricity, and energy. Tailored specifically for advanced examination readiness within the ANS Co-ordinated scheme.',
-    syllabusInfo: 'ANS Syllabus v2026.4',
+    description: 'A rigorous exploration of forces, electricity, and energy. Tailored specifically for advanced examination readiness within the CIE Co-ordinated scheme.',
+    syllabusInfo: 'CIE Syllabus v2026.4',
     stats: [
       { label: 'Rush Progress', value: '45%', icon: <Zap className="text-orange-500" /> },
       { label: 'Sprint Time', value: '14h', icon: <Clock className="text-blue-700" /> },
@@ -150,8 +150,8 @@ const classesData: Record<string, ClassData> = {
     theme: "border-emerald-100 bg-white",
     textColor: "text-emerald-700",
     barColor: "bg-emerald-600",
-    description: 'Advanced dive into atomic structure, bonding, and reactions. Synced meticulously with ANS examination methodology.',
-    syllabusInfo: 'ANS Syllabus v2026.2',
+    description: 'Advanced dive into atomic structure, bonding, and reactions. Synced meticulously with IGCSE examination methodology.',
+    syllabusInfo: 'CIE Syllabus v2026.2',
     stats: [
       { label: 'Topics Done', value: '4/11', icon: <BookOpen className="text-emerald-600" /> },
       { label: 'Mock Score', value: '78%', icon: <Target className="text-blue-600" /> },
@@ -194,7 +194,7 @@ const classesData: Record<string, ClassData> = {
     textColor: "text-blue-700",
     barColor: "bg-blue-600",
     description: 'Advanced algebra and geometry. Comprehensive preparation for examination success.',
-    syllabusInfo: 'ANS Syllabus v2026.1',
+    syllabusInfo: 'CIE Syllabus v2026.1',
     stats: [
       { label: 'Formulas', value: '156', icon: <Star className="text-yellow-500" /> },
       { label: 'Mock Streak', value: '12 Days', icon: <Flame className="text-orange-500" /> },
@@ -218,7 +218,7 @@ const classesData: Record<string, ClassData> = {
     textColor: "text-purple-700",
     barColor: "bg-purple-600",
     description: 'Exploring cells, taxonomy, and ecology. Complete alignment with assessment criteria.',
-    syllabusInfo: 'ANS Syllabus v2026.3',
+    syllabusInfo: 'CIE Syllabus v2026.3',
     stats: [
       { label: 'Topics Done', value: '0/11', icon: <BookOpen className="text-purple-600" /> },
       { label: 'Mock Score', value: '-', icon: <Target className="text-gray-400" /> },
@@ -242,7 +242,7 @@ const classesData: Record<string, ClassData> = {
     textColor: "text-gray-700",
     barColor: "bg-gray-600",
     description: 'Case study-led analysis. Real-world application of business principles.',
-    syllabusInfo: 'ANS Syllabus v2025.2',
+    syllabusInfo: 'CIE Syllabus v2025.2',
     stats: [
       { label: 'Topics Done', value: '1/6', icon: <BookOpen className="text-gray-600" /> },
       { label: 'Mock Score', value: '55%', icon: <Target className="text-red-600" /> },
@@ -266,7 +266,7 @@ const classesData: Record<string, ClassData> = {
     textColor: "text-blue-700",
     barColor: "bg-blue-600",
     description: 'Comprehensive reading and writing practice. Preparation for textual analysis.',
-    syllabusInfo: 'ANS Syllabus v2026.1',
+    syllabusInfo: 'CIE Syllabus v2026.1',
     stats: [
       { label: 'Topics Done', value: '2/5', icon: <BookOpen className="text-blue-600" /> },
       { label: 'Mock Score', value: '82%', icon: <Target className="text-blue-600" /> },
@@ -724,7 +724,7 @@ export default function CourseraClassDetailPage() {
              <div className="space-y-4 text-center md:text-left">
                 <h3 className="text-2xl font-bold font-serif">Academic Integrity & Standards</h3>
                 <p className="text-blue-100 leading-relaxed max-w-3xl font-medium">
-                  This curriculum specialization is maintained by ANS alumni subject leads. All theoretical models and laboratory walkthroughs strictly adhere to the IGCSE assessment objectives for 2026.
+                  This curriculum specialization is maintained by peer alumni subject leads. All theoretical models and laboratory walkthroughs strictly adhere to the IGCSE assessment objectives for 2026.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center md:justify-start gap-6 pt-2">
                    <button className="text-xs font-bold text-blue-300 hover:text-white uppercase tracking-widest transition-colors">View Peer-Review Log</button>

@@ -2,12 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useUser, UserButton } from "@clerk/nextjs";
-import { motion, AnimatePresence } from 'framer-motion';
+import Header from '@/components/Header';
+import { useUser } from "@clerk/nextjs";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  BookOpen, Clock, Brain, Flame, Trophy, Target, ChevronRight, Sparkles, 
-  Calendar, Play, ArrowRight, LayoutGrid, Award, ShieldAlert, ArrowUpRight,
-  TrendingUp, Award as BadgeIcon
+  Edit3, ShieldCheck, RefreshCw, BookOpen, Clock, Brain, Flame, Trophy, Target, 
+  ChevronRight, Sparkles, Calendar, Play, ArrowRight, TrendingUp 
 } from 'lucide-react';
 
 export default function StudentDashboard() {
@@ -27,7 +27,7 @@ export default function StudentDashboard() {
       bgColor: 'bg-blue-50'
     },
     {
-      id: 'igcse-physics', // Maps to the same physics course for the mock exam simulation
+      id: 'igcse-physics',
       name: 'Mathematics',
       subtitle: 'Core & Extended Syllabus',
       progress: 40,
@@ -80,38 +80,8 @@ export default function StudentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24">
-      {/* Premium Dashboard Navigation */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-700 flex items-center justify-center rounded">
-                <span className="text-white text-xl font-bold font-serif tracking-tighter">P</span>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-blue-900">POP Studying</span>
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-600">
-              <Link href="/classes" className="hover:text-blue-700 transition-colors">Classes</Link>
-              <Link href="/flashcards" className="hover:text-blue-700 transition-colors">Flashcards</Link>
-              <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
-              <Link href="/dictionary" className="hover:text-blue-700 transition-colors">Dictionary</Link>
-              <Link href="/pathways" className="hover:text-blue-700 transition-colors">Blueprints</Link>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {isLoaded && user && (
-              <div className="flex items-center gap-3 border-l pl-4 border-gray-200">
-                <span className="text-xs font-bold text-gray-500 hidden sm:block uppercase tracking-wider">
-                  {user.firstName || 'Student'}
-                </span>
-                <UserButton />
-              </div>
-            )}
-          </div>
-        </div>
-      </nav>
+      {/* Universal Header with Clerk Authentication */}
+      <Header />
 
       {/* Main Content Area */}
       <main className="pt-28 px-6 lg:px-8 max-w-7xl mx-auto space-y-8">

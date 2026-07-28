@@ -1,6 +1,6 @@
 # POP Studying 🎓
 
-An all-in-one Educational Platform designed for secondary students at **Amnuay Silpa School (ANS)** in Bangkok, Thailand, to prepare for IGCSE and A-Level examinations. 
+An all-in-one Educational Platform designed for secondary students in **Bangkok, Thailand**, to prepare for IGCSE and A-Level examinations. 
 
 Built to prioritize zero-distraction active learning, **POP Studying** replaces generic revision summaries with high-fidelity visual simulations, rigorous curriculum-aligned topic journeys, and real-time mock exam environments.
 
@@ -14,7 +14,7 @@ Built to prioritize zero-distraction active learning, **POP Studying** replaces 
 * **Core Science Laboratories**: Interactive simulations (vector addition, Archimedes' buoyant force blocks, unit circle trigonometrics, titration curves, Bohr atomic builders) with slider parameter adjustments and real-time coordinate plotting.
 
 ### 2. Curriculum-Aligned Classes
-* Mapped to **ANS Syllabus Standards** across Mathematics, Physics, Chemistry, Biology, and Computer Science.
+* Mapped to **IGCSE & A-Level Syllabus Standards** across Mathematics, Physics, Chemistry, Biology, and Computer Science.
 * Organized by three core difficulty tiers:
   * **Beginner** (Grades 1-3) — Core foundational concepts.
   * **Intermediate** (Grades 4-6) — Deeper application-level learning.

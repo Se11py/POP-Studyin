@@ -2,10 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useUser, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { Calendar, MessageCircle, Clock, CheckCircle2, ChevronRight, Play, BookOpen, Video, FileText, ArrowRight, Award, GraduationCap, Library, LayoutGrid, Globe, Brain } from 'lucide-react';
 
 export default function CourseraLandingPage() {
+  const { user, isLoaded, isSignedIn } = useUser();
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
 
   
@@ -145,16 +148,35 @@ export default function CourseraLandingPage() {
               <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
               <Link href="/dictionary" className="hover:text-blue-700 transition-colors">Dictionary</Link>
               <Link href="/pathways" className="hover:text-blue-700 transition-colors">Blueprints</Link>
+              <Link href="/hall-of-fame" className="hover:text-blue-700 transition-colors">Hall of Fame</Link>
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <Link href="/sign-in" className="hidden md:block text-blue-700 hover:text-blue-900 transition-colors text-[15px] font-bold px-4 py-2">
-              Log In
-            </Link>
-            <Link href="/sign-up" className="px-6 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md">
-              Join for Free
-            </Link>
+            {isLoaded && isSignedIn ? (
+              <div className="flex items-center gap-4">
+                <Link href="/dashboard" className="px-5 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md flex items-center gap-2">
+                  <span>Dashboard</span>
+                  <ChevronRight size={16} />
+                </Link>
+                <div className="flex items-center justify-center p-1 bg-gray-50 border border-gray-200 rounded-full">
+                  <UserButton />
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <SignInButton mode="modal">
+                  <button className="hidden md:block text-blue-700 hover:text-blue-900 transition-colors text-[15px] font-bold px-4 py-2">
+                    Log In
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="px-6 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md">
+                    Join for Free
+                  </button>
+                </SignUpButton>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -208,12 +230,7 @@ export default function CourseraLandingPage() {
             </motion.div>
 
             {/* Right Column - Coursera-Style Flat Vector Illustration */}
-            <motion.div 
-              className="md:col-span-6 relative hidden md:block"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            >
+            <div className="md:col-span-6 relative hidden md:block">
               {/* Background texture block */}
               <div className="absolute inset-0 bg-blue-50 -translate-x-6 translate-y-6 rounded-lg -z-10 border border-blue-100"></div>
               
@@ -239,21 +256,17 @@ export default function CourseraLandingPage() {
                   <circle cx="300" cy="225" r="120" fill="none" stroke="#EFF6FF" strokeWidth="1" />
 
                   {/* Biology (Green Leaf Node) */}
-                  <motion.g 
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  <g 
                   >
                     <path d="M 300,50 C 318,70 318,95 300,105 C 282,95 282,70 300,50 Z" fill="#ECFDF5" stroke="#10B981" strokeWidth="4" />
                     <line x1="300" y1="50" x2="300" y2="105" stroke="#10B981" strokeWidth="3" />
                     <line x1="300" y1="68" x2="310" y2="63" stroke="#10B981" strokeWidth="2" />
                     <line x1="300" y1="80" x2="290" y2="75" stroke="#10B981" strokeWidth="2" />
                     <line x1="300" y1="90" x2="308" y2="85" stroke="#10B981" strokeWidth="2" />
-                  </motion.g>
+                  </g>
 
                   {/* Chemistry (Flask Node) */}
-                  <motion.g 
-                    animate={{ y: [0, -8, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  <g 
                   >
                     {/* Flask Outline */}
                     <path d="M 115,100 L 135,100 L 135,125 L 160,170 A 5,5 0 0 1 155,178 L 95,178 A 5,5 0 0 1 90,170 L 115,125 Z" fill="#F8FAFC" stroke="#0056D2" strokeWidth="4" strokeLinejoin="round" />
@@ -263,33 +276,27 @@ export default function CourseraLandingPage() {
                     <circle cx="125" cy="85" r="4" fill="#0056D2" />
                     <circle cx="112" cy="70" r="3" fill="#0056D2" opacity="0.6" />
                     <circle cx="132" cy="55" r="5" fill="#F7D046" />
-                  </motion.g>
+                  </g>
 
                   {/* Physics (Atom Node) */}
-                  <motion.g 
-                    animate={{ y: [0, -7, 0] }}
-                    transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  <g 
                   >
                     <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#0056D2" strokeWidth="4" transform="rotate(-30, 480, 130)" />
                     <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#F7D046" strokeWidth="4" transform="rotate(30, 480, 130)" strokeDasharray="6,4" />
                     <circle cx="480" cy="130" r="10" fill="#0056D2" />
                     <circle cx="442" cy="108" r="4" fill="#F7D046" />
                     <circle cx="510" cy="112" r="4" fill="#0056D2" />
-                  </motion.g>
+                  </g>
 
                   {/* Mathematics (Triangle Ruler Node) */}
-                  <motion.g 
-                    animate={{ y: [0, -9, 0] }}
-                    transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                  <g 
                   >
                     <path d="M 90,340 L 165,340 L 90,265 Z" fill="#FEF3C7" stroke="#F7D046" strokeWidth="4" strokeLinejoin="round" />
                     <path d="M 102,328 L 138,328 L 102,292 Z" fill="#FFFFFF" stroke="#F7D046" strokeWidth="3" />
-                  </motion.g>
+                  </g>
 
                   {/* Computer Science (Terminal Node) */}
-                  <motion.g 
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+                  <g 
                   >
                     <rect x="420" y="270" width="100" height="75" rx="6" fill="#1E293B" stroke="#0056D2" strokeWidth="4" />
                     {/* Console Bar */}
@@ -300,7 +307,7 @@ export default function CourseraLandingPage() {
                     {/* Code Symbol */}
                     <path d="M 440,302 L 432,310 L 440,318 M 475,302 L 483,310 L 475,318" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
                     <line x1="462" y1="300" x2="452" y2="320" stroke="#F7D046" strokeWidth="3" strokeLinecap="round" />
-                  </motion.g>
+                  </g>
 
                   {/* Central Element: Coursera-Style Open Notebook */}
                   <g transform="translate(150, 125)">
@@ -353,8 +360,17 @@ export default function CourseraLandingPage() {
                     <rect x="145" y="170" width="10" height="8" rx="2" fill="#CBD5E1" />
                   </g>
                 </svg>
+                <div className="absolute bottom-0 right-3 z-10 w-32 md:w-40">
+                  <Image
+                    src="/professor-meow.png"
+                    alt="Professor Meow - POP Studying mascot"
+                    width={256}
+                    height={256}
+                    className="h-auto w-full object-contain drop-shadow-lg"
+                  />
+                </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
 
@@ -498,6 +514,70 @@ export default function CourseraLandingPage() {
                 </motion.div>
               </div>
             </div>
+          </div>
+        </section>
+
+        <section className="py-24 border-t border-gray-200">
+          <div className="grid items-center gap-12 lg:grid-cols-12">
+            <motion.div
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={staggerContainer}
+              className="lg:col-span-7"
+            >
+              <motion.div variants={fadeInUp} className="mb-6 inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                <Brain className="h-4 w-4" />
+                Brainrot, but make it healthy
+              </motion.div>
+              <motion.h2 variants={fadeInUp} className="max-w-2xl text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
+                A little silly. <span className="text-blue-700 font-serif italic">A lot</span> more memorable.
+              </motion.h2>
+              <motion.p variants={fadeInUp} className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
+                POP speaks Gen Z without turning revision into an endless scroll. Expect quick cultural references, playful prompts, and Professor Meow energy in small doses, then back to the work that moves your grades forward.
+              </motion.p>
+
+              <motion.div variants={fadeInUp} className="mt-10 grid gap-4 sm:grid-cols-3">
+                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
+                  <Brain className="mb-4 h-6 w-6 text-blue-700" />
+                  <p className="font-bold text-gray-900">Rizzed-up notes</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Explanations that actually hit different and stick in your head.</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
+                  <Clock className="mb-4 h-6 w-6 text-blue-700" />
+                  <p className="font-bold text-gray-900">Micro-dose brainrot</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Quick dopamine, then straight back to the grind. No rabbit holes.</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
+                  <CheckCircle2 className="mb-4 h-6 w-6 text-blue-700" />
+                  <p className="font-bold text-gray-900">Locked in, twin</p>
+                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Memes are fun, but that A* stays the main character.</p>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="flex flex-col items-center gap-6 lg:col-span-5"
+            >
+              <Image
+                src="/professor-meow.png"
+                alt="Professor Meow - POP Studying mascot"
+                width={360}
+                height={360}
+                className="h-auto w-56 object-contain md:w-72"
+              />
+              <div className="text-center">
+                <p className="text-xl font-bold font-serif text-gray-900">Professor Meow</p>
+
+                <p className="mt-3 text-base text-gray-600 max-w-xs leading-relaxed">
+                  Your study companion who keeps it real — a little fun, always focused.
+                </p>
+              </div>
+            </motion.div>
           </div>
         </section>
 

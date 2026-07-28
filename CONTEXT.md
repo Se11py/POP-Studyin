@@ -4,7 +4,7 @@
 
 **Project Name:** POP Studying
 
-**Purpose:** An all-in-one educational platform for secondary students at ANS, a bilingual Thai-UK curriculum school in Bangkok, Thailand, to prepare for IGCSE and A-level exams.
+**Purpose:** An all-in-one educational platform for secondary students in Bangkok, Thailand, to prepare for IGCSE and A-level exams.
 
 **Target Audience:** Year 9–13 students (~100 active users), primarily studying mathematics and science.
 
@@ -71,7 +71,7 @@
 
 ### Executive Summary
 
-POP Studying is a student-developed platform designed to enhance exam preparation for ANS students through interactive classes, tailored resources, and mock exams. Built with a tight budget, it aims to break even while serving ~100 active users, focusing on math and science for IGCSE and A-levels.
+POP Studying is a student-developed platform designed to enhance exam preparation for Bangkok students through interactive classes, tailored resources, and mock exams. Built with a tight budget, it aims to break even while serving active users, focusing on math and science for IGCSE and A-levels.
 
 ### Aims
 
@@ -88,7 +88,7 @@ POP Studying is a student-developed platform designed to enhance exam preparatio
 
 ### Target Market
 
-ANS secondary students (Year 9–13), focusing on math and science, seeking exam-focused resources and collaborative tools.
+Bangkok secondary students (Year 9–13), focusing on math and science, seeking exam-focused resources and collaborative tools.
 
 ---
 
