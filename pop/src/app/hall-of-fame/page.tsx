@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import { motion } from "framer-motion";
 import { ArrowRight, BookOpen, CheckCircle2, ChevronDown, Medal, Users } from "lucide-react";
 
@@ -96,10 +96,10 @@ export default function HallOfFamePage() {
   );
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900">
-      <Header />
+    <div className="min-h-screen bg-white text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pt-20 md:pt-10 md:pl-64">
+      <Sidebar />
 
-      <main className="pt-20">
+      <main>
         <section className="mx-auto max-w-7xl px-6 py-16 md:px-8 md:py-24">
           <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
             <div><p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-blue-700">The contributor community</p><h2 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">The people behind the resources.</h2><p className="mt-4 max-w-2xl text-lg text-gray-600">Every contribution counts. Explore the students who are helping their peers learn with more confidence.</p></div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Image from "next/image";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -69,9 +70,8 @@ export default function OnboardingPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-10 text-gray-800 md:py-16">
       <div className="mx-auto max-w-3xl">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded bg-blue-700 text-xl font-bold text-white">P</div>
-          <span className="text-xl font-bold tracking-tight text-blue-900">POP Studying</span>
+        <div className="mb-8 flex items-center">
+          <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-11 w-auto" priority />
         </div>
 
         <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">

@@ -482,15 +482,14 @@ export default function InteractiveLabPage({ params }: { params: Promise<{ id: s
   const [simTime, setSimTime] = useState<number>(0);
   const animFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
+  const lastStateUpdateRef = useRef<number>(0);
   
   // Custom lab states
   const [chemistryColor, setChemistryColor] = useState<string>("rgba(236, 72, 153, 0.8)"); // Pink base
   const [punnettMothers, setPunnettMothers] = useState<string>("Bb");
   const [punnettFathers, setPunnettFathers] = useState<string>("Bb");
 
-
-
-  // Simulation timer loop
+  // Simulation timer loop (throttled to ~30 FPS to prevent 60 FPS React re-render CPU spikes)
   useEffect(() => {
     if (!isPlaying) {
       if (animFrameRef.current) {
@@ -505,16 +504,20 @@ export default function InteractiveLabPage({ params }: { params: Promise<{ id: s
       const delta = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
 
-      setSimTime(prev => {
-        let next = prev + delta;
-        if (next > 10) next = 0;
-        return next;
-      });
+      if (now - lastStateUpdateRef.current >= 33) {
+        lastStateUpdateRef.current = now;
+        setSimTime(prev => {
+          let next = prev + delta;
+          if (next > 10) next = 0;
+          return next;
+        });
+      }
 
       animFrameRef.current = requestAnimationFrame(runLoop);
     };
 
     lastTimeRef.current = Date.now();
+    lastStateUpdateRef.current = Date.now();
     animFrameRef.current = requestAnimationFrame(runLoop);
 
     return () => {

@@ -209,6 +209,7 @@ export default function PhysicsEquationVisualizer() {
   const [simTime, setSimTime] = useState<number>(0);
   const animFrameRef = useRef<number | null>(null);
   const lastTimeRef = useRef<number>(0);
+  const lastStateUpdateRef = useRef<number>(0);
 
   const activeEquation = equationsConfig[activeTab];
 
@@ -229,7 +230,7 @@ export default function PhysicsEquationVisualizer() {
     lastTimeRef.current = Date.now();
   }, []);
 
-  // Simulation clock handler
+  // Simulation clock handler (throttled to ~30 FPS to prevent 60 FPS React re-render CPU spikes)
   useEffect(() => {
     if (!isPlaying) {
       if (animFrameRef.current) {
@@ -244,25 +245,31 @@ export default function PhysicsEquationVisualizer() {
       const delta = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
 
-      setSimTime(prev => {
-        let next = prev + delta;
-        // Repeat cycle for wave and kinematics
-        if (activeTab === 'kinematics') {
-          const maxTime = sliderValues.t || 3;
-          if (next > maxTime) next = 0;
-        } else if (activeTab === 'waves') {
-          if (next > 10) next = 0;
-        } else if (activeTab === 'newton2') {
-          if (next > 4) next = 0;
-        }
-        return next;
-      });
+      if (now - lastStateUpdateRef.current >= 33) {
+        lastStateUpdateRef.current = now;
+        setSimTime(prev => {
+          let next = prev + delta;
+          // Repeat cycle for wave and kinematics
+          if (activeTab === 'kinematics') {
+            const maxTime = sliderValues.t || 3;
+            if (next > maxTime) next = 0;
+          } else if (activeTab === 'waves') {
+            if (next > 10) next = 0;
+          } else if (activeTab === 'newton2') {
+            if (next > 4) next = 0;
+          }
+          return next;
+        });
+      }
 
-      animFrameRef.current = requestAnimationFrame(updateSim);
+      animFrameRef.current = requestAnimationFrame(runLoop);
     };
 
+    const runLoop = () => updateSim();
+
     lastTimeRef.current = Date.now();
-    animFrameRef.current = requestAnimationFrame(updateSim);
+    lastStateUpdateRef.current = Date.now();
+    animFrameRef.current = requestAnimationFrame(runLoop);
 
     return () => {
       if (animFrameRef.current) {

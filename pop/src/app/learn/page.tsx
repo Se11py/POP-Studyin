@@ -168,10 +168,17 @@ export default function CourseraLearnPage() {
   }
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (window.scrollY / totalHeight) * 100;
-      setReadingProgress(progress);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const progress = totalHeight > 0 ? (window.scrollY / totalHeight) * 100 : 0;
+          setReadingProgress(progress);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     const handleMouseUp = (e: MouseEvent) => {

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect, useMemo } from 'react';
+import Sidebar from '@/components/Sidebar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, BookA, Lightbulb, Link2, 
@@ -90,12 +90,32 @@ const getSubjectIcon = (subject: string) => {
   }
 };
 
+// Colorless icon for the filter pills — inherits the pill's own text color
+const getSubjectPillIcon = (subject: string) => {
+  switch (subject) {
+    case 'Physics': return <Atom size={15} />;
+    case 'Chemistry': return <Beaker size={15} />;
+    case 'Biology': return <Dna size={15} />;
+    default: return <Layers size={15} />;
+  }
+};
+
 const getSubjectStyles = (subject: string) => {
   switch (subject) {
     case 'Physics': return 'text-blue-700 bg-blue-50 border-blue-100';
     case 'Chemistry': return 'text-emerald-700 bg-emerald-50 border-emerald-100';
     case 'Biology': return 'text-purple-700 bg-purple-50 border-purple-100';
     default: return 'text-gray-700 bg-gray-50 border-gray-100';
+  }
+};
+
+// Solid variant of the same per-subject color, used for the active filter pill
+const getSubjectActiveStyles = (subject: string) => {
+  switch (subject) {
+    case 'Physics': return 'text-white bg-blue-700 border-blue-700';
+    case 'Chemistry': return 'text-white bg-emerald-700 border-emerald-700';
+    case 'Biology': return 'text-white bg-purple-700 border-purple-700';
+    default: return 'text-white bg-gray-900 border-gray-900';
   }
 };
 
@@ -115,49 +135,23 @@ export default function CourseraDefinitionLibrary() {
     };
   }, [selectedWord]);
 
-  const subjects = ['All', ...Array.from(new Set(definitionsData.map(d => d.subject)))];
+  const subjects = useMemo(() => ['All', ...Array.from(new Set(definitionsData.map(d => d.subject)))], []);
 
-  const filteredDefinitions = definitionsData.filter(def => {
-    const matchesSearch = def.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          def.meaning.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSubject = selectedSubject && selectedSubject !== 'All' ? def.subject === selectedSubject : true;
-    return matchesSearch && matchesSubject;
-  });
+  const filteredDefinitions = useMemo(() => {
+    return definitionsData.filter(def => {
+      const matchesSearch = def.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            def.meaning.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSubject = selectedSubject && selectedSubject !== 'All' ? def.subject === selectedSubject : true;
+      return matchesSearch && matchesSubject;
+    });
+  }, [searchQuery, selectedSubject]);
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 relative">
-      
-      {/* High-Contrast Academic Navbar */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-700 flex items-center justify-center rounded">
-                <span className="text-white text-xl font-bold font-serif tracking-tighter">P</span>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-blue-900">POP Studying</span>
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-600">
-              <Link href="/classes" className="hover:text-blue-700 transition-colors">Classes</Link>
-              <Link href="/flashcards" className="hover:text-blue-700 transition-colors">Flashcards</Link>
-              <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
-              <Link href="/dictionary" className="text-blue-700 font-bold border-b-2 border-blue-700 transition-colors">Dictionary</Link>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 relative pt-20 md:pt-10 md:pl-64">
 
-          <div className="flex items-center gap-4">
-            <Link href="/sign-in" className="hidden md:block text-blue-700 hover:text-blue-900 transition-colors text-[15px] font-bold px-4 py-2">
-              Log In
-            </Link>
-            <Link href="/sign-up" className="px-6 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md">
-              Join for Free
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <Sidebar />
 
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-24 space-y-12">
+      <main className="max-w-7xl mx-auto px-6 pb-24 space-y-12">
         {/* Title, Subtitle and Search (Coursera Academic Style) */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b border-gray-200 pb-12">
           <div className="space-y-4">
@@ -184,21 +178,25 @@ export default function CourseraDefinitionLibrary() {
           </div>
         </div>
 
-        {/* Filters (Coursera Professional Filters) */}
-        <div className="flex flex-wrap gap-3">
-          {subjects.map(subject => (
-            <button
-              key={subject}
-              onClick={() => setSelectedSubject(subject)}
-              className={`px-6 py-2.5 rounded-full font-bold text-sm transition-all border shadow-sm ${
-                (selectedSubject === subject) || (!selectedSubject && subject === 'All')
-                ? 'bg-gray-900 text-white border-gray-900'
-                : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              {subject}
-            </button>
-          ))}
+        {/* Subject Filters — color-coded to match each subject's badge elsewhere on this page */}
+        <div className="flex flex-wrap gap-2.5">
+          {subjects.map(subject => {
+            const isActive = (selectedSubject === subject) || (!selectedSubject && subject === 'All');
+            return (
+              <button
+                key={subject}
+                onClick={() => setSelectedSubject(subject)}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md font-bold text-sm border transition-all ${
+                  isActive
+                    ? `${getSubjectActiveStyles(subject)} shadow-sm`
+                    : `${getSubjectStyles(subject)} hover:brightness-95`
+                }`}
+              >
+                {getSubjectPillIcon(subject)}
+                {subject}
+              </button>
+            );
+          })}
         </div>
 
         {/* Compact Word Grid (Academic Card Style) */}

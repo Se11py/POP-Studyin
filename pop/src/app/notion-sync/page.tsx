@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import { useUser } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import { 
@@ -41,10 +41,10 @@ export default function NotionSyncPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 pb-24">
-      <Header />
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 pb-24 pt-20 md:pt-10 md:pl-64">
+      <Sidebar />
 
-      <main className="pt-24 sm:pt-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+      <main className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
         
         {/* Banner */}
         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">

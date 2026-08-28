@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Sidebar from '@/components/Sidebar';
 import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Atom, FlaskConical, Dna, Calculator, Briefcase, PenTool, Brain, Play, Clock, Target, CheckCircle2, ChevronRight, BookOpen, LayoutGrid, Sparkles, Filter, Award, Zap } from 'lucide-react';
 
@@ -133,97 +134,22 @@ export default function CourseraClassesPage() {
   const displayCategories = [{ id: 'All', icon: <LayoutGrid size={18} /> }, ...categories];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24">
-      {/* High-Contrast Academic Navbar */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-700 flex items-center justify-center rounded">
-                <span className="text-white text-xl font-bold font-serif tracking-tighter">P</span>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-blue-900">POP Studying</span>
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-600">
-              <Link href="/classes" className="text-blue-700 font-bold border-b-2 border-blue-700 transition-colors">Classes</Link>
-              <Link href="/flashcards" className="hover:text-blue-700 transition-colors">Flashcards</Link>
-              <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
-              <Link href="/dictionary" className="hover:text-blue-700 transition-colors">Dictionary</Link>
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 pt-20 md:pt-10 md:pl-64">
+      <Sidebar />
+
+      <main className="px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+
+        {/* Header */}
+        <div className="bg-white p-10 rounded border border-gray-200 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-blue-700 text-xs font-bold uppercase tracking-widest">
+              <BookOpen size={14} />
+              Enrolled Curriculum
             </div>
+            <h1 className="text-4xl font-bold text-gray-900 font-serif tracking-tight">Your Academic Paths</h1>
+            <p className="text-gray-600 max-w-xl">Meticulously structured study modules designed for deep retention and authoritative exam readiness.</p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 text-gray-500 hover:text-blue-700 transition-colors">
-              <Search size={20} />
-            </button>
-            <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs shadow-sm">
-              JD
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <main className="pt-32 px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row gap-12">
-        
-        {/* Academic Sidebar */}
-        <aside className="w-full md:w-72 shrink-0 space-y-10">
-          <div className="space-y-6">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-4">Academic Categories</h3>
-            <div className="flex flex-col gap-1">
-              {displayCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat.id)}
-                  className={`flex items-center justify-between px-4 py-3 rounded text-sm font-bold transition-all group ${
-                    activeCategory === cat.id 
-                    ? "bg-blue-50 text-blue-700 border-l-4 border-blue-700 shadow-sm" 
-                    : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className={`${activeCategory === cat.id ? 'text-blue-700' : 'text-gray-400'}`}>
-                      {cat.icon}
-                    </span>
-                    {cat.id}
-                  </span>
-                  <ChevronRight className={`w-4 h-4 transition-transform ${activeCategory === cat.id ? 'translate-x-1 opacity-100' : 'opacity-0'}`} />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="pt-10 border-t border-gray-200">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest px-4 mb-6">Performance Metrics</h3>
-            <div className="space-y-4">
-              {metrics.map((metric, idx) => (
-                <div key={idx} className="bg-white border border-gray-200 p-4 rounded shadow-sm flex items-center gap-4">
-                  <div className="w-10 h-10 rounded bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
-                    {metric.icon}
-                  </div>
-                  <div>
-                    <div className="text-lg font-bold text-gray-900 leading-none">{metric.value}</div>
-                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{metric.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </aside>
-
-        {/* Classes Content */}
-        <div className="flex-1 space-y-10">
-          {/* Header */}
-          <div className="bg-white p-10 rounded border border-gray-200 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-blue-700 text-xs font-bold uppercase tracking-widest">
-                <BookOpen size={14} />
-                Enrolled Curriculum
-              </div>
-              <h1 className="text-4xl font-bold text-gray-900 font-serif tracking-tight">Your Academic Paths</h1>
-              <p className="text-gray-600 max-w-xl">Meticulously structured study modules designed for deep retention and authoritative exam readiness.</p>
-            </div>
-            
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
@@ -234,10 +160,43 @@ export default function CourseraClassesPage() {
                 className="w-full bg-gray-50 border border-gray-200 rounded px-11 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-700 transition-all"
               />
             </div>
-          </div>
+        </div>
 
-          {/* Classes Grid */}
-          <div className="space-y-8">
+        {/* Performance Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {metrics.map((metric, idx) => (
+            <div key={idx} className="bg-white border border-gray-200 p-4 rounded shadow-sm flex items-center gap-4">
+              <div className="w-10 h-10 rounded bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
+                {metric.icon}
+              </div>
+              <div>
+                <div className="text-lg font-bold text-gray-900 leading-none">{metric.value}</div>
+                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{metric.label}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Academic Categories */}
+        <div className="flex flex-wrap items-center gap-2">
+          {displayCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-bold border transition-colors ${
+                activeCategory === cat.id
+                  ? "bg-blue-700 text-white border-blue-700 shadow-sm"
+                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              {cat.icon}
+              {cat.id}
+            </button>
+          ))}
+        </div>
+
+        {/* Classes Grid */}
+        <div className="space-y-8">
             <div className="flex items-center justify-between border-b border-gray-200 pb-4">
               <h2 className="text-2xl font-bold text-gray-900 font-serif italic">
                 {activeCategory === 'All' ? 'Current Modules' : `${activeCategory} Specializations`}
@@ -328,7 +287,6 @@ export default function CourseraClassesPage() {
               </AnimatePresence>
             </div>
           </div>
-        </div>
       </main>
     </div>
   );

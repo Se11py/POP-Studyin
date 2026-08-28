@@ -4,7 +4,7 @@ import { useUser } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect } from "react";
 
-const exemptPaths = ["/", "/landing", "/sign-in", "/sign-up", "/onboarding", "/hall-of-fame"];
+const exemptPaths = ["/", "/landing", "/install", "/sign-in", "/sign-up", "/onboarding", "/hall-of-fame", "/arena"];
 
 export default function OnboardingGuard({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn, user } = useUser();

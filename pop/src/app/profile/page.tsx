@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import Header from "@/components/Header";
+import Sidebar from "@/components/Sidebar";
 import { AtSign, Check, Save, School, UserRound } from "lucide-react";
 import { requiresCustomSchool, schools, subjects, yearGroups } from "@/lib/onboardingOptions";
 
@@ -77,9 +77,9 @@ export default function ProfilePage() {
   if (!isLoaded) return <div className="flex min-h-screen items-center justify-center bg-gray-50 text-sm font-bold text-gray-500">Loading your profile...</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20 text-gray-800">
-      <Header />
-      <main className="mx-auto max-w-4xl px-6 pb-20 pt-32">
+    <div className="min-h-screen bg-gray-50 pb-20 text-gray-800 pt-20 md:pt-10 md:pl-64">
+      <Sidebar />
+      <main className="mx-auto max-w-4xl px-6 pb-20">
         <div className="mb-8"><div className="mb-3 inline-flex items-center gap-2 rounded border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-blue-700"><UserRound className="h-4 w-4" /> Account settings</div><h1 className="text-4xl font-bold tracking-tight text-gray-900">Your profile</h1><p className="mt-3 text-gray-600">Update your student details and contributor preferences whenever you need to.</p></div>
         <form onSubmit={handleSubmit} className="space-y-8 rounded-lg border border-gray-200 bg-white p-7 shadow-sm md:p-10">
           <div className="grid gap-6 md:grid-cols-2"><label className="space-y-2"><span className="text-sm font-bold text-gray-900">Year or grade</span><select required value={yearGroup} onChange={(event) => setYearGroup(event.target.value)} className="w-full rounded border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-700"><option value="">Select your year</option>{yearGroups.map((year) => <option key={year}>{year}</option>)}</select></label><label className="space-y-2"><span className="flex items-center gap-2 text-sm font-bold text-gray-900"><School className="h-4 w-4 text-blue-700" /> School</span><select required value={school} onChange={(event) => setSchool(event.target.value)} className="w-full rounded border border-gray-300 bg-white px-4 py-3 text-sm outline-none focus:border-blue-700"><option value="">Select your school</option>{schools.map((item) => <option key={item}>{item}</option>)}</select></label></div>

@@ -1,0 +1,305 @@
+/* ==========================================================================
+   POP Arena v2 — "Stadium Broadcast" theme
+   Ink-black arena, bone-white hard-edged panels, floodlights, halftone print.
+   All rules are namespaced under .a2 so nothing leaks into the rest of POP.
+   ========================================================================== */
+
+.a2 {
+  --a2-ink: #0a0a0b;
+  --a2-ink-2: #121214;
+  --a2-ink-3: #1b1b1f;
+  --a2-bone: #f3ece0;
+  --a2-bone-dim: rgba(243, 236, 224, 0.55);
+  --a2-bone-faint: rgba(243, 236, 224, 0.16);
+
+  --a2-crimson: #ff2e4d;
+  --a2-cobalt: #2e6bff;
+  --a2-gold: #ffc400;
+  --a2-mint: #00e89b;
+  --a2-flame: #ff7f50;
+
+  --a2-shadow: 6px 6px 0 #000;
+  --a2-shadow-sm: 4px 4px 0 #000;
+  --a2-shadow-bone: 6px 6px 0 var(--a2-bone);
+
+  position: relative;
+  min-height: 100dvh;
+  background-color: var(--a2-ink);
+  color: var(--a2-bone);
+  overflow: hidden;
+  font-family: var(--a2-font-body), system-ui, sans-serif;
+  line-height: 1.3;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* The global stylesheet gives every heading a bottom margin, which fights the
+   flush broadcast layout — drop it inside the arena only. */
+.a2 h1,
+.a2 h2,
+.a2 h3,
+.a2 h4 {
+  margin: 0;
+}
+
+/* ---------- typography ---------- */
+
+.a2-display {
+  font-family: var(--a2-font-display), "Arial Narrow", sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: 0.01em;
+}
+
+.a2-mono {
+  font-family: var(--a2-font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.a2-label {
+  font-family: var(--a2-font-mono), ui-monospace, monospace;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+}
+
+.a2-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--a2-bone-faint);
+}
+
+/* ---------- atmosphere ---------- */
+
+.a2-floodlight {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 46% at 50% -12%, rgba(255, 240, 214, 0.14), transparent 72%),
+    radial-gradient(38% 34% at 6% 4%, rgba(255, 46, 77, 0.14), transparent 70%),
+    radial-gradient(40% 40% at 96% 10%, rgba(46, 107, 255, 0.14), transparent 70%),
+    radial-gradient(70% 50% at 50% 118%, rgba(0, 0, 0, 0.9), transparent 60%);
+}
+
+.a2-halftone {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  background-image: radial-gradient(var(--a2-bone-faint) 1px, transparent 1px);
+  background-size: 7px 7px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 0%, black, transparent 78%);
+  mask-image: radial-gradient(70% 60% at 50% 0%, black, transparent 78%);
+}
+
+.a2-scanlines {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0 2px,
+    rgba(0, 0, 0, 0.5) 2px 3px
+  );
+}
+
+.a2-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* vertical broadcast rail down the left edge */
+.a2-rail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 34px;
+  border-right: 1px solid var(--a2-bone-faint);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+@media (min-width: 900px) {
+  .a2-rail { display: flex; }
+  .a2-stage { padding-left: 34px; }
+}
+
+.a2-rail-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+/* ---------- surfaces ---------- */
+
+.a2-panel {
+  background: var(--a2-ink-2);
+  border: 2px solid var(--a2-bone);
+  box-shadow: var(--a2-shadow);
+  border-radius: 3px;
+}
+
+.a2-panel-sunk {
+  background: var(--a2-ink);
+  border: 1px solid var(--a2-bone-faint);
+  border-radius: 3px;
+}
+
+.a2-hazard {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--a2-gold) 0 10px,
+    #0a0a0b 10px 20px
+  );
+}
+
+.a2-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.55) 0 6px,
+    transparent 6px 12px
+  );
+}
+
+/* chunky pressable control: shadow collapses under the press */
+.a2-press {
+  border: 2px solid var(--a2-bone);
+  box-shadow: var(--a2-shadow);
+  border-radius: 3px;
+  transition: transform 0.09s steps(2, end), box-shadow 0.09s steps(2, end),
+    background-color 0.15s ease, color 0.15s ease;
+}
+
+.a2-press:not(:disabled):hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 9px 9px 0 #000;
+}
+
+.a2-press:not(:disabled):active {
+  transform: translate(5px, 5px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.a2-press:disabled {
+  opacity: 0.4;
+  box-shadow: 2px 2px 0 #000;
+}
+
+.a2-sticker {
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.85);
+  border-radius: 2px;
+}
+
+/* ticket edge for deck cards */
+.a2-ticket {
+  position: relative;
+}
+
+.a2-ticket::before,
+.a2-ticket::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--a2-ink);
+  border: 2px solid var(--a2-bone);
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.a2-ticket::before { left: -10px; clip-path: inset(0 0 0 50%); }
+.a2-ticket::after { right: -10px; clip-path: inset(0 50% 0 0); }
+
+/* ---------- motion ---------- */
+
+@keyframes a2-blink {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0.15; }
+}
+
+@keyframes a2-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes a2-flame {
+  0%, 100% { transform: scale(1) rotate(-4deg); }
+  50% { transform: scale(1.2) rotate(5deg); }
+}
+
+@keyframes a2-confetti {
+  0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+  92% { opacity: 1; }
+  100% { transform: translate3d(var(--drift, 0px), 110vh, 0) rotate(var(--spin, 900deg)); opacity: 0; }
+}
+
+@keyframes a2-sweep {
+  0% { transform: translateX(-120%) skewX(-18deg); }
+  100% { transform: translateX(320%) skewX(-18deg); }
+}
+
+@keyframes a2-jitter {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  75% { transform: translate(1px, -1px); }
+}
+
+@keyframes a2-riser {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+.a2-live-dot {
+  animation: a2-blink 1.1s steps(1, end) infinite;
+}
+
+.a2-ticker-track {
+  display: flex;
+  width: max-content;
+  animation: a2-ticker 32s linear infinite;
+}
+
+.a2-flame {
+  display: inline-block;
+  transform-origin: 50% 90%;
+  animation: a2-flame 0.75s ease-in-out infinite;
+}
+
+.a2-jitter {
+  animation: a2-jitter 0.16s steps(2, end) infinite;
+}
+
+.a2-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(243, 236, 224, 0.18), transparent);
+  animation: a2-sweep 1.1s ease-out 1;
+}
+
+/* number input chrome removal on the nickname/pin fields */
+.a2 input {
+  font-family: inherit;
+}
+
+.a2 input:focus { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .a2 *,
+  .a2 *::before,
+  .a2 *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
