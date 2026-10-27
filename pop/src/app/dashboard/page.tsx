@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
+import StudyRail from '@/components/StudyRail';
 import { useUser } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,7 +12,7 @@ import {
 
 export default function StudentDashboard() {
   const { user, isLoaded } = useUser();
-  const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'flashcards'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'courses' | 'flashcards' | 'arena'>('overview');
 
   const activeCourses = [
     {
@@ -59,12 +59,12 @@ export default function StudentDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 pt-20 md:pt-10 md:pl-64">
-      {/* Universal Sidebar with Clerk Authentication */}
-      <Sidebar />
+    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 lg:pl-[84px]">
+      {/* Same rail as the class pages */}
+      <StudyRail />
 
       {/* Main Content Area */}
-      <main className="px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
+      <main className="px-6 lg:px-8 pt-6 lg:pt-10 max-w-7xl mx-auto space-y-8">
 
         {/* Welcome Greeting Header */}
         <div className="bg-white border border-gray-200 rounded-lg p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
@@ -105,6 +105,12 @@ export default function StudentDashboard() {
             className={`pb-4 border-b-2 transition-colors ${activeTab === 'flashcards' ? 'border-blue-700 text-blue-900' : 'border-transparent hover:text-gray-700'}`}
           >
             My Flashcards
+          </button>
+          <button
+            onClick={() => setActiveTab('arena')}
+            className={`pb-4 border-b-2 transition-colors ${activeTab === 'arena' ? 'border-blue-700 text-blue-900' : 'border-transparent hover:text-gray-700'}`}
+          >
+            POP Arena
           </button>
         </div>
 
@@ -227,30 +233,28 @@ export default function StudentDashboard() {
                           <h4 className="text-lg font-bold text-gray-900">{deck.title}</h4>
                         </div>
 
-                        <div className="space-y-4">
-                          <div className="flex gap-2">
-                            <Link 
-                              href={`/flashcards/study/${deck.id}`} 
-                              className="flex-1 py-2.5 bg-blue-700 text-white rounded font-bold text-xs hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-2"
-                            >
-                              <Play size={12} fill="currentColor" />
-                              <span>Continue Deck</span>
-                            </Link>
-                            <Link
-                              href="/arena-2"
-                              title={`Host ${deck.title} as a live POP Arena game`}
-                              className="py-2.5 px-3 bg-gray-900 text-white rounded font-bold text-xs hover:bg-black transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-1.5 shrink-0"
-                            >
-                              <Gamepad2 size={13} />
-                              <span>Host</span>
-                            </Link>
-                          </div>
-                        </div>
+                        <Link
+                          href={`/flashcards/study/${deck.id}`}
+                          className="py-2.5 bg-blue-700 text-white rounded font-bold text-xs hover:bg-blue-800 transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-2"
+                        >
+                          <Play size={12} fill="currentColor" />
+                          <span>Continue Deck</span>
+                        </Link>
                       </div>
                     ))}
                   </div>
+                </motion.div>
+              )}
 
-                  {/* Host POP Arena — turn any of these decks into a live game */}
+              {activeTab === 'arena' && (
+                <motion.div
+                  key="arena"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-6"
+                >
+                  {/* Host POP Arena — turn any deck into a live game */}
                   <div className="relative overflow-hidden rounded-lg border border-gray-900 bg-[#0B0B0D] p-6 shadow-sm">
                     <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-4">
                       <div className="flex items-center gap-2.5">
@@ -298,6 +302,28 @@ export default function StudentDashboard() {
                         <ArrowRight size={14} />
                       </Link>
                     </div>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 font-serif">Host from a Deck</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {activeFlashcardDecks.map((deck, idx) => (
+                      <div key={idx} className="p-6 rounded-lg border border-gray-200 bg-white flex items-center justify-between gap-4 hover:shadow-md transition-shadow">
+                        <div className="space-y-2 min-w-0">
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-white border uppercase tracking-widest text-gray-500 shadow-sm">
+                            {deck.category}
+                          </span>
+                          <h4 className="text-base font-bold text-gray-900 truncate">{deck.title}</h4>
+                        </div>
+                        <Link
+                          href="/arena-2"
+                          title={`Host ${deck.title} as a live POP Arena game`}
+                          className="py-2.5 px-3 bg-gray-900 text-white rounded font-bold text-xs hover:bg-black transition-colors shadow-sm uppercase tracking-wider flex items-center justify-center gap-1.5 shrink-0"
+                        >
+                          <Gamepad2 size={13} />
+                          <span>Host</span>
+                        </Link>
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
               )}

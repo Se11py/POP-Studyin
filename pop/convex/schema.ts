@@ -39,4 +39,16 @@ export default defineSchema({
   })
   .index("by_topic", ["topicSlug", "orderIndex"])
   .index("by_topic_and_section", ["topicSlug", "sectionId"]),
+
+  discussionPosts: defineTable({
+    classId: v.string(),
+    lessonId: v.string(),
+    parentId: v.optional(v.id("discussionPosts")),
+    authorClerkId: v.string(),
+    authorName: v.string(),
+    body: v.string(),
+    hidden: v.optional(v.boolean()),
+  })
+  .index("by_lesson", ["classId", "lessonId"])
+  .index("by_parent", ["parentId"]),
 });
