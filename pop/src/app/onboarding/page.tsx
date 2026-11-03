@@ -8,6 +8,11 @@ import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { ArrowRight, AtSign, Check, School, Sparkles } from "lucide-react";
 import { requiresCustomSchool, schools, subjects, yearGroups } from "@/lib/onboardingOptions";
+import posthog from "posthog-js";
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export default function OnboardingPage() {
   const { user, isLoaded } = useUser();
@@ -55,9 +60,18 @@ export default function OnboardingPage() {
         wantsToContribute,
       };
       await user.update({ unsafeMetadata: { ...user.unsafeMetadata, ...profile } });
+      // Mirror the answers to the Notion Pupils table; a Notion hiccup must never block onboarding
+      await fetch("/api/onboarding-notion", { method: "POST" }).catch(() => undefined);
       await saveProfile(profile);
+      if (posthogConfigured) {
+        posthog.capture("onboarding_completed", {
+          subject_count: selectedSubjects.length,
+          wants_to_contribute: wantsToContribute,
+        });
+      }
       router.replace("/dashboard");
-    } catch {
+    } catch (err) {
+      console.error("Onboarding save failed:", err);
       setError("We couldn't save your details. Please try again.");
       setIsSaving(false);
     }

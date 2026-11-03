@@ -9,6 +9,11 @@ import {
   BookOpen
 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
+import posthog from "posthog-js";
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 // --- Mock Exam Data Structure ---
 interface Question {
@@ -141,6 +146,14 @@ export default function CourseraMockExamSimulator() {
 
   const handleNext = () => {
     if (isLastQuestion) {
+      if (posthogConfigured) {
+        posthog.capture("mock_exam_completed", {
+          exam_id: classId,
+          question_count: examData.questions.length,
+          answered_question_count: Object.keys(answers).length,
+          duration_seconds: examData.duration - timeLeft,
+        });
+      }
       setIsFinished(true);
     } else {
       setCurrentIndex((prev) => prev + 1);

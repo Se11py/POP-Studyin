@@ -82,7 +82,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
           <>
             <SectionLabel>Recent</SectionLabel>
             {recent.map((subject) => {
-              const href = `/classes/${subject.id}`;
+              const href = `/classes/${subject.id}/study`;
               return (
                 <Link
                   key={subject.id}

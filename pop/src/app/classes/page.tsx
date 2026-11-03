@@ -1,293 +1,191 @@
 "use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Sidebar from '@/components/Sidebar';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Atom, FlaskConical, Dna, Calculator, Briefcase, PenTool, Brain, Play, Clock, Target, CheckCircle2, ChevronRight, BookOpen, LayoutGrid, Sparkles, Filter, Award, Zap } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import PageShell from "@/components/PageShell";
 
-const initialClassesData = [
+type Course = { name: string; code: string; meta: string; href?: string };
+type Group = { label: string; courses: Course[] };
+
+// Only the classes that already have a page link through; the rest stay plain rows
+const igcseLeft: Group[] = [
   {
-    id: 'physics-rushed',
-    name: 'Physics Rushed',
-    institution: 'ANS Science Faculty',
-    subjectIcon: <Zap size={24} />,
-    progress: 45,
-    topicsDone: '5/11 Units',
-    miniMocks: '4 Graded',
-    nextUp: 'Sprint Module',
-    category: 'Science',
-    description: 'High-speed, zero fluff learning path. Master the entire IGCSE Physics curriculum in record time.',
-    theme: "border-blue-100 bg-white",
-    textColor: "text-blue-700"
+    label: "Sciences",
+    courses: [
+      { name: "Physics", code: "0625", meta: "42 lessons · 610 questions · 58 papers · most picked", href: "/classes/igcse-physics" },
+      { name: "Chemistry", code: "0620", meta: "38 lessons · 540 questions · 58 papers", href: "/classes/igcse-chemistry" },
+      { name: "Biology", code: "0610", meta: "40 lessons · 495 questions · 56 papers", href: "/classes/igcse-biology" },
+    ],
   },
   {
-    id: 'igcse-physics',
-    name: 'Physics — Co-ordinated Sciences',
-    institution: 'ANS Science Faculty',
-    subjectIcon: <Atom size={24} />,
-    progress: 72,
-    topicsDone: '8/11 Units',
-    miniMocks: '2 Graded',
-    nextUp: 'Work & Energy recap',
-    category: 'Science',
-    description: 'Advanced forces, electricity, and energetic principles tailored to the ANS Co-ordinated scheme.',
-    theme: "border-blue-100 bg-white",
-    textColor: "text-blue-700"
+    label: "Mathematics",
+    courses: [
+      { name: "Mathematics", code: "0580", meta: "Core & Extended · 125 topics · 62 papers · most picked", href: "/classes/igcse-math" },
+      { name: "Mathematics A (Pearson Edexcel)", code: "4MA1", meta: "8 grade bands · 134 topics · Foundation & Higher", href: "/classes/edexcel-igcse-math" },
+      { name: "Additional Maths", code: "0606", meta: "29 lessons · 410 questions · 44 papers" },
+    ],
   },
-  {
-    id: 'igcse-chemistry',
-    name: 'Chemistry — Co-ordinated Sciences',
-    institution: 'ANS Science Faculty',
-    subjectIcon: <FlaskConical size={24} />,
-    progress: 41,
-    topicsDone: '4/11 Units',
-    miniMocks: '1 Graded',
-    nextUp: 'Ionic & covalent bonding',
-    category: 'Science',
-    theme: "border-gray-200 bg-white",
-    textColor: "text-gray-700"
-  },
-  {
-    id: 'igcse-biology',
-    name: 'Biology — Co-ordinated Sciences',
-    institution: 'ANS Science Faculty',
-    subjectIcon: <Dna size={24} />,
-    progress: 19,
-    topicsDone: '0/11 Units',
-    miniMocks: '0 Graded',
-    nextUp: 'Cell structure intro',
-    category: 'Science',
-    theme: "border-gray-200 bg-white",
-    textColor: "text-gray-700"
-  },
-  {
-    id: 'igcse-math',
-    name: 'Mathematics (Core/Extended)',
-    institution: 'Mathematics Institute',
-    subjectIcon: <Calculator size={24} />,
-    progress: 58,
-    topicsDone: 'Paper 2 focus',
-    miniMocks: '3 Graded',
-    nextUp: 'Algebra inequalities',
-    category: 'Math',
-    theme: "border-blue-100 bg-white",
-    textColor: "text-blue-700"
-  },
-  {
-    id: 'igcse-business',
-    name: 'IGCSE Business Studies',
-    institution: 'Faculty of Commerce',
-    subjectIcon: <Briefcase size={24} />,
-    progress: 26,
-    topicsDone: 'Unit 1 complete',
-    miniMocks: '1 Graded',
-    nextUp: 'Marketing mix analysis',
-    category: 'Humanities',
-    theme: "border-gray-200 bg-white",
-    textColor: "text-gray-700"
-  },
-  {
-    id: 'igcse-english',
-    name: 'English Language Specialization',
-    institution: 'Faculty of Arts',
-    subjectIcon: <PenTool size={24} />,
-    progress: 64,
-    topicsDone: 'Writing drill',
-    miniMocks: '2 Graded',
-    nextUp: 'Summary question practice',
-    category: 'Humanities',
-    theme: "border-blue-100 bg-white",
-    textColor: "text-blue-700"
-  }
 ];
 
-const categories = [
-  { id: 'Science', icon: <FlaskConical size={18} /> },
-  { id: 'Math', icon: <Calculator size={18} /> },
-  { id: 'Humanities', icon: <BookOpen size={18} /> },
-  { id: 'Standardized Tests', icon: <Sparkles size={18} /> },
+const igcseRight: Group[] = [
+  {
+    label: "Computing",
+    courses: [{ name: "Computer Science", code: "0478", meta: "33 lessons · 380 questions · 40 papers" }],
+  },
+  {
+    label: "Business & Economics",
+    courses: [
+      { name: "Economics", code: "0455", meta: "27 lessons · 300 questions · 46 papers" },
+      { name: "Business Studies", code: "0450", meta: "25 lessons · 280 questions · 46 papers", href: "/classes/igcse-business" },
+    ],
+  },
 ];
 
-const metrics = [
-  { label: 'Weekly Hours', value: '14.5h', icon: <Clock size={18} className="text-blue-600" /> },
-  { label: 'Units Mastered', value: '28', icon: <Award size={18} className="text-blue-600" /> },
-  { label: 'Mock Readiness', value: '82%', icon: <Target size={18} className="text-blue-600" /> },
+const alevelLeft: Group[] = [
+  {
+    label: "Sciences",
+    courses: [
+      { name: "Physics", code: "9702", meta: "38 lessons · 540 questions · 40 papers" },
+      { name: "Chemistry", code: "9701", meta: "41 lessons · 505 questions · 40 papers" },
+    ],
+  },
+  {
+    label: "Mathematics",
+    courses: [{ name: "Mathematics", code: "9709", meta: "46 lessons · 760 questions · 52 papers" }],
+  },
 ];
 
-export default function CourseraClassesPage() {
-  const [activeCategory, setActiveCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
+const alsoAlevel: Course[] = [
+  { name: "Physics", code: "9702", meta: "" },
+  { name: "Chemistry", code: "9701", meta: "" },
+  { name: "Mathematics", code: "9709", meta: "" },
+];
 
-  const fadeInUp: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
-  };
+const comingNext: Course[] = [
+  { name: "Biology", code: "9700", meta: "" },
+  { name: "Economics", code: "9708", meta: "" },
+  { name: "Computer Science", code: "9618", meta: "" },
+];
 
-  const filteredClasses = initialClassesData.filter(cls => {
-    const matchesCategory = activeCategory === 'All' || cls.category === activeCategory;
-    const matchesSearch = cls.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                         (cls.description || "").toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
+function Row({ course }: { course: Course }) {
+  const inner = (
+    <>
+      <div className="min-w-0">
+        <h3 className="!mb-0 text-[clamp(20px,1.75vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">{course.name}</h3>
+        <p className="!mb-0 mt-0.5 text-[clamp(11px,0.85vw,13px)] text-[#4a4a44]">{course.meta}</p>
+      </div>
+      <span className="shrink-0 pl-4 text-[clamp(22px,1.9vw,30px)] font-bold tracking-[-0.02em] text-[#1c3bff]">{course.code}</span>
+    </>
+  );
+  const cls = "flex items-center justify-between border-b border-[#d9d4c4] py-[clamp(6px,1.1vh,12px)]";
+  return course.href ? (
+    <Link href={course.href} className={`${cls} transition-colors hover:bg-[#ece8da]`}>
+      {inner}
+    </Link>
+  ) : (
+    <div className={cls}>{inner}</div>
+  );
+}
 
-  const displayCategories = [{ id: 'All', icon: <LayoutGrid size={18} /> }, ...categories];
+function CompactList({ label, courses, dim }: { label: string; courses: Course[]; dim?: boolean }) {
+  return (
+    <section>
+      <h2 className="!mb-0 border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">{label}</h2>
+      {courses.map((c) => (
+        <div
+          key={c.code}
+          className={`flex items-center justify-between border-b border-[#d9d4c4] py-[clamp(4px,0.8vh,8px)] ${dim ? "opacity-60" : ""}`}
+        >
+          <span className="!mb-0 text-[clamp(15px,1.25vw,20px)] font-bold">{c.name}</span>
+          <span className="text-[clamp(18px,1.5vw,24px)] font-bold text-[#1c3bff]">{c.code}</span>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function Groups({ groups }: { groups: Group[] }) {
+  return (
+    <>
+      {groups.map((g) => (
+        <section key={g.label}>
+          <h2 className="!mb-0 border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">{g.label}</h2>
+          {g.courses.map((c) => (
+            <Row key={c.code} course={c} />
+          ))}
+        </section>
+      ))}
+    </>
+  );
+}
+
+export default function ClassesPage() {
+  const [level, setLevel] = useState<"IGCSE" | "A-Level">("IGCSE");
+  const [query, setQuery] = useState("");
+
+  const q = query.trim().toLowerCase();
+  const match = (c: Course) => !q || c.name.toLowerCase().includes(q) || c.code.includes(q);
+  const filter = (groups: Group[]) =>
+    groups.map((g) => ({ ...g, courses: g.courses.filter(match) })).filter((g) => g.courses.length > 0);
+
+  const left = filter(level === "IGCSE" ? igcseLeft : alevelLeft);
+  const right = level === "IGCSE" ? filter(igcseRight) : [];
+  const sideList = (level === "IGCSE" ? alsoAlevel : comingNext).filter(match);
+  const nothing = left.length === 0 && right.length === 0 && sideList.length === 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 pb-24 pt-20 md:pt-10 md:pl-64">
-      <Sidebar />
-
-      <main className="px-6 lg:px-8 max-w-7xl mx-auto space-y-8">
-
-        {/* Header */}
-        <div className="bg-white p-10 rounded border border-gray-200 shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-blue-700 text-xs font-bold uppercase tracking-widest">
-              <BookOpen size={14} />
-              Enrolled Curriculum
-            </div>
-            <h1 className="text-4xl font-bold text-gray-900 font-serif tracking-tight">Your Academic Paths</h1>
-            <p className="text-gray-600 max-w-xl">Meticulously structured study modules designed for deep retention and authoritative exam readiness.</p>
-          </div>
-
-            <div className="relative w-full sm:w-72">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search modules..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded px-11 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-700 transition-all"
-              />
-            </div>
-        </div>
-
-        {/* Performance Metrics */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {metrics.map((metric, idx) => (
-            <div key={idx} className="bg-white border border-gray-200 p-4 rounded shadow-sm flex items-center gap-4">
-              <div className="w-10 h-10 rounded bg-gray-50 flex items-center justify-center border border-gray-100 shrink-0">
-                {metric.icon}
-              </div>
-              <div>
-                <div className="text-lg font-bold text-gray-900 leading-none">{metric.value}</div>
-                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mt-1">{metric.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Academic Categories */}
-        <div className="flex flex-wrap items-center gap-2">
-          {displayCategories.map((cat) => (
+    <PageShell eyebrow="Classes — the 2026/27 index" title="The index.">
+      {/* Level tabs + search */}
+      <div className="flex flex-wrap items-end justify-between gap-4 pt-2">
+        <div className="flex gap-7" role="tablist">
+          {(["IGCSE", "A-Level"] as const).map((l) => (
             <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-bold border transition-colors ${
-                activeCategory === cat.id
-                  ? "bg-blue-700 text-white border-blue-700 shadow-sm"
-                  : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+              key={l}
+              role="tab"
+              aria-selected={level === l}
+              onClick={() => setLevel(l)}
+              className={`border-b-2 pb-2 text-[clamp(16px,1.25vw,20px)] font-bold transition-colors ${
+                level === l ? "border-[#111] text-[#111]" : "border-transparent text-[#a9a493] hover:text-[#111]"
               }`}
             >
-              {cat.icon}
-              {cat.id}
+              {l}
             </button>
           ))}
         </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search a subject or code"
+          aria-label="Search a subject or code"
+          className="w-full border-b border-[#111] bg-transparent py-2 text-[clamp(14px,1.1vw,17px)] outline-none placeholder:text-[#8d8978] sm:w-[min(100%,320px)]"
+        />
+      </div>
 
-        {/* Classes Grid */}
-        <div className="space-y-8">
-            <div className="flex items-center justify-between border-b border-gray-200 pb-4">
-              <h2 className="text-2xl font-bold text-gray-900 font-serif italic">
-                {activeCategory === 'All' ? 'Current Modules' : `${activeCategory} Specializations`}
-              </h2>
-              <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded uppercase tracking-widest">
-                {filteredClasses.length} active courses
-              </span>
-            </div>
+      {/* Index */}
+      <div className="mt-4 grid grid-cols-1 gap-x-12 gap-y-5 lg:grid-cols-2">
+        <div className="space-y-[clamp(14px,2.4vh,28px)]">
+          <Groups groups={left} />
+        </div>
+        <div className="space-y-[clamp(14px,2.4vh,28px)]">
+          <Groups groups={right} />
+          {sideList.length > 0 && (
+            <CompactList
+              label={level === "IGCSE" ? "A-Level · also on POP" : "A-Level · coming next"}
+              courses={sideList}
+              dim={level === "A-Level"}
+            />
+          )}
+        </div>
+      </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <AnimatePresence mode="popLayout">
-                {filteredClasses.map((cls) => (
-                  <motion.div
-                    key={cls.id}
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <Link href={cls.id === 'physics-rushed' ? '/physics-rush' : `/classes/${cls.id}`}>
-                      <div className="bg-white border border-gray-200 rounded-lg p-8 hover:shadow-xl transition-all duration-300 group flex flex-col h-full relative overflow-hidden">
-                        <div className="absolute top-0 right-0 p-4">
-                           {cls.id === 'physics-rushed' ? (
-                             <span className="bg-blue-700 text-white text-[10px] font-bold px-3 py-1.5 rounded uppercase tracking-widest shadow-md">Specialized</span>
-                           ) : (
-                             <span className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-widest">Verified</span>
-                           )}
-                        </div>
+      {nothing && <p className="mt-10 text-lg">No class matches “{query}”.</p>}
 
-                        <div className="flex items-start gap-6 mb-8">
-                          <div className={`w-16 h-16 rounded flex items-center justify-center border ${cls.theme} shrink-0 group-hover:scale-105 transition-transform shadow-sm`}>
-                            {React.cloneElement(cls.subjectIcon as React.ReactElement<{ className?: string; size?: number }>, { className: cls.textColor, size: 32 })}
-                          </div>
-                          <div className="space-y-1">
-                            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{cls.institution}</div>
-                            <h3 className="text-xl font-bold text-gray-900 leading-tight group-hover:text-blue-700 transition-colors pr-12">{cls.name}</h3>
-                          </div>
-                        </div>
-                        
-                        <p className="text-gray-600 text-sm leading-relaxed mb-8 line-clamp-2">
-                          {cls.description}
-                        </p>
-
-                        <div className="mt-auto space-y-6">
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                              <span className="text-gray-400">Curriculum Coverage</span>
-                              <span className="text-blue-700">{cls.progress}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                              <motion.div 
-                                initial={{ width: 0 }}
-                                animate={{ width: `${cls.progress}%` }}
-                                className="h-full bg-blue-600 rounded-full" 
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="bg-gray-50 rounded-lg p-4 border border-gray-100 space-y-1">
-                            <div className="text-[9px] font-black uppercase tracking-widest text-gray-400 flex items-center gap-1">
-                              <Target size={10} /> Priority Next
-                            </div>
-                            <p className="text-xs font-bold text-gray-700">{cls.nextUp}</p>
-                          </div>
-
-                          <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                            <div className="flex items-center gap-4">
-                              <div className="flex flex-col">
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Status</span>
-                                <span className="text-xs font-bold text-gray-700">{cls.topicsDone}</span>
-                              </div>
-                              <div className="w-px h-6 bg-gray-200" />
-                              <div className="flex flex-col">
-                                <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Mocks</span>
-                                <span className="text-xs font-bold text-gray-700">{cls.miniMocks}</span>
-                              </div>
-                            </div>
-                            <div className="text-blue-700 font-bold text-sm flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                              Access Material <ChevronRight size={16} />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
-          </div>
-      </main>
-    </div>
+      <div className="mt-auto border-t border-[#111] pt-4 text-[clamp(14px,1.1vw,17px)]">
+        <p className="!mb-0">
+          Can&apos;t find your subject? New classes are added every term. Tell us which one you need{" "}
+          <Link href="/" className="font-bold">→</Link>
+        </p>
+      </div>
+    </PageShell>
   );
 }

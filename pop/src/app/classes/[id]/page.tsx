@@ -1,181 +1,174 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import {
-  ArrowLeft, BookOpen, FileText, PlayCircle, Layers, ChevronRight, MessageSquare, MousePointerClick,
-} from "lucide-react";
+import PageShell from "@/components/PageShell";
+import SubjectSidebar from "./components/SubjectSidebar";
+import { getOverview, type OverviewUnit } from "./overviewData";
 
-import { classesData, findDefaultLesson } from "./classesData";
-import { lessonContent } from "./lessonContent";
-import SyllabusSidebar from "./components/SyllabusSidebar";
-import StudyRail from "@/components/StudyRail";
-import NotesTab from "./components/NotesTab";
-import QuestionsTab from "./components/QuestionsTab";
-import PastPapersTab from "./components/PastPapersTab";
-import VideoTab from "./components/VideoTab";
-import FlashcardsTab from "./components/FlashcardsTab";
-import DiscussionTab from "./components/DiscussionTab";
-import InteractiveTab from "./components/InteractiveTab";
-import PaperPreviewModal, { type PaperModalState } from "./components/PaperPreviewModal";
+const blue = "text-[#1c3bff]";
 
-type TabId = "notes" | "questions" | "pastpapers" | "videos" | "flashcards" | "interactive" | "discussion";
-
-const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
-  { id: "notes", label: "Revision Notes", icon: BookOpen },
-  { id: "questions", label: "Topic Questions", icon: FileText },
-  { id: "pastpapers", label: "Past Papers & MS", icon: Layers },
-  { id: "videos", label: "Video Lessons", icon: PlayCircle },
-  { id: "flashcards", label: "Flashcards", icon: Layers },
-  { id: "interactive", label: "Interactive", icon: MousePointerClick },
-  { id: "discussion", label: "Discussion", icon: MessageSquare },
-];
-
-export default function ClassStudyPage() {
-  const params = useParams();
-  const classId = (params.id as string) || "igcse-physics";
-  // Keyed so switching subject from the sidebar resets lesson/tab state
-  return <ClassStudy key={classId} classId={classId} />;
+function TopicLinks({ study }: { study: string }) {
+  return (
+    <span className={`shrink-0 text-[11px] font-bold ${blue}`}>
+      <Link href={study} className="hover:underline">notes</Link>
+      {" · "}
+      <Link href="/flashcards" className="hover:underline">cards</Link>
+      {" · "}
+      <Link href={study} className="hover:underline">quiz</Link>
+    </span>
+  );
 }
 
-function ClassStudy({ classId }: { classId: string }) {
-  const classData = classesData[classId] || classesData["igcse-physics"];
+function Unit({ unit, study }: { unit: OverviewUnit; study: string }) {
+  return (
+    <section>
+      <div className="flex items-baseline gap-4 border-b-2 border-[#111] pb-1.5">
+        <span className={`text-[clamp(22px,1.8vw,30px)] font-bold leading-none tracking-[-0.03em] ${blue}`}>
+          {String(unit.n).padStart(2, "0")}
+        </span>
+        <h2 className="flex-1 text-[clamp(16px,1.3vw,21px)] font-bold tracking-[-0.02em]">{unit.title}</h2>
+        <span className="text-[11px] font-bold uppercase tracking-wide text-[#8d8978]">{unit.topics.length} topics</span>
+      </div>
+      {unit.topics.map((tp) => (
+        <div key={tp.id} className="flex items-center justify-between gap-4 border-b border-[#d9d4c4] py-[clamp(1px,0.3vh,5px)] text-[clamp(12px,0.95vw,14px)]">
+          <Link href={study} className={`flex min-w-0 gap-3 hover:underline ${tp.done ? `font-bold ${blue}` : ""}`}>
+            <span className="min-w-7 shrink-0">{tp.id}</span>
+            <span className="min-w-0">
+              {tp.title}
+              {tp.tag && <span className="ml-2 text-[10px] font-bold uppercase tracking-wide text-[#8d8978]">{tp.tag}</span>}
+              {tp.done && <span className="ml-2" aria-label="done">✓</span>}
+            </span>
+          </Link>
+          <TopicLinks study={study} />
+        </div>
+      ))}
+    </section>
+  );
+}
 
-  const defaultLesson = useMemo(() => findDefaultLesson(classData), [classData]);
+export default function SubjectOverviewPage() {
+  const params = useParams();
+  const classId = (params.id as string) || "igcse-physics";
+  const data = getOverview(classId);
+  const [tier, setTier] = useState(0);
 
-  const [selection, setSelection] = useState(defaultLesson);
-  const [expandedChapterId, setExpandedChapterId] = useState<number | null>(defaultLesson?.chapterId ?? null);
-  const [activeTab, setActiveTab] = useState<TabId>("notes");
-  const [completedLessons, setCompletedLessons] = useState<Record<string, boolean>>({});
-  const [resourceModal, setResourceModal] = useState<PaperModalState | null>(null);
+  if (!data) {
+    return (
+      <PageShell eyebrow="Classes — not found" title="No such class.">
+        <p className="pt-6 text-lg">
+          We couldn&apos;t find that class. <Link href="/classes" className="font-bold text-[#1c3bff]">Back to all classes →</Link>
+        </p>
+      </PageShell>
+    );
+  }
 
-  const chapter = classData.topics.find((t) => t.id === selection?.chapterId) ?? null;
-  const subTopic = chapter?.subTopics.find((s) => s.id === selection?.subTopicId) ?? null;
-  const lesson = subTopic?.lessons.find((l) => l.id === selection?.lessonId) ?? null;
+  const study = `/classes/${classId}/study`;
+  const units = data.tiers ? data.tiers[tier].units : data.units;
+  const allTopics = units.flatMap((u) => u.topics);
+  const done = allTopics.filter((tp) => tp.done).length;
+  const next = allTopics.find((tp) => !tp.done);
 
-  const contentKey = selection ? `${classId}:${selection.lessonId}` : "";
-  const content = lessonContent[contentKey];
-  const isComplete = selection ? !!completedLessons[selection.lessonId] : false;
+  // Fill the left column until it holds about half the topics, so the two columns balance
+  const half = allTopics.length / 2;
+  const left: OverviewUnit[] = [];
+  const right: OverviewUnit[] = [];
+  let count = 0;
+  let splitDone = false;
+  for (const unit of units) {
+    if (!splitDone && count + unit.topics.length / 2 <= half) {
+      left.push(unit);
+      count += unit.topics.length;
+    } else {
+      splitDone = true;
+      right.push(unit);
+    }
+  }
 
-  const handleSelectLesson = (chapterId: number, subTopicId: string, lessonId: string) => {
-    setSelection({ chapterId, subTopicId, lessonId });
-    setActiveTab("notes");
-  };
+  const jump = [
+    { label: data.cards ? `Flashcards · ${data.cards} cards` : "Flashcards", href: "/flashcards" },
+    { label: "Lightning quiz · 60 sec", href: study },
+    { label: "Mock exam", href: `/classes/mock/${classId}` },
+    { label: data.papers ? `Past papers · ${data.papers}` : "Past papers", href: study },
+    { label: "POP Arena", href: "/arena" },
+  ];
 
-  const toggleChapter = (chapterId: number) => {
-    setExpandedChapterId((current) => (current === chapterId ? null : chapterId));
-  };
-
-  const toggleComplete = () => {
-    if (!selection) return;
-    setCompletedLessons((s) => ({ ...s, [selection.lessonId]: !s[selection.lessonId] }));
-  };
+  const sideLinks = [
+    { label: "Overview", href: `/classes/${classId}` },
+    { label: "Revision notes", href: study },
+    { label: "Flashcards", href: "/flashcards" },
+    { label: "Past papers", href: study },
+    { label: "Mock exam", href: `/classes/mock/${classId}` },
+    { label: "POP Arena", href: "/arena" },
+    { label: "Discussion", href: study },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 pb-24 lg:pl-[84px]">
-      <StudyRail classId={classId} />
-      <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {/* Main Study Canvas */}
-        <main className="flex flex-col lg:flex-row gap-6">
-          <SyllabusSidebar
-            classId={classId}
-            classData={classData}
-            expandedChapterId={expandedChapterId}
-            onToggleChapter={toggleChapter}
-            selectedLessonId={selection?.lessonId ?? null}
-            onSelectLesson={handleSelectLesson}
-            onOpenFormulaSheet={() =>
-              setResourceModal({ title: `${classData.name} Data & Formula Sheet`, code: "Reference Document" })
-            }
-            onOpenGlossary={() => setResourceModal({ title: "Official Definitions Glossary", code: "Reference Document" })}
-            currentLesson={
-              lesson
-                ? {
-                    id: lesson.id,
-                    title: lesson.title,
-                    chapterTitle: subTopic?.title ?? null,
-                    practiceMarks: content ? content.questions.reduce((sum, q) => sum + q.marks, 0) : 0,
-                    isComplete,
-                    onToggleComplete: toggleComplete,
-                  }
-                : null
-            }
-          />
-
-          <section className="flex-1 min-w-0">
-            {!lesson ? (
-              <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-16 text-center space-y-3">
-                <BookOpen size={40} className="text-gray-300 mx-auto" />
-                <p className="text-lg font-bold text-gray-400">No lessons published for this subject yet.</p>
-                <Link href="/classes" className="inline-flex items-center gap-1 text-xs font-bold text-blue-700 hover:underline">
-                  <ArrowLeft size={12} /> Back to your classes
-                </Link>
-              </div>
-            ) : (
-              <>
-                {/* Tab Nav */}
-                <div className="bg-white border border-gray-200 border-b-0 rounded-t-lg overflow-hidden flex flex-wrap">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex-auto min-w-[150px] justify-center px-5 py-4 text-xs font-bold uppercase tracking-wider border-b-2 flex items-center gap-2 whitespace-nowrap ${
-                          isActive
-                            ? "border-blue-700 text-blue-700 bg-white"
-                            : "border-transparent text-gray-500 hover:text-gray-900 hover:bg-white bg-gray-50"
-                        }`}
-                      >
-                        <Icon size={16} />
-                        <span>{tab.label}</span>
-                        {tab.id === "questions" && content && content.questions.length > 0 && (
-                          <span className="bg-blue-700 text-white text-[10px] leading-none rounded px-1.5 py-1 ml-1">{content.questions.length}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Tab Content */}
-                <div className="bg-white border border-gray-200 rounded-b-lg shadow-sm p-6 lg:p-8 min-h-[600px]">
-                  {activeTab === "discussion" ? (
-                    <DiscussionTab classId={classId} lessonId={lesson.id} lessonTitle={lesson.title} />
-                  ) : !content ? (
-                    <div className="py-24 text-center space-y-4">
-                      <ChevronRight size={40} className="text-gray-300 mx-auto rotate-90" />
-                      <p className="text-xl font-bold text-gray-400">Full study content for this lesson is coming soon.</p>
-                      <p className="text-sm text-gray-500 max-w-md mx-auto">
-                        Try <button onClick={() => handleSelectLesson(1, "1.2", "1.2.2")} className="text-blue-700 font-bold underline">
-                          1.2.2 Graphical Analysis: Distance-Time
-                        </button>{" "}
-                        for a fully built example of this study layout.
-                      </p>
-                    </div>
-                  ) : (
-                    <>
-                      {activeTab === "notes" && <NotesTab notes={content.notes} onPracticeClick={() => setActiveTab("questions")} />}
-                      {activeTab === "questions" && <QuestionsTab questions={content.questions} />}
-                      {activeTab === "pastpapers" && (
-                        <PastPapersTab papers={content.pastPapers} syllabusLabel={classData.syllabusCode} />
-                      )}
-                      {activeTab === "videos" && <VideoTab video={content.video} />}
-                      {activeTab === "flashcards" && (
-                        <FlashcardsTab deckTitle={`${subTopic?.title ?? classData.name} Deck`} cards={content.flashcards} />
-                      )}
-                      {activeTab === "interactive" && <InteractiveTab />}
-                    </>
-                  )}
-                </div>
-              </>
-            )}
-          </section>
-        </main>
+    <PageShell
+      eyebrow={`${data.name} ${data.code} — Subject overview`.toUpperCase()}
+      title={`${data.name}.`}
+      titleAside={data.blurb}
+      topLeft={<Link href="/classes" className="text-sm font-bold text-[#1c3bff]">← All classes</Link>}
+      sidebar={
+        <SubjectSidebar
+          subject={data.name.toUpperCase()}
+          code={data.code}
+          links={sideLinks}
+          blurb={`${data.board} ${data.level} ${data.name}. ${
+            units.length ? `${["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][units.length] ?? units.length} units, ${allTopics.length} topics, every one mapped to the syllabus you'll sit.` : "Units are being added."
+          }`}
+          progress={{ done, total: allTopics.length, next: next ? `${next.id} ${next.title}` : undefined }}
+          footer={data.syllabusLine.replaceAll(" · ", "  ·  ")}
+        />
+      }
+    >
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 border-b border-[#d9d4c4] pb-2 text-[clamp(11px,0.9vw,14px)]">
+        <span className={`text-[11px] font-bold uppercase tracking-wide ${blue}`}>Jump in</span>
+        {jump.map((j) => (
+          <Link key={j.label} href={j.href} className="font-bold hover:text-[#1c3bff]">
+            {j.label} →
+          </Link>
+        ))}
       </div>
 
-      <PaperPreviewModal state={resourceModal} syllabusLabel={classData.syllabusCode} onClose={() => setResourceModal(null)} />
-    </div>
+      {data.tiers && (
+        <div className="mt-3 flex gap-7" role="tablist">
+          {data.tiers.map((tr, i) => (
+            <button
+              key={tr.name}
+              role="tab"
+              aria-selected={tier === i}
+              onClick={() => setTier(i)}
+              className={`border-b-2 pb-1 text-[clamp(15px,1.15vw,19px)] font-bold transition-colors ${
+                tier === i ? "border-[#111] text-[#111]" : "border-transparent text-[#a9a493] hover:text-[#111]"
+              }`}
+            >
+              {tr.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {units.length === 0 ? (
+        <p className="py-10 text-lg">The {data.name} syllabus map is still being written. Check back soon.</p>
+      ) : (
+        <div className="mt-3 grid grid-cols-1 gap-x-12 gap-y-6 lg:grid-cols-2">
+          <div className="space-y-[clamp(8px,1.4vh,20px)]">
+            {left.map((u) => <Unit key={u.n} unit={u} study={study} />)}
+            {data.quiz && (
+              <div className="border-l-4 border-[#1c3bff] pl-4">
+                <p className={`text-[11px] font-bold uppercase tracking-wide ${blue}`}>Lightning quiz · This week</p>
+                <p className="mt-1 text-[clamp(16px,1.35vw,21px)] italic leading-snug">{data.quiz}</p>
+                <Link href={study} className={`mt-3 inline-block text-sm font-bold ${blue}`}>Start the quiz →</Link>
+              </div>
+            )}
+          </div>
+          <div className="space-y-[clamp(8px,1.4vh,20px)]">
+            {right.map((u) => <Unit key={u.n} unit={u} study={study} />)}
+          </div>
+        </div>
+      )}
+    </PageShell>
   );
 }

@@ -18,6 +18,11 @@ import {
   getSubjectIconComponent,
   type SyllabusResource,
 } from "../data";
+import posthog from "posthog-js";
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 const getResourceIcon = (type: SyllabusResource["type"]) => {
   if (type === "pdf") return File;
@@ -100,6 +105,11 @@ export default function SubjectWorkbenchPage() {
         return doc;
       })
     );
+    if (posthogConfigured && currentDoc) {
+      posthog.capture("editor_draft_approved", {
+        subject: currentDoc.subject,
+      });
+    }
     showToast("✅ Revision note changes approved & synced live!");
     setActiveTab("read");
   };
@@ -119,6 +129,11 @@ export default function SubjectWorkbenchPage() {
         return doc;
       })
     );
+    if (posthogConfigured) {
+      posthog.capture("editor_note_saved", {
+        subject: currentDoc.subject,
+      });
+    }
     showToast("💾 Content updates saved successfully!");
   };
 

@@ -7,6 +7,11 @@ import { api } from "@/convex/_generated/api";
 import Sidebar from "@/components/Sidebar";
 import { AtSign, Check, Save, School, UserRound } from "lucide-react";
 import { requiresCustomSchool, schools, subjects, yearGroups } from "@/lib/onboardingOptions";
+import posthog from "posthog-js";
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -66,6 +71,12 @@ export default function ProfilePage() {
       };
       await user.update({ unsafeMetadata: { ...user.unsafeMetadata, ...profile } });
       await saveProfile(profile);
+      if (posthogConfigured) {
+        posthog.capture("profile_updated", {
+          subject_count: selectedSubjects.length,
+          wants_to_contribute: wantsToContribute,
+        });
+      }
       setStatus("Your profile has been updated.");
     } catch {
       setStatus("We couldn't save your changes. Please try again.");

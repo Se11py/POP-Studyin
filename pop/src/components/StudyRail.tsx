@@ -100,7 +100,7 @@ function SubjectsPopover({ classId, onClose }: { classId?: string; onClose: () =
           return (
             <Link
               key={id}
-              href={`/classes/${id}`}
+              href={`/classes/${id}/study`}
               onClick={onClose}
               className={`group flex items-center gap-3 rounded px-2.5 py-2 transition-colors ${
                 isCurrent ? "bg-[#DFF2FC]/60" : "hover:bg-slate-50"
@@ -263,7 +263,7 @@ export default function StudyRail({ classId }: { classId?: string }) {
               {recent.map(({ id, name, icon }) => (
                 <Link
                   key={id}
-                  href={`/classes/${id}`}
+                  href={`/classes/${id}/study`}
                   aria-label={`Recent: ${name}`}
                   className="group relative shrink-0 w-9 h-9 rounded bg-white/60 text-slate-600 flex items-center justify-center [&_svg]:w-4 [&_svg]:h-4 transition-all hover:bg-white hover:text-[#0056D2] hover:translate-x-0.5"
                 >

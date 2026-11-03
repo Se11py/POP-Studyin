@@ -9,6 +9,11 @@ import LobbyScreen from "./components/LobbyScreen";
 import GameScreen from "./components/GameScreen";
 import LeaderboardScreen from "./components/LeaderboardScreen";
 import PodiumScreen from "./components/PodiumScreen";
+import posthog from "posthog-js";
+
+const posthogConfigured = Boolean(
+  process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN && process.env.NEXT_PUBLIC_POSTHOG_HOST,
+);
 
 type Phase = "home" | "lobby" | "question" | "leaderboard" | "podium";
 
@@ -40,6 +45,12 @@ export default function ArenaPage() {
   }
 
   function handleStart(roster: ArenaPlayer[]) {
+    if (posthogConfigured) {
+      posthog.capture("arena_game_started", {
+        deck_id: deck.id,
+        player_count: roster.length,
+      });
+    }
     setPlayers(roster);
     setQuestionIndex(0);
     setPhase("question");
@@ -55,6 +66,13 @@ export default function ArenaPage() {
       setQuestionIndex((i) => i + 1);
       setPhase("question");
     } else {
+      if (posthogConfigured) {
+        posthog.capture("arena_game_completed", {
+          deck_id: deck.id,
+          question_count: deck.questions.length,
+          final_score: players.find((player) => player.id === "user")?.score ?? 0,
+        });
+      }
       setPhase("podium");
     }
   }

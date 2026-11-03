@@ -1,12 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from 'react';
-import Sidebar from '@/components/Sidebar';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Search, BookA, Lightbulb, Link2, 
-  MessageCircle, Beaker, Atom, Dna, X, FunctionSquare, Layers, Award, ExternalLink
-} from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import PageShell from "@/components/PageShell";
 
 type Definition = {
   id: string;
@@ -81,289 +76,162 @@ const definitionsData: Definition[] = [
   }
 ];
 
-const getSubjectIcon = (subject: string) => {
-  switch (subject) {
-    case 'Physics': return <Atom size={16} className="text-blue-700" />;
-    case 'Chemistry': return <Beaker size={16} className="text-emerald-700" />;
-    case 'Biology': return <Dna size={16} className="text-purple-700" />;
-    default: return <BookA size={16} className="text-gray-700" />;
-  }
-};
+const subjectsList = ["All", ...Array.from(new Set(definitionsData.map((d) => d.subject)))];
 
-// Colorless icon for the filter pills — inherits the pill's own text color
-const getSubjectPillIcon = (subject: string) => {
-  switch (subject) {
-    case 'Physics': return <Atom size={15} />;
-    case 'Chemistry': return <Beaker size={15} />;
-    case 'Biology': return <Dna size={15} />;
-    default: return <Layers size={15} />;
-  }
-};
+export default function DictionaryPage() {
+  const [query, setQuery] = useState("");
+  const [subject, setSubject] = useState("All");
+  const [selected, setSelected] = useState<Definition | null>(null);
 
-const getSubjectStyles = (subject: string) => {
-  switch (subject) {
-    case 'Physics': return 'text-blue-700 bg-blue-50 border-blue-100';
-    case 'Chemistry': return 'text-emerald-700 bg-emerald-50 border-emerald-100';
-    case 'Biology': return 'text-purple-700 bg-purple-50 border-purple-100';
-    default: return 'text-gray-700 bg-gray-50 border-gray-100';
-  }
-};
-
-// Solid variant of the same per-subject color, used for the active filter pill
-const getSubjectActiveStyles = (subject: string) => {
-  switch (subject) {
-    case 'Physics': return 'text-white bg-blue-700 border-blue-700';
-    case 'Chemistry': return 'text-white bg-emerald-700 border-emerald-700';
-    case 'Biology': return 'text-white bg-purple-700 border-purple-700';
-    default: return 'text-white bg-gray-900 border-gray-900';
-  }
-};
-
-export default function CourseraDefinitionLibrary() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [selectedWord, setSelectedWord] = useState<Definition | null>(null);
+  // Lock page scroll while a definition is open
+  useEffect(() => {
+    document.body.style.overflow = selected ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selected]);
 
   useEffect(() => {
-    if (selectedWord) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [selectedWord]);
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setSelected(null);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected]);
 
-  const subjects = useMemo(() => ['All', ...Array.from(new Set(definitionsData.map(d => d.subject)))], []);
+  const q = query.trim().toLowerCase();
+  const filtered = useMemo(
+    () =>
+      definitionsData
+        .filter(
+          (d) =>
+            (subject === "All" || d.subject === subject) &&
+            (!q || d.word.toLowerCase().includes(q) || d.meaning.toLowerCase().includes(q))
+        )
+        .sort((a, b) => a.word.localeCompare(b.word)),
+    [q, subject]
+  );
 
-  const filteredDefinitions = useMemo(() => {
-    return definitionsData.filter(def => {
-      const matchesSearch = def.word.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            def.meaning.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesSubject = selectedSubject && selectedSubject !== 'All' ? def.subject === selectedSubject : true;
-      return matchesSearch && matchesSubject;
+  // Group alphabetically, then split the letters across two columns
+  const letters = useMemo(() => {
+    const map = new Map<string, Definition[]>();
+    filtered.forEach((d) => {
+      const k = d.word[0].toUpperCase();
+      map.set(k, [...(map.get(k) ?? []), d]);
     });
-  }, [searchQuery, selectedSubject]);
+    return Array.from(map.entries());
+  }, [filtered]);
+  const half = Math.ceil(letters.length / 2);
+  const columns = [letters.slice(0, half), letters.slice(half)];
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900 relative pt-20 md:pt-10 md:pl-64">
-
-      <Sidebar />
-
-      <main className="max-w-7xl mx-auto px-6 pb-24 space-y-12">
-        {/* Title, Subtitle and Search (Coursera Academic Style) */}
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-10 border-b border-gray-200 pb-12">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-100 rounded text-[10px] font-bold uppercase tracking-widest text-blue-700">
-               <Award size={14} /> Academic Documentation
-            </div>
-            <h1 className="text-5xl font-bold text-gray-900 tracking-tight font-serif">
-              Technical Glossary
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl leading-relaxed">A comprehensive library of formal definitions and methodologies required for international curriculum standards.</p>
-          </div>
-
-          <div className="relative w-full lg:w-[450px]">
-            <div className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400">
-               <Search size={22} />
-            </div>
-            <input 
-              type="text" 
-              placeholder="Search by keyword or definition..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white border border-gray-300 rounded-md py-4 pl-14 pr-6 text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all shadow-sm text-lg"
-            />
-          </div>
+    <PageShell eyebrow="Dictionary — technical glossary" title="The glossary.">
+      <div className="flex flex-wrap items-end justify-between gap-4 pt-3">
+        <div className="flex gap-7" role="tablist">
+          {subjectsList.map((s) => (
+            <button
+              key={s}
+              role="tab"
+              aria-selected={subject === s}
+              onClick={() => setSubject(s)}
+              className={`border-b-2 pb-2 text-[clamp(16px,1.25vw,20px)] font-bold transition-colors ${
+                subject === s ? "border-[#111] text-[#111]" : "border-transparent text-[#a9a493] hover:text-[#111]"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
         </div>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search a word or definition"
+          aria-label="Search a word or definition"
+          className="w-full border-b border-[#111] bg-transparent py-2 text-[clamp(14px,1.1vw,17px)] outline-none placeholder:text-[#8d8978] sm:w-[min(100%,320px)]"
+        />
+      </div>
 
-        {/* Subject Filters — color-coded to match each subject's badge elsewhere on this page */}
-        <div className="flex flex-wrap gap-2.5">
-          {subjects.map(subject => {
-            const isActive = (selectedSubject === subject) || (!selectedSubject && subject === 'All');
-            return (
-              <button
-                key={subject}
-                onClick={() => setSelectedSubject(subject)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-md font-bold text-sm border transition-all ${
-                  isActive
-                    ? `${getSubjectActiveStyles(subject)} shadow-sm`
-                    : `${getSubjectStyles(subject)} hover:brightness-95`
-                }`}
-              >
-                {getSubjectPillIcon(subject)}
-                {subject}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Compact Word Grid (Academic Card Style) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          <AnimatePresence>
-            {filteredDefinitions.length > 0 ? (
-              filteredDefinitions.map((def) => (
-                <motion.div
-                  key={def.id}
-                  layoutId={`card-${def.id}`}
-                  onClick={() => setSelectedWord(def)}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white rounded border border-gray-200 p-6 cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all group flex flex-col justify-between"
-                >
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-start">
-                       <span className={`inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest border ${getSubjectStyles(def.subject)} items-center gap-1.5`}>
-                         {getSubjectIcon(def.subject)} {def.subject}
-                       </span>
-                       <ExternalLink size={14} className="text-gray-300 group-hover:text-blue-600 transition-colors" />
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors font-serif">{def.word}</h2>
-                    <p className="text-sm font-medium text-gray-500 line-clamp-3 leading-relaxed">{def.meaning}</p>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="col-span-full py-32 text-center space-y-4 bg-white rounded border border-dashed border-gray-300"
-              >
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-300">
-                  <Search size={32} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900">No definitions found</h3>
-                <p className="text-gray-500 font-medium">Try adjusting your search criteria or subject filters.</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </main>
-
-      {/* Expanded Modal Overlay (Coursera Professional Modal) */}
-      <AnimatePresence>
-        {selectedWord && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedWord(null)}
-              className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[100]"
-            />
-            <div className="fixed inset-0 flex items-center justify-center z-[110] p-4 md:p-10 pointer-events-none">
-              <motion.div
-                layoutId={`card-${selectedWord.id}`}
-                className="bg-white rounded-lg border border-gray-200 w-full max-w-2xl max-h-[85vh] overflow-y-auto pointer-events-auto shadow-2xl relative"
-              >
-                {/* Academic Header - Sticky */}
-                <div className="sticky top-0 z-20 px-8 py-6 md:px-12 bg-gray-50/95 backdrop-blur-md border-b border-gray-100 flex justify-between items-center">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                       <span className={`inline-flex px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border ${getSubjectStyles(selectedWord.subject)} items-center gap-2`}>
-                         {getSubjectIcon(selectedWord.subject)} {selectedWord.subject} Specialist
-                       </span>
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest hidden sm:inline">v2026.4 Standard</span>
-                    </div>
-                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight font-serif">{selectedWord.word}</h2>
-                  </div>
-                  <button 
-                    onClick={() => setSelectedWord(null)}
-                    className="w-10 h-10 bg-white border border-gray-200 hover:bg-gray-50 rounded-full flex items-center justify-center text-gray-500 transition-colors shadow-sm shrink-0"
+      <div className="mt-4 grid grid-cols-1 gap-x-12 gap-y-5 lg:grid-cols-2">
+        {columns.map((col, ci) => (
+          <div key={ci} className="space-y-[clamp(14px,2.4vh,28px)]">
+            {col.map(([letter, words]) => (
+              <section key={letter}>
+                <h2 className="border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">{letter}</h2>
+                {words.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => setSelected(d)}
+                    className="flex w-full items-center justify-between border-b border-[#d9d4c4] py-[clamp(8px,1.3vh,14px)] text-left transition-colors hover:bg-[#ece8da]"
                   >
-                    <X size={20} strokeWidth={2.5} />
+                    <div className="min-w-0">
+                      <h3 className="text-[clamp(20px,1.7vw,26px)] font-bold leading-[1.1] tracking-[-0.02em]">{d.word}</h3>
+                      <p className="mt-0.5 line-clamp-2 max-w-[60ch] text-[clamp(11px,0.85vw,13px)] leading-snug text-[#4a4a44]">{d.meaning}</p>
+                    </div>
+                    <span className="shrink-0 pl-4 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">{d.subject}</span>
                   </button>
-                </div>
+                ))}
+              </section>
+            ))}
+          </div>
+        ))}
+      </div>
 
-                <div className="px-8 md:px-12 py-10 space-y-10">
-                  {/* Formal Meaning */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-blue-700 font-bold uppercase tracking-[0.15em] text-[10px]">
-                      <BookA size={14} /> Primary Methodology
-                    </div>
-                    <div className="bg-white border-l-4 border-blue-700 p-6 shadow-sm">
-                       <p className="text-xl font-medium text-gray-800 leading-relaxed italic">{selectedWord.meaning}</p>
-                    </div>
-                  </div>
+      {filtered.length === 0 && <p className="mt-10 text-lg">No definition matches “{query}”.</p>}
 
-                  {/* Physics Formula OR Chemistry Elements */}
-                  {(selectedWord.formula || selectedWord.elements) && (
-                    <div className={`grid grid-cols-1 ${selectedWord.formula && selectedWord.elements ? 'md:grid-cols-2' : ''} gap-6`}>
-                      {selectedWord.formula && (
-                        <div className="bg-gray-900 rounded-lg p-6 text-white shadow-lg">
-                          <div className="flex items-center gap-2 text-blue-400 font-bold uppercase tracking-widest text-[10px] mb-4">
-                            <FunctionSquare size={14} /> Mathematical Model
-                          </div>
-                          <div className="text-2xl md:text-3xl font-bold font-mono tracking-wider flex justify-center py-6 border-y border-gray-800 my-2 overflow-x-auto whitespace-nowrap">
-                            {selectedWord.formula}
-                          </div>
-                          <p className="text-[10px] text-gray-500 text-center uppercase mt-2">Standard SI Derived Units</p>
-                        </div>
-                      )}
-                      
-                      {selectedWord.elements && (
-                        <div className="bg-emerald-900 rounded-lg p-6 text-white shadow-lg">
-                          <div className="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-widest text-[10px] mb-4">
-                            <Layers size={14} /> Chemical Reference
-                          </div>
-                          <div className="flex flex-wrap gap-2 py-2">
-                            {selectedWord.elements.map(el => (
-                              <span key={el} className="px-3 py-1.5 bg-emerald-800/50 rounded border border-emerald-700 text-sm font-bold text-emerald-100">{el}</span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Example Usage */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-gray-500 font-bold uppercase tracking-[0.15em] text-[10px]">
-                      <MessageCircle size={14} /> Contextual Application
-                    </div>
-                    <p className="text-lg font-medium text-gray-600 leading-relaxed bg-gray-50 p-6 rounded italic border border-gray-100">
-                      &quot;{selectedWord.example}&quot;
-                    </p>
-                  </div>
-
-                  {/* Academic Context */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2 text-orange-700 font-bold uppercase tracking-[0.15em] text-[10px]">
-                      <Lightbulb size={14} /> Examiner Insight
-                    </div>
-                    <p className="text-sm font-medium text-gray-600 leading-relaxed bg-orange-50 p-6 rounded-lg border border-orange-100">
-                      {selectedWord.context}
-                    </p>
-                  </div>
-
-                  {/* Goes Together */}
-                  <div className="pt-8 border-t border-gray-100 space-y-4">
-                    <div className="flex items-center gap-2 text-gray-400 font-bold uppercase tracking-[0.15em] text-[10px]">
-                      <Link2 size={14} /> Relational Schema
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {selectedWord.goesTogether.map(word => (
-                        <span key={word} className="px-4 py-2 bg-white text-blue-700 rounded border border-blue-100 font-bold text-xs hover:bg-blue-50 cursor-pointer transition-colors shadow-sm">
-                          {word}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="px-8 py-6 bg-gray-50 border-t border-gray-100 text-center">
-                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center justify-center gap-2">
-                      <Award size={12} /> Certified by ANS Science Faculty Subject Leads
-                   </p>
-                </div>
-              </motion.div>
+      {selected && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={selected.word}>
+          <div className="absolute inset-0 bg-[#111]/60" onClick={() => setSelected(null)} />
+          <div className="relative max-h-[88vh] w-full max-w-2xl overflow-y-auto bg-[#f4f1e8] shadow-2xl">
+            <div className="sticky top-0 flex items-start justify-between border-t-[4px] border-[#1c3bff] bg-[#f4f1e8] px-8 pb-4 pt-6">
+              <div>
+                <p className="text-[12px] font-bold uppercase tracking-wide text-[#1c3bff]">{selected.subject}</p>
+                <h2 className="text-[clamp(34px,4vw,52px)] font-bold leading-none tracking-[-0.03em]">{selected.word}</h2>
+              </div>
+              <button onClick={() => setSelected(null)} aria-label="Close" className="text-2xl leading-none text-[#4a4a44] hover:text-[#111]">
+                ×
+              </button>
             </div>
-          </>
-        )}
-      </AnimatePresence>
-    </div>
+
+            <div className="space-y-7 px-8 pb-8">
+              <p className="border-l-[3px] border-[#1c3bff] pl-4 text-[20px] italic leading-snug">{selected.meaning}</p>
+
+              {selected.formula && (
+                <div className="bg-[#1c3bff] px-6 py-5 text-white">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-white/70">Formula</p>
+                  <p className="mt-2 overflow-x-auto whitespace-nowrap font-mono text-[clamp(24px,3vw,34px)] font-bold">{selected.formula}</p>
+                </div>
+              )}
+
+              {selected.elements && (
+                <div>
+                  <p className="border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">Examples</p>
+                  {selected.elements.map((el) => (
+                    <p key={el} className="border-b border-[#d9d4c4] py-2 text-[16px] font-bold">{el}</p>
+                  ))}
+                </div>
+              )}
+
+              <div>
+                <p className="border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">In a sentence</p>
+                <p className="pt-2 text-[17px] italic leading-snug">“{selected.example}”</p>
+              </div>
+
+              <div>
+                <p className="border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">Examiner insight</p>
+                <p className="pt-2 text-[15px] leading-relaxed text-[#2a2a26]">{selected.context}</p>
+              </div>
+
+              <div>
+                <p className="border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">Goes together with</p>
+                <div className="flex flex-wrap gap-2 pt-3">
+                  {selected.goesTogether.map((w) => (
+                    <span key={w} className="border border-[#111] px-3 py-1 text-[13px] font-bold">{w}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </PageShell>
   );
 }

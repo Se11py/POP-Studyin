@@ -1,1062 +1,1124 @@
 "use client";
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useUser, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
-import { motion, Variants, AnimatePresence } from 'framer-motion';
-import { Calendar, MessageCircle, Clock, CheckCircle2, ChevronRight, Play, BookOpen, Video, FileText, ArrowRight, Award, GraduationCap, Library, LayoutGrid, Globe, Brain, Gamepad2, MonitorPlay, Flame, Trophy, Smartphone, Wifi, Battery, Signal } from 'lucide-react';
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import Circuit from "@/components/Circuit";
+
+const BLUE = "#2339f5";
+const FIRST_PAPER = new Date(2027, 3, 27); // 27 Apr 2027
+
+const igcse = [
+  { name: "Physics", code: "0625", meta: "32 lessons · 610 questions · 63 papers" },
+  { name: "Chemistry", code: "0620", meta: "36 lessons · 530 questions · 58 papers" },
+  { name: "Biology", code: "0610", meta: "40 lessons · 495 questions · 56 papers" },
+  { name: "Mathematics", code: "0580", meta: "51 lessons · 820 questions · 62 papers" },
+  { name: "Additional Maths", code: "0606", meta: "28 lessons · 410 questions · 44 papers" },
+  { name: "Computer Science", code: "0478", meta: "33 lessons · 380 questions · 40 papers" },
+  { name: "Economics", code: "0455", meta: "27 lessons · 300 questions · 46 papers" },
+  { name: "Business Studies", code: "0450", meta: "25 lessons · 280 questions · 46 papers" },
+];
+
+const alevel = [
+  { name: "Physics", code: "9702", meta: "38 lessons · 540 questions · 40 papers" },
+  { name: "Chemistry", code: "9701", meta: "41 lessons · 505 questions · 40 papers" },
+  { name: "Mathematics", code: "9709", meta: "46 lessons · 760 questions · 52 papers" },
+];
+
+const comingNext = [
+  { name: "Biology", code: "9700" },
+  { name: "Economics", code: "9708" },
+  { name: "Computer Science", code: "9618" },
+];
+
+const thisWeek = [
+  { title: "2025 Oct/Nov papers added", sub: "Physics, Chemistry, Maths →" },
+  { title: "Lightning quiz: Units 1–2", sub: "60 seconds, 10 questions →" },
+  { title: "POP Arena, Thursday 19:00", sub: "Physics 0625 open round →" },
+  { title: "New class: A-Level Maths", sub: "9709, Pure 1 is live →" },
+];
+
+const steps = [
+  {
+    n: "01",
+    title: "Read the notes",
+    body: "Short notes built on each syllabus statement, with worked examples and the exact wording examiners reward.",
+    time: "≈ 15 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M7 3h13l6 6v20H7z" />
+        <path d="M20 3v6h6" />
+        <path d="M11 14h8M11 18h8M11 22h8" strokeWidth="3" />
+      </svg>
+    ),
+  },
+  {
+    n: "02",
+    title: "Drill the cards",
+    body: "Flashcards for every definition, equation and unit, brought back right before you'd forget them.",
+    time: "≈ 10 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <rect x="3" y="12" width="17" height="17" />
+        <path d="M7 12V8h17v17h-4M11 8V4h17v17h-4" />
+      </svg>
+    ),
+  },
+  {
+    n: "03",
+    title: "Lightning quiz",
+    body: "Ten questions in sixty seconds. Score 7/10 and the topic's past-paper questions unlock.",
+    time: "60 SEC",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M18 2L7 18h8l-2 12 11-17h-8z" />
+      </svg>
+    ),
+  },
+  {
+    n: "04",
+    title: "Past-paper questions",
+    body: "Every real exam question on the topic, sorted by year, with the mark scheme beside it.",
+    time: "≈ 25 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M7 3h18v26H7z" />
+        <path d="M12 9h9M12 13h9M12 17h5" strokeWidth="3" />
+        <path d="M17 24l3 3 6-7" />
+      </svg>
+    ),
+  },
+  {
+    n: "05",
+    title: "Mock exam",
+    body: "A timed paper across the whole unit, marked on the latest grade boundaries.",
+    time: "1 H 15 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <circle cx="16" cy="16" r="13" />
+        <path d="M16 8v8l-6-4" />
+      </svg>
+    ),
+  },
+];
+
+const statements = [
+  { id: "1.6.1", text: "Define momentum as mass × velocity", done: true },
+  { id: "1.6.2", text: "Recall and use p = mv", done: true },
+  { id: "1.6.3", text: "Define impulse as force × time", done: true },
+  { id: "1.6.4", text: "Use F = Δp / Δt for safety features", done: false },
+  { id: "1.6.5", text: "Apply conservation of momentum", done: false },
+];
+
+type Cell = { s: "done" | "started" | "new" | "none"; v?: string };
+const none: Cell = { s: "none" };
+const d = (v: string): Cell => ({ s: "done", v });
+const st = (v: string): Cell => ({ s: "started", v });
+const nw: Cell = { s: "new", v: "NEW" };
+
+const paperRows: { year: number; cells: Cell[] }[] = [
+  { year: 2025, cells: [d("35/40"), d("62/80"), st("12/40"), d("33/40"), d("64/80"), d("31/40"), nw, nw, nw] },
+  { year: 2024, cells: [none, none, none, d("36/40"), d("71/80"), d("34/40"), d("30/40"), d("58/80"), st("20/40")] },
+  { year: 2023, cells: [none, none, none, d("29/40"), d("55/80"), st("9/40"), st("18/40"), none, none] },
+  { year: 2022, cells: [none, none, none, d("27/40"), none, none, none, none, none] },
+  { year: 2021, cells: [none, none, none, none, st("26/80"), none, none, none, none] },
+  { year: 2020, cells: Array(9).fill(none) },
+  { year: 2019, cells: Array(9).fill(none) },
+];
+
+const boundaries = [
+  { g: "U", from: 0 },
+  { g: "G", from: 20 },
+  { g: "F", from: 28 },
+  { g: "E", from: 36 },
+  { g: "D", from: 44 },
+  { g: "C", from: 52 },
+  { g: "B", from: 61 },
+  { g: "A", from: 70 },
+  { g: "A*", from: 80 },
+];
+
+const marks = [
+  { n: 1, name: "Motion, forces & energy", pct: 88 },
+  { n: 2, name: "Thermal physics", pct: 72 },
+  { n: 3, name: "Waves", pct: 79 },
+  { n: 4, name: "Electricity & magnetism", pct: 52, hi: true },
+  { n: 5, name: "Nuclear physics", pct: 90 },
+  { n: 6, name: "Space physics", pct: 61 },
+];
+
+const board = [
+  { r: "01", name: "Aisha R.", loc: "Dubai, UAE", acc: "96%", streak: "21 days", pts: "9,840" },
+  { r: "02", name: "Leo M.", loc: "London, UK", acc: "94%", streak: "14 days", pts: "9,615" },
+  { r: "03", name: "Mei L.", loc: "Singapore", acc: "95%", streak: "33 days", pts: "9,402" },
+  { r: "04", name: "Arjun S.", loc: "Pune, India", acc: "91%", streak: "8 days", pts: "9,110" },
+  { r: "05", name: "Sofia G.", loc: "Madrid, Spain", acc: "90%", streak: "19 days", pts: "8,975" },
+  { r: "06", name: "Kwame O.", loc: "Accra, Ghana", acc: "92%", streak: "11 days", pts: "8,760" },
+  { r: "07", name: "You", loc: "▲ 3 places this round", acc: "89%", streak: "6 days", pts: "8,712", you: true },
+  { r: "08", name: "Hana K.", loc: "Kuala Lumpur, Malaysia", acc: "88%", streak: "27 days", pts: "8,540" },
+  { r: "09", name: "Omar F.", loc: "Cairo, Egypt", acc: "87%", streak: "5 days", pts: "8,333" },
+  { r: "10", name: "Lucas P.", loc: "São Paulo, Brazil", acc: "86%", streak: "9 days", pts: "8,120" },
+];
+
+const included: [string, string][] = [
+  ["Revision notes, every class", "✓"],
+  ["Lightning quizzes", "✓"],
+  ["Flashcards", "Unlimited"],
+  ["Past papers + mark schemes", "All, 2019–2025"],
+  ["Mock exams, graded", "Every unit"],
+  ["Predicted grade + syllabus map", "✓"],
+  ["POP Arena", "Compete"],
+  ["Offline mode", "✓"],
+];
+
+const faqs = [
+  { q: "Which exam boards?", a: "Cambridge International (CAIE) IGCSE and A-Level. Edexcel is in the works." },
+  { q: "Can my school use it?", a: "Yes. Whole classes can use it free, with a teacher dashboard." },
+  { q: "Who pays for it?", a: "Nobody. Senior students write and proofread the notes as volunteers." },
+];
 
 export default function LandingPage() {
-  const { isLoaded, isSignedIn } = useUser();
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  const [days, setDays] = useState(182);
+  const [today, setToday] = useState("27 OCT");
+  const [weeks, setWeeks] = useState(26);
+  const [query, setQuery] = useState("");
+  const rootRef = useRef<HTMLDivElement>(null);
 
+  // Scroll-snap between sections and fade/slide each section in as it arrives
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const html = document.documentElement;
+    html.classList.add("lp-snap");
+    root.classList.add("lp-anim");
+    const sections = root.querySelectorAll<HTMLElement>(":scope > section:not(.lp-hero), .lp-last > section");
+    sections.forEach((el) => el.classList.add("lp-rv"));
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))),
+      { threshold: 0.2 }
+    );
+    sections.forEach((el) => io.observe(el));
+    return () => {
+      io.disconnect();
+      html.classList.remove("lp-snap");
+      root.classList.remove("lp-anim");
+    };
+  }, []);
+  useEffect(() => {
+    // Deferred so the server-rendered markup hydrates before the live date swaps in
+    const t = setTimeout(() => {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diff = Math.max(0, Math.round((FIRST_PAPER.getTime() - startOfToday.getTime()) / 86400000));
+      setDays(diff);
+      setWeeks(Math.round(diff / 7));
+      setToday(`${now.getDate()} ${now.toLocaleString("en-GB", { month: "short" }).toUpperCase()}`);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []);
 
-  const focusBlocks = [
-    { title: 'Functions', detail: 'IB Math AA', time: '08:30' },
-    { title: 'Energetics', detail: 'Chemistry HL', time: '11:00' },
-    { title: 'Stoichiometry', detail: 'Chemistry SL', time: '14:30' }
-  ];
-  
-  const clinics = [
-    { title: 'IB Physics Clinic', detail: 'Wave superposition drills · 19:00' },
-    { title: 'Essay review window', detail: 'Upload drafts by Friday' }
-  ];
-  
-  const heroStats = [
-    { label: 'Mock readiness avg.', value: '89%' },
-    { label: 'Weekly clinics', value: '12' },
-    { label: 'Active cohorts', value: '48' }
-  ];
-  
-  const cadenceSteps = [
-    {
-      title: 'Sunday brief',
-      description: 'Receive a structured 4-line overview: key topics, mock target, and one reflective question to set the academic week.',
-      detail: 'Sent 18:00 local time',
-      id: '01',
-      icon: <Calendar className="w-6 h-6 text-white" />,
-    },
-    {
-      title: 'Mid-week check',
-      description: 'Your assigned mentor replies to your submission with annotated, actionable feedback within 48 hours.',
-      detail: 'Delivered in-app',
-      id: '02',
-      icon: <MessageCircle className="w-6 h-6 text-white" />,
-    },
-    {
-      title: 'Studio hour',
-      description: 'Join a moderated focus room with 12 peers, swap questions, and log your next set of objectives.',
-      detail: 'Thursday 19:00',
-      id: '03',
-      icon: <Clock className="w-6 h-6 text-white" />,
-    }
-  ];
-
-  const syllabusBadges = [
-    'IGCSE Curriculum', 'IB Diploma', 'A-Level Certified', 'Mock Exam Clinics'
-  ];
-
-  const faqs = [
-    {
-      q: "What is the pricing structure?",
-      a: "The platform is completely free. We operate as a student-led non-profit funded entirely by alumni donations to ensure high-quality revision materials remain accessible."
-    },
-    {
-      q: "Which specific exam boards are supported?",
-      a: "Our curriculum experts focus heavily on IB, Cambridge (CIE), and Edexcel for both IGCSE and A-Levels. Additional boards are regularly reviewed for inclusion."
-    },
-    {
-      q: "Who authors the study materials?",
-      a: "Every academic resource is authored by top-performing alumni (scoring 7s in IB or A*s at A-Level) and is rigorously verified by our subject leads for accuracy."
-    }
-  ];
-
-  const subjects = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Computer Science', 'History', 'English Literature', 'Economics'];
-
-  // POP Arena — the four high-contrast answer tokens used in the live game
-  const arenaTokens = [
-    { letter: 'A', name: 'Electric Crimson', color: '#FF2E4D', answer: '2 m/s²', shape: <path d="M12 3 22 20.5H2L12 3Z" /> },
-    { letter: 'B', name: 'Neon Cobalt', color: '#2E6BFF', answer: '4 m/s²', shape: <path d="M12 1.5 22.5 12 12 22.5 1.5 12 12 1.5Z" /> },
-    { letter: 'C', name: 'Solar Gold', color: '#FFC400', answer: '5 m/s²', shape: <circle cx="12" cy="12" r="10" /> },
-    { letter: 'D', name: 'Emerald Mint', color: '#00E89B', answer: '100 m/s²', shape: <rect x="2.5" y="2.5" width="19" height="19" /> }
-  ];
-
-  const arenaHighlights = [
-    {
-      icon: <Gamepad2 className="w-5 h-5 text-blue-700" />,
-      title: 'Join in seconds',
-      detail: 'Students enter a 6-digit Game PIN on any phone, pick a nickname, and they are in. Nothing to install.'
-    },
-    {
-      icon: <MonitorPlay className="w-5 h-5 text-blue-700" />,
-      title: 'Built for the projector',
-      detail: 'A dedicated host view shows live joins, the countdown ring, answer distributions, and leaderboard reveals.'
-    },
-    {
-      icon: <Flame className="w-5 h-5 text-blue-700" />,
-      title: 'Speed, streaks, and coins',
-      detail: 'Faster answers score higher, consecutive correct answers stack a streak multiplier, and coins unlock power-ups.'
-    }
-  ];
-
-  const arenaBoard = [
-    { rank: 1, avatar: '🦊', name: 'Namtan', score: '4,180', streak: 4 },
-    { rank: 2, avatar: '🐼', name: 'Beam', score: '3,940', streak: 2 },
-    { rank: 3, avatar: '🦉', name: 'Captain Calc', score: '3,610', streak: 0 }
-  ];
-
-  const classProgress = [
-    {
-      title: 'Mathematics',
-      icon: <LayoutGrid className="w-8 h-8 text-blue-700" />,
-      overall: 75,
-      foundation: 100,
-      intermediate: 80,
-      advanced: 20,
-      theme: 'bg-blue-50 border-blue-100',
-      textTheme: 'text-blue-900',
-      barColor: 'bg-blue-600',
-      lightBar: 'bg-blue-100'
-    },
-    {
-      title: 'Sciences',
-      icon: <Brain className="w-8 h-8 text-blue-700" />,
-      overall: 60,
-      foundation: 100,
-      intermediate: 50,
-      advanced: 10,
-      theme: 'bg-gray-50 border-gray-200',
-      textTheme: 'text-gray-800',
-      barColor: 'bg-gray-600',
-      lightBar: 'bg-gray-200'
-    },
-    {
-      title: 'Humanities',
-      icon: <Library className="w-8 h-8 text-blue-700" />,
-      overall: 90,
-      foundation: 100,
-      intermediate: 100,
-      advanced: 70,
-      theme: 'bg-blue-50 border-blue-100',
-      textTheme: 'text-blue-900',
-      barColor: 'bg-blue-600',
-      lightBar: 'bg-blue-100'
-    }
-  ];
-
-  const fadeInUp: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-  };
-
-  const staggerContainer: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.15
-      }
-    }
-  };
+  const passed = Math.min(1, Math.max(0, 1 - days / 182));
+  const ringLen = 2 * Math.PI * 112;
 
   return (
-    <div className="min-h-screen bg-white text-gray-800 font-sans selection:bg-blue-100 selection:text-blue-900">
-      
-      {/* High-Contrast Academic Navbar */}
-      <nav className="fixed top-0 z-50 w-full bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-20">
-          <div className="flex items-center gap-12">
-            <Link href="/" className="flex items-center">
-              <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-11 w-auto" priority />
-            </Link>
-            
-            <div className="hidden md:flex items-center gap-8 text-[15px] font-medium text-gray-600">
-              <Link href="/classes" className="hover:text-blue-700 transition-colors">Classes</Link>
-              <Link href="/flashcards" className="hover:text-blue-700 transition-colors">Flashcards</Link>
-              <Link href="/interactives" className="hover:text-blue-700 transition-colors">Interactives</Link>
-              <Link href="/dictionary" className="hover:text-blue-700 transition-colors">Dictionary</Link>
-              <Link href="/pathways" className="hover:text-blue-700 transition-colors">Blueprints</Link>
-              <Link href="/hall-of-fame" className="hover:text-blue-700 transition-colors">Hall of Fame</Link>
-            </div>
-          </div>
+    <div className="lp" ref={rootRef}>
+      <style>{css}</style>
 
-          <div className="flex items-center gap-4">
-            {isLoaded && isSignedIn ? (
-              <div className="flex items-center gap-4">
-                <Link href="/dashboard" className="px-5 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md flex items-center gap-2">
-                  <span>Dashboard</span>
-                  <ChevronRight size={16} />
-                </Link>
-                <div className="flex items-center justify-center p-1 bg-gray-50 border border-gray-200 rounded-full">
-                  <UserButton />
+      {/* ───────── 01 HERO ───────── */}
+      <section className="lp-hero">
+        <div className="lp-hero-main">
+          <header className="lp-nav">
+            <Link href="/" className="lp-logo">
+              <b>POP</b>
+              <span>Studying</span>
+            </Link>
+            <div className="lp-nav-r lp-mobile-only">
+              <Link href="/sign-in" className="lp-link-sm">Log in</Link>
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Start free →</Link>
+            </div>
+          </header>
+
+          <p className="lp-eyebrow">CAMBRIDGE IGCSE &amp; A-LEVEL &nbsp;·&nbsp; REVISION THAT FOLLOWS THE SYLLABUS</p>
+          <h1 className="lp-h1">
+            Revise exactly what the examiner asks.
+          </h1>
+
+          <div className="lp-hero-lower">
+            <div>
+              <p className="lp-lede">
+                Notes, flashcards, lightning quizzes and real past papers for every Cambridge IGCSE and A-Level class,
+                each written against the exact syllabus point it&apos;s examined on.
+              </p>
+              <form
+                className="lp-find"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  window.location.href = `/classes${query ? `?q=${encodeURIComponent(query)}` : ""}`;
+                }}
+              >
+                <label>FIND YOUR CLASS</label>
+                <div className="lp-find-row">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Physics, 0625, momentum…"
+                  />
+                  <button type="submit">Search →</button>
                 </div>
+              </form>
+              <div className="lp-cta-row">
+                <Link href="/sign-up" className="lp-btn lp-btn-black">Start free →</Link>
+                <Link href="/classes" className="lp-link">Browse all 11 classes →</Link>
               </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <SignInButton mode="modal">
-                  <button className="hidden md:block text-blue-700 hover:text-blue-900 transition-colors text-[15px] font-bold px-4 py-2">
-                    Log In
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button className="px-6 py-2.5 bg-blue-700 text-white font-bold rounded hover:bg-blue-800 transition-colors text-[15px] shadow-md">
-                    Join for Free
-                  </button>
-                </SignUpButton>
-              </div>
-            )}
+            </div>
+
+            <aside className="lp-week">
+              <h4>THIS WEEK</h4>
+              {thisWeek.map((w) => (
+                <div key={w.title} className="lp-week-item">
+                  <strong>{w.title}</strong>
+                  <span>{w.sub}</span>
+                </div>
+              ))}
+            </aside>
           </div>
         </div>
-      </nav>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-6 pt-20 pb-32">
-        {/* Hero Section — fills the viewport together with the fixed navbar (nav h-20 + this = 100vh) */}
-        <section className="min-h-[calc(100vh-5rem)] flex items-center py-12">
-          <div className="grid md:grid-cols-12 gap-16 items-center w-full">
-            
-            {/* Left Column - Hero Content */}
-            <motion.div 
-              className="md:col-span-6 space-y-8"
-              initial="hidden"
-              animate="visible"
-              variants={staggerContainer}
-            >
-              <div className="space-y-6">
-                <motion.h1 variants={fadeInUp} className="text-5xl md:text-[68px] font-bold leading-[1.1] tracking-tight text-gray-900">
-                  Academic excellence,<br />
-                  <span className="text-blue-700 font-serif font-semibold italic">structured.</span>
-                </motion.h1>
-                
-                <motion.p variants={fadeInUp} className="text-lg md:text-xl text-gray-600 font-normal leading-relaxed max-w-lg">
-                  Guided study cadences, authoritative topic packs, and rigorous mock submissions in one trusted academic environment. Prepare for your IB and A-Level exams with confidence.
-                </motion.p>
-              </div>
-
-              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Link
-                  href="/sign-up"
-                  className="px-8 py-4 bg-blue-700 text-white rounded font-bold text-lg hover:bg-blue-800 transition-colors shadow-lg flex items-center justify-center gap-3"
-                >
-                  Start Your Journey <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/classes"
-                  className="px-8 py-4 bg-white text-blue-700 rounded font-bold text-lg border-2 border-blue-700 hover:bg-blue-50 transition-colors text-center"
-                >
-                  Explore Curriculum
-                </Link>
-              </motion.div>
-              
-              <motion.div variants={fadeInUp} className="pt-10 flex flex-wrap items-center gap-8 md:gap-12">
-                {heroStats.map((stat) => (
-                  <div key={stat.label} className="flex flex-col gap-1 border-l-4 border-blue-700 pl-4">
-                    <span className="text-3xl font-bold text-gray-900">{stat.value}</span>
-                    <span className="text-gray-500 text-sm font-medium">{stat.label}</span>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-
-            {/* Right Column - Coursera-Style Flat Vector Illustration */}
-            <div className="md:col-span-6 relative hidden md:block">
-              {/* Background texture block */}
-              <div className="absolute inset-0 bg-blue-50 -translate-x-6 translate-y-6 rounded-lg -z-10 border border-blue-100"></div>
-              
-              <div className="bg-white rounded-lg border border-gray-200 shadow-xl overflow-hidden p-6 flex items-center justify-center">
-                <svg viewBox="0 0 600 450" className="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-                  {/* Decorative background grid */}
-                  <g opacity="0.3">
-                    <line x1="50" y1="0" x2="50" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="150" y1="0" x2="150" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="250" y1="0" x2="250" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="350" y1="0" x2="350" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="450" y1="0" x2="450" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="550" y1="0" x2="550" y2="450" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    
-                    <line x1="0" y1="50" x2="600" y2="50" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="0" y1="150" x2="600" y2="150" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="0" y1="255" x2="600" y2="255" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                    <line x1="0" y1="350" x2="600" y2="350" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4,4" />
-                  </g>
-                  
-                  {/* Outer circle orbits for aesthetic depth */}
-                  <circle cx="300" cy="225" r="180" fill="none" stroke="#EFF6FF" strokeWidth="2" />
-                  <circle cx="300" cy="225" r="120" fill="none" stroke="#EFF6FF" strokeWidth="1" />
-
-                  {/* Biology (Green Leaf Node) */}
-                  <g 
-                  >
-                    <path d="M 300,50 C 318,70 318,95 300,105 C 282,95 282,70 300,50 Z" fill="#ECFDF5" stroke="#10B981" strokeWidth="4" />
-                    <line x1="300" y1="50" x2="300" y2="105" stroke="#10B981" strokeWidth="3" />
-                    <line x1="300" y1="68" x2="310" y2="63" stroke="#10B981" strokeWidth="2" />
-                    <line x1="300" y1="80" x2="290" y2="75" stroke="#10B981" strokeWidth="2" />
-                    <line x1="300" y1="90" x2="308" y2="85" stroke="#10B981" strokeWidth="2" />
-                  </g>
-
-                  {/* Chemistry (Flask Node) */}
-                  <g 
-                  >
-                    {/* Flask Outline */}
-                    <path d="M 115,100 L 135,100 L 135,125 L 160,170 A 5,5 0 0 1 155,178 L 95,178 A 5,5 0 0 1 90,170 L 115,125 Z" fill="#F8FAFC" stroke="#0056D2" strokeWidth="4" strokeLinejoin="round" />
-                    {/* Liquid */}
-                    <path d="M 96,160 L 154,160 L 156,170 A 4,4 0 0 1 152,174 L 98,174 A 4,4 0 0 1 94,170 Z" fill="#0056D2" opacity="0.85" />
-                    {/* Bubbles */}
-                    <circle cx="125" cy="85" r="4" fill="#0056D2" />
-                    <circle cx="112" cy="70" r="3" fill="#0056D2" opacity="0.6" />
-                    <circle cx="132" cy="55" r="5" fill="#F7D046" />
-                  </g>
-
-                  {/* Physics (Atom Node) */}
-                  <g 
-                  >
-                    <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#0056D2" strokeWidth="4" transform="rotate(-30, 480, 130)" />
-                    <ellipse cx="480" cy="130" rx="45" ry="15" fill="none" stroke="#F7D046" strokeWidth="4" transform="rotate(30, 480, 130)" strokeDasharray="6,4" />
-                    <circle cx="480" cy="130" r="10" fill="#0056D2" />
-                    <circle cx="442" cy="108" r="4" fill="#F7D046" />
-                    <circle cx="510" cy="112" r="4" fill="#0056D2" />
-                  </g>
-
-                  {/* Mathematics (Triangle Ruler Node) */}
-                  <g 
-                  >
-                    <path d="M 90,340 L 165,340 L 90,265 Z" fill="#FEF3C7" stroke="#F7D046" strokeWidth="4" strokeLinejoin="round" />
-                    <path d="M 102,328 L 138,328 L 102,292 Z" fill="#FFFFFF" stroke="#F7D046" strokeWidth="3" />
-                  </g>
-
-                  {/* Computer Science (Terminal Node) */}
-                  <g 
-                  >
-                    <rect x="420" y="270" width="100" height="75" rx="6" fill="#1E293B" stroke="#0056D2" strokeWidth="4" />
-                    {/* Console Bar */}
-                    <line x1="420" y1="285" x2="520" y2="285" stroke="#0056D2" strokeWidth="2" />
-                    <circle cx="430" cy="277.5" r="2.5" fill="#EF4444" />
-                    <circle cx="440" cy="277.5" r="2.5" fill="#F59E0B" />
-                    <circle cx="450" cy="277.5" r="2.5" fill="#10B981" />
-                    {/* Code Symbol */}
-                    <path d="M 440,302 L 432,310 L 440,318 M 475,302 L 483,310 L 475,318" fill="none" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                    <line x1="462" y1="300" x2="452" y2="320" stroke="#F7D046" strokeWidth="3" strokeLinecap="round" />
-                  </g>
-
-                  {/* Central Element: Coursera-Style Open Notebook */}
-                  <g transform="translate(150, 125)">
-                    {/* Shadow */}
-                    <rect x="0" y="10" width="300" height="210" rx="8" fill="#E2E8F0" opacity="0.8" />
-                    
-                    {/* Blue Cover */}
-                    <rect x="0" y="0" width="300" height="210" rx="8" fill="#0056D2" />
-                    
-                    {/* Left Page */}
-                    <rect x="10" y="8" width="135" height="194" rx="4" fill="#FFFFFF" />
-                    
-                    {/* Right Page */}
-                    <rect x="155" y="8" width="135" height="194" rx="4" fill="#FFFFFF" />
-                    
-                    {/* Left Page Writing Lines */}
-                    <line x1="25" y1="35" x2="130" y2="35" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
-                    <line x1="25" y1="65" x2="110" y2="65" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
-                    
-                    <line x1="25" y1="95" x2="120" y2="95" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
-                    <line x1="25" y1="110" x2="80" y2="110" stroke="#EFF6FF" strokeWidth="6" strokeLinecap="round" />
-
-                    <line x1="25" y1="140" x2="115" y2="140" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
-                    <line x1="25" y1="170" x2="125" y2="170" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
-
-                    {/* Right Page: High-contrast Plot/Math Grid */}
-                    <rect x="170" y="25" width="105" height="85" fill="#F8FAFC" rx="4" stroke="#E2E8F0" strokeWidth="1" />
-                    {/* Grid inner mesh */}
-                    <line x1="170" y1="46" x2="275" y2="46" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="170" y1="67" x2="275" y2="67" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="170" y1="88" x2="275" y2="88" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="191" y1="25" x2="191" y2="110" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="212" y1="25" x2="212" y2="110" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="233" y1="25" x2="233" y2="110" stroke="#F1F5F9" strokeWidth="1" />
-                    <line x1="254" y1="25" x2="254" y2="110" stroke="#F1F5F9" strokeWidth="1" />
-                    
-                    {/* Plotted Sine Wave Curve */}
-                    <path d="M 170,67 Q 196.25,25 222.5,67 T 275,67" fill="none" stroke="#0056D2" strokeWidth="4" strokeLinecap="round" />
-                    
-                    {/* Right Page Study Text */}
-                    <line x1="170" y1="135" x2="275" y2="135" stroke="#F1F5F9" strokeWidth="12" strokeLinecap="round" />
-                    <line x1="170" y1="165" x2="240" y2="165" stroke="#EFF6FF" strokeWidth="12" strokeLinecap="round" />
-
-                    {/* Book Spine Rings */}
-                    <rect x="145" y="20" width="10" height="8" rx="2" fill="#CBD5E1" />
-                    <rect x="145" y="50" width="10" height="8" rx="2" fill="#CBD5E1" />
-                    <rect x="145" y="80" width="10" height="8" rx="2" fill="#CBD5E1" />
-                    <rect x="145" y="110" width="10" height="8" rx="2" fill="#CBD5E1" />
-                    <rect x="145" y="140" width="10" height="8" rx="2" fill="#CBD5E1" />
-                    <rect x="145" y="170" width="10" height="8" rx="2" fill="#CBD5E1" />
-                  </g>
-                </svg>
-                <div className="absolute bottom-0 right-3 z-10 w-32 md:w-40">
-                  <Image
-                    src="/professor-meow.png"
-                    alt="Professor Meow - POP Studying mascot"
-                    width={256}
-                    height={256}
-                    className="h-auto w-full object-contain drop-shadow-lg"
-                  />
-                </div>
-              </div>
-            </div>
+        <div className="lp-hero-panel">
+          <Circuit id="hc" />
+          <div className="lp-nav-r lp-desktop-only">
+            <Link href="/sign-in" className="lp-link-sm lp-white">Log in</Link>
+            <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Start free →</Link>
           </div>
-        </section>
-
-        <div className="w-full h-px bg-gray-200 my-16"></div>
-
-        {/* Affiliations / Syllabus */}
-        <section className="py-12">
-          <div className="text-center mb-10">
-            <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest">Supported Academic Programs</h2>
-          </div>
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 items-center opacity-70 grayscale">
-            {syllabusBadges.map((badge, idx) => (
-              <div key={idx} className="text-xl md:text-2xl font-serif font-bold text-gray-800 tracking-tight">
-                {badge}
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <div className="w-full h-px bg-gray-200 my-16"></div>
-
-        {/* Methodology Section */}
-        <section id="method" className="py-16">
-          <motion.div 
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={staggerContainer}
-            className="mb-16 text-center max-w-3xl mx-auto"
-          >
-            <motion.h2 variants={fadeInUp} className="text-4xl font-bold text-gray-900 mb-6">A rigorous, proven methodology.</motion.h2>
-            <motion.p variants={fadeInUp} className="text-lg text-gray-600 leading-relaxed">
-              Three essential touchpoints that repeat every seven days. A structural approach designed by educators to maintain focus and accountability throughout the academic year.
-            </motion.p>
-          </motion.div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {cadenceSteps.map((step, idx) => (
-              <motion.div 
-                key={idx} 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.6, delay: idx * 0.2 }}
-                className="bg-white border border-gray-200 p-8 rounded shadow-sm hover:shadow-xl transition-shadow duration-300 relative overflow-hidden group"
-              >
-                <div className="absolute top-0 left-0 w-full h-1 bg-gray-200 group-hover:bg-blue-700 transition-colors"></div>
-                <div className="w-14 h-14 bg-blue-700 flex items-center justify-center mb-8 rounded shadow-md">
-                  {step.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-4 font-serif">{step.title}</h3>
-                <p className="text-gray-600 mb-8 leading-relaxed">
-                  {step.description}
-                </p>
-                <div className="pt-6 border-t border-gray-100 flex items-center text-sm font-bold text-blue-700 uppercase tracking-wider">
-                  <Clock className="w-4 h-4 mr-2" />
-                  {step.detail}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* Resources Section */}
-        <section id="resources" className="py-24">
-          <div className="bg-gray-50 rounded-lg border border-gray-200 p-8 md:p-16">
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="mb-16 md:w-2/3"
-            >
-              <motion.h2 variants={fadeInUp} className="text-4xl font-bold text-gray-900 mb-6">Comprehensive Curriculum Library</motion.h2>
-              <motion.p variants={fadeInUp} className="text-lg text-gray-600 leading-relaxed">
-                Everything you need to excel, meticulously organized. Access peer-reviewed study materials, attend expert-led live sessions, and analyze graded practice papers.
-              </motion.p>
-            </motion.div>
-
-            <div className="grid lg:grid-cols-12 gap-8">
-              {/* Main Feature */}
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="lg:col-span-7 bg-white border border-gray-200 p-10 rounded shadow-md hover:shadow-xl transition-shadow group flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="w-16 h-16 bg-blue-50 text-blue-700 rounded flex items-center justify-center border border-blue-100">
-                      <BookOpen className="w-8 h-8" />
-                    </div>
-                    <span className="bg-blue-100 text-blue-800 text-xs font-bold px-3 py-1 rounded uppercase tracking-wider">Most Popular</span>
-                  </div>
-                  <h3 className="text-3xl font-bold text-gray-900 mb-4 font-serif">Verified Study Notes</h3>
-                  <p className="text-gray-600 text-lg max-w-lg leading-relaxed mb-8">
-                    Zero-fluff notes shaped by actual top scorers. Features crucial annotations and margin cues highlighting precise examination methodology.
-                  </p>
-                </div>
-                <div className="flex justify-between items-center border-t border-gray-100 pt-6">
-                  <span className="text-sm font-bold text-gray-500 uppercase tracking-wider">126+ Modules Available</span>
-                  <Link href="/classes" className="text-blue-700 font-bold flex items-center gap-2 hover:text-blue-900 transition-colors">
-                    Browse Notes <ArrowRight className="w-5 h-5" />
-                  </Link>
-                </div>
-              </motion.div>
-
-              {/* Stacked Cards */}
-              <div className="lg:col-span-5 flex flex-col gap-8">
-                <motion.div 
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.1 }}
-                  className="bg-white border border-gray-200 p-8 rounded shadow-md hover:shadow-xl transition-shadow flex-1 flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="w-12 h-12 bg-blue-50 text-blue-700 rounded flex items-center justify-center border border-blue-100 mb-6">
-                      <Video className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2 font-serif">Live Seminars</h3>
-                    <p className="text-gray-600 text-base leading-relaxed">Expert-led academic sessions featuring live Q&A and comprehensive problem-solving walkthroughs.</p>
-                  </div>
-                </motion.div>
-
-                <motion.div 
-                  initial={{ opacity: 0, x: 20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="bg-white border border-gray-200 p-8 rounded shadow-md hover:shadow-xl transition-shadow flex-1 flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="w-12 h-12 bg-blue-50 text-blue-700 rounded flex items-center justify-center border border-blue-100 mb-6">
-                      <FileText className="w-6 h-6" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2 font-serif">Graded Mock Papers</h3>
-                    <p className="text-gray-600 text-base leading-relaxed">Fully annotated examination scripts demonstrating precisely where method marks are awarded.</p>
-                  </div>
-                </motion.div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* POP Arena Section */}
-        <section id="arena" className="py-24 border-t border-gray-200">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="lg:col-span-5"
-            >
-              <motion.div variants={fadeInUp} className="mb-6 inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                <Gamepad2 className="h-4 w-4" />
-                New · POP Arena
-              </motion.div>
-
-              <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold leading-[1.1] text-gray-900">
-                Turn any topic into a <span className="text-blue-700 font-serif italic">live match.</span>
-              </motion.h2>
-
-              <motion.p variants={fadeInUp} className="mt-6 text-lg leading-relaxed text-gray-600">
-                POP Arena is a fast-paced multiplayer quiz built straight into the platform. Host any flashcard set or IGCSE and A-Level question bank as a live game — the classroom screen becomes the arena, and every phone in the room becomes a controller.
-              </motion.p>
-
-              <motion.div variants={fadeInUp} className="mt-10 space-y-6">
-                {arenaHighlights.map((item) => (
-                  <div key={item.title} className="flex gap-4">
-                    <div className="w-10 h-10 shrink-0 bg-blue-50 border border-blue-100 rounded flex items-center justify-center">
-                      {item.icon}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900">{item.title}</p>
-                      <p className="mt-1 text-base leading-relaxed text-gray-600">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="mt-10 flex flex-col sm:flex-row sm:items-center gap-4">
-                <Link
-                  href="/arena-2"
-                  className="px-8 py-4 bg-blue-700 text-white rounded font-bold text-lg hover:bg-blue-800 transition-colors shadow-lg flex items-center justify-center gap-3"
-                >
-                  Enter the Arena <ArrowRight className="w-5 h-5" />
-                </Link>
-                <p className="text-sm font-medium text-gray-500">
-                  Free to host. Works on phones, tablets, and laptops.
-                </p>
-              </motion.div>
-            </motion.div>
-
-            {/* Live game mock-up */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="lg:col-span-7 relative"
-            >
-              <div className="absolute inset-0 -z-10 translate-x-5 translate-y-5 rounded-lg border border-blue-100 bg-blue-50"></div>
-
-              <div className="overflow-hidden rounded-lg border border-gray-900 bg-[#0B0B0D] shadow-2xl">
-                {/* Broadcast bar */}
-                <div className="flex items-center justify-between gap-4 border-b border-white/10 px-5 py-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="relative flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75"></span>
-                      <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
-                    </span>
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-white">POP Arena</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 sm:block">Game PIN</span>
-                    <div className="flex gap-1">
-                      {'482917'.split('').map((digit, idx) => (
-                        <span key={idx} className="grid h-7 w-6 place-items-center rounded-sm bg-white/10 font-mono text-sm font-bold text-white">
-                          {digit}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Question */}
-                <div className="px-5 py-6 md:px-8 md:py-8">
-                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                    <span>Question 3 / 5 · IGCSE Physics 0625</span>
-                    <span>18 / 24 locked in</span>
-                  </div>
-
-                  <p className="mt-4 text-xl font-bold leading-snug text-white md:text-2xl">
-                    A car accelerates from rest to 20 m/s in 5 seconds. What is its acceleration?
-                  </p>
-
-                  {/* Countdown */}
-                  <div className="mt-5 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-                    <motion.div
-                      className="h-full rounded-full bg-[#00E89B]"
-                      initial={{ width: '100%' }}
-                      whileInView={{ width: '18%' }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 6, ease: 'linear' }}
-                    />
-                  </div>
-
-                  {/* Answer tokens */}
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    {arenaTokens.map((token, idx) => (
-                      <motion.div
-                        key={token.letter}
-                        initial={{ opacity: 0, y: 12 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: 0.15 + idx * 0.1 }}
-                        className="flex items-center gap-3 rounded px-4 py-3"
-                        style={{ backgroundColor: token.color }}
-                      >
-                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-sm bg-black/85">
-                          <svg viewBox="0 0 24 24" className="h-4 w-4" fill={token.color} aria-hidden="true">
-                            {token.shape}
-                          </svg>
-                        </span>
-                        <span className="font-bold text-gray-900">{token.answer}</span>
-                        <span className="ml-auto font-mono text-xs font-bold text-black/45">{token.letter}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Leaderboard strip */}
-                <div className="border-t border-white/10 bg-black/40 px-5 py-4 md:px-8">
-                  <div className="mb-3 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                    <Trophy className="h-3.5 w-3.5 text-[#FFC400]" />
-                    Live leaderboard
-                  </div>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {arenaBoard.map((player) => (
-                      <div key={player.rank} className="flex items-center gap-2.5 rounded border border-white/10 px-2.5 py-2">
-                        <span className="font-mono text-xs font-bold text-white/40">{player.rank}</span>
-                        <span className="text-lg leading-none">{player.avatar}</span>
-                        <span className="min-w-0 flex-1 truncate text-sm font-bold text-white">{player.name}</span>
-                        {player.streak > 1 && (
-                          <span className="flex items-center gap-0.5 font-mono text-[11px] font-bold text-[#FF7F50]">
-                            🔥{player.streak}
-                          </span>
-                        )}
-                        <span className="font-mono text-xs font-bold text-white/70">{player.score}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        <section className="py-24 border-t border-gray-200">
-          <div className="grid items-center gap-12 lg:grid-cols-12">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="lg:col-span-7"
-            >
-              <motion.div variants={fadeInUp} className="mb-6 inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                <Brain className="h-4 w-4" />
-                Brainrot, but make it healthy
-              </motion.div>
-              <motion.h2 variants={fadeInUp} className="max-w-2xl text-4xl font-bold leading-tight text-gray-900 md:text-5xl">
-                A little silly. <span className="text-blue-700 font-serif italic">A lot</span> more memorable.
-              </motion.h2>
-              <motion.p variants={fadeInUp} className="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
-                POP speaks Gen Z without turning revision into an endless scroll. Expect quick cultural references, playful prompts, and Professor Meow energy in small doses, then back to the work that moves your grades forward.
-              </motion.p>
-
-              <motion.div variants={fadeInUp} className="mt-10 grid gap-4 sm:grid-cols-3">
-                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-                  <Brain className="mb-4 h-6 w-6 text-blue-700" />
-                  <p className="font-bold text-gray-900">Rizzed-up notes</p>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Explanations that actually hit different and stick in your head.</p>
-                </div>
-                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-                  <Clock className="mb-4 h-6 w-6 text-blue-700" />
-                  <p className="font-bold text-gray-900">Micro-dose brainrot</p>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Quick dopamine, then straight back to the grind. No rabbit holes.</p>
-                </div>
-                <div className="bg-white border border-gray-200 rounded p-5 shadow-sm">
-                  <CheckCircle2 className="mb-4 h-6 w-6 text-blue-700" />
-                  <p className="font-bold text-gray-900">Locked in, twin</p>
-                  <p className="mt-2 text-sm leading-relaxed text-gray-600">Memes are fun, but that A* stays the main character.</p>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="flex flex-col items-center gap-6 lg:col-span-5"
-            >
-              <Image
-                src="/professor-meow.png"
-                alt="Professor Meow - POP Studying mascot"
-                width={360}
-                height={360}
-                className="h-auto w-56 object-contain md:w-72"
+          <div className="lp-countdown">
+            <svg viewBox="0 0 240 240" className="lp-ring" aria-hidden>
+              <circle cx="120" cy="120" r="112" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="1" />
+              <circle
+                cx="120"
+                cy="120"
+                r="112"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="2.5"
+                strokeDasharray={`${ringLen * passed} ${ringLen}`}
+                transform="rotate(-90 120 120)"
               />
-              <div className="text-center">
-                <p className="text-xl font-bold font-serif text-gray-900">Professor Meow</p>
+            </svg>
+            <span className="lp-today">TODAY</span>
+            <div className="lp-big-days">{days}</div>
+          </div>
+          <p className="lp-days-label">days until the May/June 2027 papers</p>
+          <p className="lp-panel-foot">IGCSE &nbsp;·&nbsp; A-LEVEL &nbsp;·&nbsp; CAMBRIDGE</p>
+        </div>
+      </section>
 
-                <p className="mt-3 text-base text-gray-600 max-w-xs leading-relaxed">
-                  Your study companion who keeps it real — a little fun, always focused.
-                </p>
+      {/* ───────── 02 INDEX ───────── */}
+      <section className="lp-sec lp-index">
+        <div className="lp-index-l">
+          <p className="lp-num">02 — THE INDEX</p>
+          <h2 className="lp-h2">Eleven classes. Built line by line.</h2>
+          <p className="lp-body">
+            Every class follows its Cambridge syllabus in order: units, topics, and the individual statements examiners
+            write their questions from. Pick yours and start at 1.1.
+          </p>
+          <div className="lp-eleven">11</div>
+          <p className="lp-tiny-caps">8 IGCSE &nbsp;·&nbsp; 3 A-LEVEL &nbsp;·&nbsp; MORE EVERY TERM</p>
+        </div>
+
+        <div className="lp-index-m">
+          <div className="lp-list-head"><b>IGCSE</b><span>TAP A CLASS TO OPEN IT</span></div>
+          {igcse.map((c) => (
+            <Link href="/classes" key={c.code} className="lp-class">
+              <div>
+                <h3>{c.name}</h3>
+                <small>{c.meta}</small>
               </div>
-            </motion.div>
-          </div>
-        </section>
+              <em>{c.code}</em>
+            </Link>
+          ))}
+          <Link href="/classes" className="lp-link lp-mt">See every class →</Link>
+        </div>
 
-        {/* Subjects Grid */}
-        <section className="py-16 border-t border-gray-200">
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2 font-serif">Academic Disciplines</h2>
-            <p className="text-gray-600">Expert-curated resources across core curriculum subjects.</p>
-          </div>
+        <div className="lp-index-r">
+          <div className="lp-list-head"><b>A-LEVEL</b></div>
+          {alevel.map((c) => (
+            <Link href="/classes" key={c.code} className="lp-class">
+              <div>
+                <h3>{c.name}</h3>
+                <small>{c.meta}</small>
+              </div>
+              <em>{c.code}</em>
+            </Link>
+          ))}
+          <p className="lp-coming">COMING NEXT &nbsp;·&nbsp; VOTE FOR ONE</p>
+          {comingNext.map((c) => (
+            <div key={c.code} className="lp-vote">
+              <span>{c.name}&nbsp; {c.code}</span>
+              <button>vote →</button>
+            </div>
+          ))}
+          <blockquote className="lp-quote">
+            Every class is checked against the latest syllabus before each exam series. Last check: October 2026.
+          </blockquote>
+        </div>
+      </section>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {subjects.map((subject, idx) => (
-              <motion.div 
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="p-6 border border-gray-200 bg-white hover:border-blue-700 hover:shadow-md cursor-pointer transition-all flex items-center justify-between group rounded"
-              >
-                <span className="font-bold text-gray-700 group-hover:text-blue-700">{subject}</span>
-                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-blue-700 transition-colors" />
-              </motion.div>
+      {/* ───────── 03 METHOD ───────── */}
+      <section className="lp-sec">
+        <p className="lp-num">03 — THE METHOD</p>
+        <div className="lp-split">
+          <h2 className="lp-h2 lp-h2-wide">Five steps a topic. Same order, every time.</h2>
+          <p className="lp-body lp-narrow">
+            Every topic on POP runs the same loop, so you always know what&apos;s next, and you never revise something
+            the syllabus doesn&apos;t ask for.
+          </p>
+        </div>
+        <div className="lp-steps">
+          {steps.map((s) => (
+            <div key={s.n} className="lp-step">
+              <div className="lp-step-icon">{s.icon}</div>
+              <div className="lp-step-rule"><i /></div>
+              <div className="lp-step-body">
+                <div className="lp-step-n">{s.n}</div>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+                <small>{s.time}</small>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="lp-steps-foot">
+          <span>Finish all five and the topic gets ticked off your syllabus map. Physics has 25 of them.</span>
+          <Link href="/classes" className="lp-link">See how a topic looks →</Link>
+        </div>
+      </section>
+
+      {/* ───────── 04 NOTES ───────── */}
+      <section className="lp-sec lp-notes">
+        <div>
+          <p className="lp-num">04 — REVISION NOTES</p>
+          <h2 className="lp-h2 lp-h2-tight">Notes written against the syllabus, not around it.</h2>
+          <p className="lp-body">
+            Each note starts from the statement Cambridge prints in the syllabus and stops when you can answer it. No
+            padding, no off-syllabus tangents.
+          </p>
+          <p className="lp-sub-caps">1.6 MOMENTUM &nbsp;·&nbsp; SYLLABUS STATEMENTS</p>
+          <ul className="lp-statements">
+            {statements.map((s) => (
+              <li key={s.id}>
+                <b>{s.id}</b>
+                <span>{s.text}</span>
+                {s.done && <i>✓</i>}
+              </li>
+            ))}
+          </ul>
+          <Link href="/classes" className="lp-link lp-mt">Read the 1.6 note →</Link>
+          <p className="lp-fine">Supplement statements are marked S, so Core students know what to skip.</p>
+        </div>
+
+        <article className="lp-note">
+          <p className="lp-crumb">PHYSICS 0625 &nbsp;›&nbsp; UNIT 1 &nbsp;·&nbsp; MOTION, FORCES &amp; ENERGY &nbsp;›&nbsp; 1.6</p>
+          <div className="lp-note-title">
+            <h3>1.6 Momentum</h3>
+            <span>8 MIN READ &nbsp;·&nbsp; 3 OF 5 DONE</span>
+          </div>
+          <div className="lp-note-grid">
+            <div>
+              <p>
+                Momentum is the product of an object&apos;s mass and its velocity. Because velocity has a direction,
+                momentum is a vector: if right is positive, a ball moving left has negative momentum.
+              </p>
+              <div className="lp-formula">
+                <div>p = m v</div>
+                <small>p &nbsp; momentum, kg m/s</small>
+                <small>m &nbsp; mass, kg</small>
+                <small>v &nbsp; velocity, m/s</small>
+              </div>
+              <p className="lp-caps-blue">EXAMINER&apos;S NOTE</p>
+              <p className="lp-italic">
+                Give the unit as kg m/s or N s. Writing just “kg m” loses the mark every series.
+              </p>
+            </div>
+            <div>
+              <p className="lp-caps-grey">WORKED EXAMPLE &nbsp;·&nbsp; 2023 P42 Q3(b)</p>
+              <div className="lp-trolleys">
+                <div className="lp-trolley"><span>2.0 kg</span><i /><i /></div>
+                <div className="lp-arrow">▶</div>
+                <div className="lp-trolley lp-trolley-s"><span>1.0 kg</span><i /><i /></div>
+                <div className="lp-speed lp-speed-a">3.0 m/s</div>
+                <div className="lp-speed lp-speed-b">at rest</div>
+                <div className="lp-track" />
+              </div>
+              <div className="lp-working">
+                p before = 2.0 × 3.0 = 6.0 kg m/s<br />
+                p after = (2.0 + 1.0) × v<br />
+                6.0 = 3.0 v, &nbsp;so &nbsp;v = 2.0 m/s
+              </div>
+              <p className="lp-caps-grey lp-ms">MARK SCHEME</p>
+              <table className="lp-mark">
+                <tbody>
+                  <tr><th>B1</th><td>uses conservation of momentum</td></tr>
+                  <tr><th>C1</th><td>6.0 = 3.0 v</td></tr>
+                  <tr><th>A1</th><td>v = 2.0 m/s</td></tr>
+                </tbody>
+              </table>
+              <Link href="/classes" className="lp-link lp-mt">Try 3 more like this →</Link>
+            </div>
+          </div>
+          <div className="lp-note-foot">
+            <span>← 1.5 Forces</span>
+            <span className="lp-blue">notes &nbsp;·&nbsp; cards &nbsp;·&nbsp; quiz</span>
+            <b>1.7 Energy, work and power →</b>
+          </div>
+        </article>
+      </section>
+
+      {/* ───────── 05 PAST PAPERS ───────── */}
+      <section className="lp-sec lp-papers">
+        <div>
+          <p className="lp-num">05 — PAST PAPERS</p>
+          <h2 className="lp-h2 lp-h2-tight">Every paper, with the mark scheme beside it.</h2>
+          <p className="lp-body">
+            Physics 0625 papers from 2019 to 2025 (Papers 2, 4 and 6), split question by question and tagged to the topic
+            each one tests.
+          </p>
+          <ul className="lp-legend">
+            <li><i className="k-done" />Done, with your score</li>
+            <li><i className="k-started" />Started</li>
+            <li><i className="k-none" />Not started yet</li>
+          </ul>
+          <p className="lp-sub-caps lp-blue">FILTER BY TOPIC</p>
+          <div className="lp-filter"><span>1.6 Momentum: 41 questions in 23 papers</span><i>→</i></div>
+          <div className="lp-filter"><span>4.3 Electric circuits: 66 questions in 31 papers</span><i>→</i></div>
+          <Link href="/classes" className="lp-link lp-mt">Open the paper archive →</Link>
+        </div>
+
+        <div className="lp-grid-wrap">
+          <div className="lp-grid">
+            <div />
+            <div className="lp-series"><b>FEB / MAR</b><span>P2</span><span>P4</span><span>P6</span></div>
+            <div className="lp-series"><b>MAY / JUN</b><span>P2</span><span>P4</span><span>P6</span></div>
+            <div className="lp-series"><b>OCT / NOV</b><span>P2</span><span>P4</span><span>P6</span></div>
+            {paperRows.map((row) => (
+              <React.Fragment key={row.year}>
+                <div className="lp-year">{row.year}</div>
+                {[0, 1, 2].map((g) => (
+                  <div key={g} className="lp-cells">
+                    {row.cells.slice(g * 3, g * 3 + 3).map((c, i) => (
+                      <div key={i} className={`lp-cell c-${c.s}`}>{c.v}</div>
+                    ))}
+                  </div>
+                ))}
+              </React.Fragment>
             ))}
           </div>
-        </section>
+          <div className="lp-grid-foot">
+            <span>13 of 63 papers done &nbsp;·&nbsp; average 79% &nbsp;·&nbsp; best: May/Jun 2024 Paper 4, 71/80</span>
+            <Link href="/classes" className="lp-link-sm lp-blue">Continue: Oct/Nov 2024 P6 →</Link>
+          </div>
+          <p className="lp-fine">Tap any paper to open it question by question, mark scheme and examiner report included.</p>
+        </div>
+      </section>
 
-        {/* Learning Dashboard / Class Progress */}
-        <section className="py-24 border-t border-gray-200 bg-gray-50 -mx-6 px-6 md:mx-0 md:px-12 md:rounded-3xl mt-12 mb-12">
-          <div className="max-w-7xl mx-auto">
-            <motion.div 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="mb-16 text-center"
-            >
-              <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm text-sm font-bold text-gray-600 mb-6">
-                <GraduationCap className="w-5 h-5 text-blue-700" />
-                Learning Dashboard
-              </motion.div>
-              <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold text-gray-900 leading-[1.1] font-serif">
-                Track your academic journey <br />
-                <span className="text-blue-700 italic">across every difficulty.</span>
-              </motion.h2>
-            </motion.div>
+      {/* ───────── 06 QUIZ ───────── */}
+      <section className="lp-quiz">
+        <svg className="lp-arcs" viewBox="0 0 600 600" aria-hidden>
+          <circle cx="0" cy="620" r="520" fill="none" stroke="#fff" strokeOpacity=".18" />
+          <circle cx="0" cy="620" r="470" fill="none" stroke="#fff" strokeOpacity=".12" />
+        </svg>
+        <div className="lp-quiz-in">
+          <div>
+            <p className="lp-num lp-white">06 — LIGHTNING QUIZ &amp; FLASHCARDS</p>
+            <h2 className="lp-h2 lp-white">Ten questions. Sixty seconds. No hiding.</h2>
+            <p className="lp-body lp-white-soft">
+              Quick-fire questions pulled from the topics you&apos;ve just studied. Score 7 out of 10 to unlock that
+              topic&apos;s past-paper questions. Miss one and its flashcard comes back tomorrow.
+            </p>
+            <p className="lp-quiz-cards">
+              412 Physics flashcards, scheduled by spaced repetition so they come back just before you&apos;d forget
+              them.
+            </p>
+            <div className="lp-cta-row">
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-blue">Try a quiz →</Link>
+              <span className="lp-white-soft lp-fine-w">No sign-up needed</span>
+            </div>
+          </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {classProgress.map((cls, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ duration: 0.5, delay: idx * 0.15 }}
-                  className={`bg-white p-8 rounded border border-gray-200 shadow-sm hover:shadow-xl transition-shadow duration-300 relative group`}
-                >
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className={`w-16 h-16 rounded flex items-center justify-center border ${cls.theme}`}>
-                      {cls.icon}
-                    </div>
-                    <div>
-                      <h3 className={`text-2xl font-bold font-serif ${cls.textTheme}`}>{cls.title}</h3>
-                      <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mt-1">Overall {cls.overall}%</p>
-                    </div>
-                  </div>
+          <div className="lp-q">
+            <div className="lp-q-top">
+              <div>
+                <p className="lp-q-meta">PHYSICS 0625 &nbsp;·&nbsp; UNIT 1 &nbsp;·&nbsp; QUESTION 4 OF 10</p>
+                <div className="lp-q-bars">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <i key={i} className={i < 3 ? "on" : i === 3 ? "cur" : ""} />
+                  ))}
+                </div>
+              </div>
+              <div className="lp-timer">
+                <svg viewBox="0 0 76 76">
+                  <circle cx="38" cy="38" r="35" fill="none" stroke="#fff" strokeOpacity=".3" strokeWidth="2" />
+                  <circle
+                    cx="38"
+                    cy="38"
+                    r="35"
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="3"
+                    strokeDasharray={`${2 * Math.PI * 35 * 0.7} ${2 * Math.PI * 35}`}
+                    transform="rotate(-90 38 38)"
+                  />
+                </svg>
+                <div><b>42</b><span>SEC</span></div>
+              </div>
+            </div>
+            <h3 className="lp-q-text">A 1200 kg car travels at 15 m/s. What is its momentum?</h3>
+            <ul className="lp-opts">
+              <li><b>A</b><span>80 kg m/s</span></li>
+              <li><b>B</b><span>1 215 kg m/s</span></li>
+              <li className="right"><b>C</b><span>18 000 kg m/s</span><em>✓ correct</em></li>
+              <li><b>D</b><span>18 000 N</span></li>
+            </ul>
+            <p className="lp-q-expl">
+              p = mv = 1200 × 15 = 18 000 kg m/s. D has the right number but the wrong unit, and that&apos;s the trap.
+            </p>
+            <div className="lp-q-foot"><b>Score so far &nbsp;3 / 3</b><b>Next question →</b></div>
+          </div>
+        </div>
+      </section>
 
-                  <div className="space-y-6">
-                    <div>
-                      <div className="flex justify-between text-sm font-bold mb-2">
-                        <span className="text-gray-600">Foundation</span>
-                        <span className={cls.textTheme}>{cls.foundation}%</span>
-                      </div>
-                      <div className={`w-full h-2 rounded-full ${cls.lightBar} overflow-hidden`}>
-                        <div className={`h-full rounded-full ${cls.barColor}`} style={{ width: `${cls.foundation}%` }}></div>
-                      </div>
-                    </div>
+      {/* ───────── 07 MOCK ───────── */}
+      <section className="lp-sec lp-mock">
+        <p className="lp-num">07 — MOCK EXAMS</p>
+        <div className="lp-mock-head">
+          <div>
+            <h2 className="lp-h2 lp-h2-wide">Sit it like the real thing. Get graded like it, too.</h2>
+            <p className="lp-body lp-mt2">
+              Timed papers built from real exam questions across a whole unit. When the clock stops, POP marks it against
+              the mark scheme and the latest grade boundaries.
+            </p>
+          </div>
+          <div className="lp-grade">
+            <div>A</div>
+            <p className="lp-caps-blue">PREDICTED GRADE</p>
+            <p className="lp-fine">from your last mock: 74%</p>
+          </div>
+        </div>
 
-                    <div>
-                      <div className="flex justify-between text-sm font-bold mb-2">
-                        <span className="text-gray-600">Intermediate</span>
-                        <span className={cls.textTheme}>{cls.intermediate}%</span>
-                      </div>
-                      <div className={`w-full h-2 rounded-full ${cls.lightBar} overflow-hidden`}>
-                        <div className={`h-full rounded-full ${cls.barColor}`} style={{ width: `${cls.intermediate}%` }}></div>
-                      </div>
-                    </div>
+        <p className="lp-sub-caps lp-mt2">MAY/JUNE 2025 GRADE BOUNDARIES &nbsp;·&nbsp; PHYSICS 0625 EXTENDED</p>
+        <div className="lp-bounds">
+          <div className="lp-pin lp-pin-last" style={{ left: "61%" }}><span>LAST MOCK &nbsp;61%</span><i>▽</i></div>
+          <div className="lp-pin lp-pin-you" style={{ left: "74%" }}><span>YOU &nbsp;74%</span><i>▼</i></div>
+          <div className="lp-bar"><i style={{ width: "74%", background: BLUE }} /></div>
+          {boundaries.map((b, i) => {
+            const next = boundaries[i + 1]?.from ?? 100;
+            return (
+              <React.Fragment key={b.g}>
+                {i > 0 && <div className="lp-tick" style={{ left: `${b.from}%` }}><small>{b.from}%</small></div>}
+                <div className="lp-gl" style={{ left: `${(b.from + next) / 2}%` }}>{b.g}</div>
+              </React.Fragment>
+            );
+          })}
+        </div>
 
-                    <div>
-                      <div className="flex justify-between text-sm font-bold mb-2">
-                        <span className="text-gray-600">Advanced</span>
-                        <span className={cls.textTheme}>{cls.advanced}%</span>
-                      </div>
-                      <div className={`w-full h-2 rounded-full ${cls.lightBar} overflow-hidden`}>
-                        <div className={`h-full rounded-full ${cls.barColor}`} style={{ width: `${cls.advanced}%` }}></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-                    <Link href={`/learn/${cls.title.toLowerCase()}`} className={`inline-flex items-center gap-2 font-bold ${cls.textTheme} hover:text-blue-900 transition-colors`}>
-                      Continue Learning <ArrowRight className="w-5 h-5" />
-                    </Link>
-                  </div>
-                </motion.div>
+        <div className="lp-mock-low">
+          <div>
+            <p className="lp-sub-caps">WHERE THE MARKS WENT</p>
+            <div className="lp-marks">
+              {marks.map((m) => (
+                <div key={m.n} className={`lp-mrow ${m.hi ? "hi" : ""}`}>
+                  <span>{m.n} &nbsp;{m.name}</span>
+                  <div><i style={{ width: `${m.pct}%` }} /></div>
+                  <b>{m.pct}%</b>
+                </div>
               ))}
             </div>
           </div>
-        </section>
-
-        {/* Get the App Section */}
-        <section id="get-the-app" className="py-24 border-t border-gray-200">
-          <div className="grid items-center gap-12 lg:grid-cols-12 lg:gap-16">
-            <motion.div
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={staggerContainer}
-              className="lg:col-span-6"
-            >
-              <motion.div variants={fadeInUp} className="mb-6 inline-flex items-center gap-2 bg-blue-100 text-blue-800 rounded px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                <Smartphone className="h-4 w-4" />
-                Install POP Studying
-              </motion.div>
-
-              <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold leading-[1.1] text-gray-900">
-                Get the <span className="text-blue-700 font-serif italic">POP Studying</span> app.
-              </motion.h2>
-
-              <motion.p variants={fadeInUp} className="mt-6 text-lg leading-relaxed text-gray-600">
-                Add POP Studying to your home screen for one-tap access — no app store required. It opens full-screen, without the browser bar, so revision sessions feel focused from the moment you tap the icon.
-              </motion.p>
-
-              <motion.div variants={fadeInUp} className="mt-8 space-y-4">
-                {[
-                  { title: 'One tap from your home screen', detail: 'Launches straight into POP, just like any other app.' },
-                  { title: 'Full-screen, distraction-free', detail: 'No browser bar or tabs competing for your attention.' },
-                  { title: 'Works on iPhone, Android, and desktop', detail: 'Same install, tailored steps for whichever device you\'re on.' },
-                ].map((item) => (
-                  <div key={item.title} className="flex gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
-                    <div>
-                      <p className="font-bold text-gray-900">{item.title}</p>
-                      <p className="text-sm leading-relaxed text-gray-600">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-
-              <motion.div variants={fadeInUp} className="mt-10">
-                <Link
-                  href="/install"
-                  className="inline-flex items-center gap-3 px-8 py-4 bg-blue-700 text-white rounded font-bold text-lg hover:bg-blue-800 transition-colors shadow-lg"
-                >
-                  Show Me How <ArrowRight className="w-5 h-5" />
-                </Link>
-              </motion.div>
-            </motion.div>
-
-            {/* Phone mockup */}
-            <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              className="lg:col-span-6 flex justify-center"
-            >
-              <div className="relative w-64">
-                <div className="absolute inset-0 -z-10 translate-x-4 translate-y-4 rounded-[2.5rem] border border-blue-100 bg-blue-50"></div>
-                <div className="rounded-[2.5rem] border-[6px] border-gray-900 bg-gray-900 shadow-2xl overflow-hidden">
-                  {/* Status bar */}
-                  <div className="flex items-center justify-between px-5 pt-3 pb-2 text-white">
-                    <span className="text-[11px] font-bold">9:41</span>
-                    <div className="flex items-center gap-1.5">
-                      <Signal className="h-3 w-3" />
-                      <Wifi className="h-3 w-3" />
-                      <Battery className="h-3.5 w-3.5" />
-                    </div>
-                  </div>
-
-                  {/* Home screen grid */}
-                  <div className="bg-gradient-to-b from-blue-900 to-gray-900 px-5 pt-6 pb-8">
-                    <div className="grid grid-cols-4 gap-4">
-                      {Array.from({ length: 7 }).map((_, i) => (
-                        <div key={i} className="aspect-square rounded-xl bg-white/10" />
-                      ))}
-                      <div className="flex flex-col items-center gap-1">
-                        <div className="aspect-square w-full rounded-xl bg-white shadow-lg overflow-hidden ring-2 ring-white/40">
-                          <Image src="/icon-192.png" alt="POP Studying app icon" width={192} height={192} className="w-full h-full object-cover" />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-center text-[9px] font-bold text-white/70 tracking-wide">POP Studying</p>
-
-                    <div className="mt-8 flex items-center justify-center gap-1.5 text-white/50">
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Added to Home Screen</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section id="faq" className="py-24 border-t border-gray-200">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-4 font-serif">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600 max-w-2xl">
-              Transparent information regarding our methodology, pricing, and curriculum coverage.
+          <div className="lp-next">
+            <p className="lp-caps-blue">NEXT UP</p>
+            <h3>Revise 4.3 Electric circuits. You dropped 9 marks there.</h3>
+            <p className="lp-fine">
+              We&apos;ve queued its notes, 18 flashcards and a lightning quiz. Retake the Unit 4 mock in 3 days.
             </p>
-          </motion.div>
+            <div className="lp-cta-row">
+              <Link href="/sign-up" className="lp-btn lp-btn-black">Start the revision →</Link>
+              <Link href="/sign-up" className="lp-link-sm lp-blue">Download as PDF</Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <div className="max-w-4xl border-t border-gray-200">
-            {faqs.map((faq, idx) => (
-              <div key={idx} className="border-b border-gray-200">
-                <button 
-                  onClick={() => setOpenFAQ(openFAQ === idx ? null : idx)}
-                  className="flex items-center justify-between w-full text-left py-6 group"
-                >
-                  <span className="font-bold text-xl text-gray-800 group-hover:text-blue-700 transition-colors pr-8">{faq.q}</span>
-                  <div className={`w-10 h-10 border border-gray-200 rounded flex items-center justify-center transition-all ${openFAQ === idx ? 'bg-blue-50 border-blue-200' : 'bg-gray-50'}`}>
-                    <ChevronRight className={`w-6 h-6 text-gray-500 transition-transform duration-300 ${openFAQ === idx ? 'rotate-90 text-blue-700' : 'group-hover:text-blue-700'}`} />
-                  </div>
-                </button>
-                <motion.div 
-                  initial={false}
-                  animate={{ height: openFAQ === idx ? 'auto' : 0, opacity: openFAQ === idx ? 1 : 0 }}
-                  className="overflow-hidden"
-                >
-                  <p className="pb-8 text-gray-600 text-lg leading-relaxed max-w-3xl">
-                    {faq.a}
-                  </p>
-                </motion.div>
+      {/* ───────── 08 ARENA ───────── */}
+      <section className="lp-sec lp-arena">
+        <div>
+          <p className="lp-num">08 — POP ARENA</p>
+          <h2 className="lp-h2 lp-h2-tight">Revision, but someone&apos;s keeping score.</h2>
+          <p className="lp-body">
+            Live rounds every week. Everyone gets the same questions at the same time, and the fastest correct answers
+            climb the board.
+          </p>
+          <p className="lp-live"><i />LIVE NOW &nbsp;·&nbsp; PHYSICS 0625 &nbsp;·&nbsp; ROUND 3 OF 5</p>
+          <div className="lp-1284">1,284</div>
+          <p className="lp-body">students in tonight&apos;s round, from 41 countries.</p>
+          <div className="lp-cta-row">
+            <Link href="/arena" className="lp-btn lp-btn-black">Join the round →</Link>
+            <span className="lp-fine lp-bold">Next round in 04:12</span>
+          </div>
+        </div>
+        <div className="lp-board">
+          <div className="lp-board-head">
+            <span>RANK</span><span>STUDENT</span><span>ACCURACY</span><span>STREAK</span><span>POINTS</span>
+          </div>
+          {board.map((r) => (
+            <div key={r.r} className={`lp-board-row ${r.you ? "you" : ""}`}>
+              <b className={`rank ${["01", "02", "03"].includes(r.r) || r.you ? "blue" : ""}`}>{r.r}</b>
+              <div><strong>{r.name}</strong><small>{r.loc}</small></div>
+              <span>{r.acc}</span>
+              <span>{r.streak}</span>
+              <b className="pts">{r.pts}</b>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ───────── 09 PRICING ───────── */}
+      <section className="lp-sec lp-pricing">
+        <div>
+          <p className="lp-num">09 — PRICING</p>
+          <h2 className="lp-h2 lp-h2-tight">Free. All of it, for everyone.</h2>
+          <p className="lp-body lp-mt3">
+            Every note, quiz, flashcard, past paper and mock is free, for every class. No card, no ads, no catch.
+          </p>
+          <p className="lp-sub-caps lp-blue lp-mt3">QUESTIONS</p>
+          <div className="lp-faq">
+            {faqs.map((f) => (
+              <div key={f.q}>
+                <h4>{f.q}</h4>
+                <p>{f.a}</p>
               </div>
             ))}
           </div>
-        </section>
+        </div>
 
-        {/* CTA */}
-        <section className="mt-16">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="bg-blue-900 text-white rounded-lg p-12 md:p-24 text-center shadow-2xl relative overflow-hidden"
-          >
-            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-800 rounded-full blur-[100px] -z-10 translate-x-1/2 -translate-y-1/4 opacity-50"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-800 rounded-full blur-[100px] -z-10 -translate-x-1/2 translate-y-1/4 opacity-50"></div>
-            
-            <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-              <div className="w-20 h-20 bg-blue-800 border border-blue-700 flex items-center justify-center mb-8 rounded shadow-lg">
-                <GraduationCap className="w-10 h-10 text-white" />
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight font-serif">
-                Join a community dedicated to academic excellence.
-              </h2>
-              <p className="text-xl text-blue-100 mb-12 leading-relaxed max-w-2xl mx-auto">
-                Step away from generic revision guides. Access specialized notes, meticulous mock assessments, and expert-led clinics tailored to your curriculum.
-              </p>
-              <Link href="/sign-up" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-blue-900 rounded font-bold text-lg hover:bg-gray-100 transition-colors shadow-xl hover:shadow-2xl">
-                Enroll Now for Free <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
-          </motion.div>
-        </section>
-      </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-16 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-12">
-            <div className="flex items-center">
-              <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-11 w-auto invert" />
-            </div>
-            <div className="flex flex-wrap gap-8 text-[15px] font-medium text-gray-400">
-              <Link href="#" className="hover:text-white transition-colors">Our Mission</Link>
-              <Link href="#" className="hover:text-white transition-colors">Curriculum Partners</Link>
-              <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="#" className="hover:text-white transition-colors">Contact Support</Link>
-            </div>
+        <div className="lp-table">
+          <div className="lp-price-card">
+            <p className="lp-caps-blue">POP STUDYING</p>
+            <div className="lp-price">£0</div>
+            <small>free, forever</small>
           </div>
-          <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
-            <p>&copy; {new Date().getFullYear()} POP Studying Initiative. All academic rights reserved.</p>
-            <p>Empowering student success globally.</p>
+          <p className="lp-sub-caps lp-incl">EVERYTHING INCLUDED</p>
+          <div className="lp-rows">
+            {included.map(([k, v]) => (
+              <div key={k} className="lp-row"><span>{k}</span><b>{v}</b></div>
+            ))}
+          </div>
+          <div className="lp-table-cta">
+            <Link href="/sign-up" className="lp-btn lp-btn-blue">Start free →</Link>
+            <span className="lp-fine">No card, no ads, no catch.</span>
           </div>
         </div>
+      </section>
+
+      <div className="lp-last">
+      {/* ───────── CTA ───────── */}
+      <section className="lp-final">
+        <Circuit id="fc" />
+        <p className="lp-num lp-white">THE MAY/JUNE 2027 SERIES STARTS IN</p>
+        <div className="lp-final-in">
+          <div className="lp-big-days lp-final-days">{days}</div>
+          <div>
+            <h2 className="lp-h2 lp-white">days. Plenty of time, if you start tonight.</h2>
+            <div className="lp-cta-row">
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-blue">Start free →</Link>
+              <Link href="/classes" className="lp-link lp-white">Browse classes →</Link>
+            </div>
+            <p className="lp-fine lp-white-soft">Notes and quizzes are free forever. No card needed.</p>
+          </div>
+        </div>
+        <div className="lp-timeline">
+          <i />
+          <div><span>TODAY &nbsp;·&nbsp; {today}</span><span>{weeks} WEEKS</span><span>FIRST PAPER &nbsp;·&nbsp; 27 APR 2027</span></div>
+        </div>
+      </section>
+
+      {/* ───────── FOOTER ───────── */}
+      <footer className="lp-footer">
+        <div className="lp-foot-grid">
+          <div>
+            <div className="lp-logo lp-logo-lg"><b>POP</b><span>Studying</span></div>
+            <p className="lp-fine">Exam prep for Cambridge IGCSE and A-Level, written against the syllabus.</p>
+          </div>
+          <div>
+            <h5>CLASSES</h5>
+            <Link href="/classes">IGCSE</Link>
+            <Link href="/classes">A-Level</Link>
+            <Link href="/classes">All subjects</Link>
+            <Link href="/classes">Request a class</Link>
+          </div>
+          <div>
+            <h5>TOOLS</h5>
+            <Link href="/learn">Revision notes</Link>
+            <Link href="/flashcards">Flashcards</Link>
+            <Link href="/classes">Lightning quiz</Link>
+            <Link href="/classes">Past papers</Link>
+            <Link href="/classes">Mock exams</Link>
+            <Link href="/arena">POP Arena</Link>
+          </div>
+          <div>
+            <h5>COMPANY</h5>
+            <Link href="/">About</Link>
+            <Link href="/">For schools</Link>
+            <Link href="/">Contact</Link>
+            <Link href="/">Privacy</Link>
+            <Link href="/">Terms</Link>
+          </div>
+          <div>
+            <h5>EXAM-SEASON EMAILS</h5>
+            <p className="lp-fine">One email a week with what to revise next.</p>
+            <form className="lp-email" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="your@email.com" aria-label="Email" />
+              <button type="submit" aria-label="Subscribe">→</button>
+            </form>
+          </div>
+        </div>
+        <div className="lp-legal">
+          <span>© 2026 POP Studying. Not affiliated with Cambridge University Press &amp; Assessment.</span>
+          <b>IGCSE &nbsp;·&nbsp; A-LEVEL &nbsp;·&nbsp; CAMBRIDGE</b>
+        </div>
       </footer>
+      </div>
     </div>
   );
 }
+
+const css = `
+.lp{--blue:${BLUE};--ink:#111;--mute:#555;--rule:#e2e2e2;--beige:#e2dfd8;--tint:#e8eafd;
+  --u:clamp(1px,min(calc(100vw / 1440),calc(100vh / 900)),1.6px);--pad:calc(56 * var(--u));--gut:var(--pad);--vh:100vh;
+  background:#fff;color:var(--ink);min-height:100vh;
+  font-family:"Helvetica Neue",Helvetica,Arial,"Liberation Sans",sans-serif;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+.lp *{box-sizing:border-box}
+:where(.lp) a{color:inherit;text-decoration:none}
+:where(.lp) :where(h1,h2,h3,h4,h5,p,ul){margin:0;padding:0}
+:where(.lp) ul{list-style:none}
+.lp button{font:inherit;cursor:pointer;background:none;border:0;color:inherit}
+.lp .lp-blue{color:var(--blue)}.lp .lp-white{color:#fff}.lp .lp-white-soft{color:rgba(255,255,255,.88)}
+.lp-bold{font-weight:700}
+.lp-mt{display:inline-block;margin-top:calc(22 * var(--u))}.lp-mt2{margin-top:calc(28 * var(--u))}.lp-mt3{margin-top:calc(56 * var(--u))}
+
+.lp-sec{min-height:var(--vh);padding:calc(64 * var(--u)) var(--gut);display:grid;align-content:center}
+.lp-num,.lp-eyebrow,.lp-sub-caps,.lp-caps-blue,.lp-caps-grey,.lp-tiny-caps,.lp-coming,.lp-crumb{
+  font-size:calc(13 * var(--u));font-weight:700;letter-spacing:.02em;text-transform:uppercase}
+.lp-num,.lp-caps-blue,.lp-eyebrow{color:var(--blue)}
+.lp-caps-grey,.lp-sub-caps,.lp-tiny-caps,.lp-crumb{color:#444}
+.lp-sub-caps.lp-blue{color:var(--blue)}
+.lp-h1{font-size:calc(58 * var(--u));line-height:1;letter-spacing:-.04em;font-weight:700;max-width:calc(680 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-h2{font-size:calc(40 * var(--u));line-height:1.02;letter-spacing:-.035em;font-weight:700;margin-top:calc(14 * var(--u))}
+.lp-h2-tight{line-height:1;max-width:calc(420 * var(--u))}
+.lp-h2-wide{max-width:calc(640 * var(--u))}
+.lp-body{font-size:calc(17 * var(--u));line-height:1.55;color:#222;max-width:calc(430 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-narrow{max-width:calc(400 * var(--u));margin-top:0}
+.lp-fine{font-size:calc(14 * var(--u));line-height:1.5;color:var(--mute);margin-top:calc(14 * var(--u))}
+.lp-fine-w{font-size:calc(13 * var(--u))}
+.lp-link{font-size:calc(15 * var(--u));font-weight:700;color:var(--blue)}
+.lp-link-sm{font-size:calc(14 * var(--u));font-weight:700}
+.lp-btn{display:inline-flex;align-items:center;justify-content:center;font-size:calc(15 * var(--u));font-weight:700;padding:0 calc(28 * var(--u));height:calc(48 * var(--u));white-space:nowrap}
+.lp-btn-black{background:#111;color:#fff!important}
+.lp-btn-white{background:#fff;color:#111}
+.lp-btn-blue{background:var(--blue);color:#fff!important}
+.lp-btn-sm{height:calc(40 * var(--u));padding:0 calc(20 * var(--u));font-size:calc(14 * var(--u))}
+.lp-cta-row{display:flex;align-items:center;gap:calc(24 * var(--u));margin-top:calc(24 * var(--u));flex-wrap:wrap}
+
+/* hero */
+.lp-hero{display:grid;grid-template-columns:minmax(0,1fr) 28%;min-height:var(--vh);margin:0}
+.lp-hero-main{padding:0 calc(56 * var(--u)) calc(40 * var(--u)) var(--pad);display:flex;flex-direction:column}
+.lp-nav{display:flex;justify-content:space-between;align-items:center;padding:calc(20 * var(--u)) 0 calc(16 * var(--u));border-bottom:1px solid #eee}
+.lp-logo{display:inline-flex;align-items:baseline;gap:calc(5 * var(--u));color:var(--blue)}
+.lp-logo b{font-size:calc(24 * var(--u));letter-spacing:-.02em}
+.lp-logo span{font-size:calc(14 * var(--u));color:#111}
+.lp-logo-lg{flex-direction:column;gap:0}.lp-logo-lg b{font-size:calc(24 * var(--u))}.lp-logo-lg span{font-size:calc(15 * var(--u))}
+.lp-nav-r{display:flex;align-items:center;gap:calc(22 * var(--u))}
+.lp-mobile-only{display:none}
+.lp-eyebrow{margin-top:auto}
+.lp-hero-lower{margin-bottom:auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:calc(48 * var(--u));border-top:3px solid #111;margin-top:calc(32 * var(--u));padding-top:calc(28 * var(--u))}
+.lp-lede{font-size:calc(19 * var(--u));line-height:1.55;max-width:calc(520 * var(--u))}
+.lp-find{margin-top:calc(24 * var(--u));max-width:calc(520 * var(--u))}
+.lp-find label{font-size:calc(13 * var(--u));font-weight:700;color:#444;letter-spacing:.02em}
+.lp-find-row{display:flex;border-bottom:1px solid #111;align-items:center}
+.lp-find input{flex:1;border:0;outline:0;font:inherit;font-size:calc(18 * var(--u));padding:calc(12 * var(--u)) 0;background:none;min-width:0}
+.lp-find input::placeholder{color:#777}
+.lp-find button{font-size:calc(15 * var(--u));padding:calc(12 * var(--u)) 0 calc(12 * var(--u)) calc(12 * var(--u));font-weight:700;color:var(--blue)}
+.lp-hero-lower .lp-cta-row{margin-top:calc(20 * var(--u))}
+.lp-week h4{font-size:calc(13 * var(--u));font-weight:700;color:var(--blue);padding-bottom:calc(8 * var(--u));border-bottom:1px solid #111;margin-bottom:0}
+.lp-week-item{padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-week-item strong{display:block;font-size:calc(17 * var(--u))}
+.lp-week-item span{display:block;font-size:calc(15 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
+.lp-hero-panel{position:relative;background:var(--blue);color:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:0 calc(28 * var(--u)) calc(36 * var(--u))}
+.lp-hero-panel .lp-nav-r{position:absolute;top:calc(17 * var(--u));right:calc(30 * var(--u));z-index:2}
+.lp-hero-panel .lp-link-sm{color:#fff}
+.lp-circuit{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
+.lp-countdown{position:relative;margin:auto 0 0 0;aspect-ratio:1;max-width:calc(280 * var(--u));width:100%;display:flex;align-items:center;justify-content:center;z-index:1}
+.lp-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.lp-today{position:absolute;bottom:2px;right:calc(30 * var(--u));font-size:calc(12 * var(--u));font-weight:700}
+.lp-big-days{font-size:calc(160 * var(--u));line-height:.8;font-weight:700;letter-spacing:-.07em;color:#fff;position:relative}
+.lp-countdown .lp-big-days{font-size:calc(120 * var(--u));margin-left:calc(-6 * var(--u));white-space:nowrap}
+.lp-days-label{position:relative;font-size:calc(16 * var(--u));margin-top:calc(20 * var(--u));font-weight:600}
+.lp-panel-foot{position:relative;font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(30 * var(--u));opacity:.9}
+
+/* index */
+.lp-index{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr) minmax(0,1fr);gap:calc(40 * var(--u)) calc(48 * var(--u))}
+.lp-index-l .lp-body{margin-top:calc(28 * var(--u))}
+.lp-eleven{font-size:calc(170 * var(--u));line-height:.72;font-weight:700;letter-spacing:-.08em;color:var(--blue);margin:calc(48 * var(--u)) 0 calc(20 * var(--u)) calc(-6 * var(--u))}
+.lp-list-head{display:flex;justify-content:space-between;font-size:calc(13 * var(--u));font-weight:700;border-bottom:3px solid #111;padding-bottom:calc(8 * var(--u));color:#333}
+.lp-list-head span{color:#444;font-size:calc(12 * var(--u))}
+.lp-class{display:flex;justify-content:space-between;align-items:center;padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-class h3{font-size:calc(20 * var(--u));letter-spacing:-.01em}
+.lp-class small{display:block;font-size:calc(14 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
+.lp-class em{font-style:normal;color:var(--blue);font-size:calc(26 * var(--u));font-weight:600;letter-spacing:-.02em}
+.lp-class:hover h3{color:var(--blue)}
+.lp-coming{margin-top:calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444;border-bottom:2px solid #111;padding-bottom:calc(8 * var(--u))}
+.lp-vote{display:flex;justify-content:space-between;font-size:calc(15 * var(--u));padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-vote button{color:var(--blue);font-weight:700;font-size:calc(14 * var(--u))}
+.lp-quote{margin:calc(40 * var(--u)) 0 0;border-left:3px solid var(--blue);padding-left:calc(12 * var(--u));font-style:italic;font-size:calc(16 * var(--u));line-height:1.45;max-width:calc(340 * var(--u));color:#222}
+
+/* method */
+.lp-split{display:flex;justify-content:space-between;align-items:flex-start;gap:calc(40 * var(--u));flex-wrap:wrap}
+.lp-split .lp-narrow{margin-top:calc(20 * var(--u))}
+.lp-steps{display:grid;grid-template-columns:repeat(5,1fr);margin-top:calc(28 * var(--u))}
+.lp-step{position:relative}
+.lp-step-icon{height:calc(40 * var(--u));margin-bottom:calc(14 * var(--u));color:#111}
+.lp-step-icon svg{height:calc(38 * var(--u));width:calc(38 * var(--u))}
+.lp-step-rule{height:calc(12 * var(--u));position:relative}
+.lp-step-rule::before{content:"";position:absolute;left:0;right:0;top:calc(4 * var(--u));border-top:3px solid #111}
+.lp-step-rule i{position:absolute;left:0;top:0;width:calc(12 * var(--u));height:calc(12 * var(--u));background:var(--blue)}
+.lp-step-body{padding:calc(16 * var(--u)) calc(16 * var(--u)) 0 0;min-height:0;display:flex;flex-direction:column;border-left:0}
+.lp-step+.lp-step .lp-step-body{border-left:1px solid var(--rule);padding-left:0}
+.lp-step-n{font-size:calc(56 * var(--u));line-height:1;font-weight:700;letter-spacing:-.04em;color:var(--blue)}
+.lp-step h3{font-size:calc(19 * var(--u));margin:calc(14 * var(--u)) 0 calc(8 * var(--u));letter-spacing:-.01em}
+.lp-step p{font-size:calc(15 * var(--u));line-height:1.5;color:#222;flex:1;max-width:calc(210 * var(--u))}
+.lp-step small{font-size:calc(13 * var(--u));font-weight:700;color:#444;margin-top:calc(20 * var(--u))}
+.lp-steps-foot{display:flex;justify-content:space-between;gap:calc(20 * var(--u));flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:calc(34 * var(--u));padding-top:calc(18 * var(--u));font-size:calc(15 * var(--u))}
+
+/* notes */
+.lp-notes{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr);gap:calc(64 * var(--u));align-items:start}
+.lp-sub-caps{margin-top:calc(56 * var(--u));margin-bottom:calc(6 * var(--u))}
+.lp-notes .lp-sub-caps{margin-top:calc(32 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;font-size:calc(13 * var(--u));color:var(--blue)}
+.lp-statements li{display:flex;gap:calc(14 * var(--u));font-size:calc(15 * var(--u));padding:calc(10 * var(--u)) 0;border-bottom:1px solid var(--rule);align-items:center}
+.lp-statements b{color:var(--blue);font-size:calc(14 * var(--u));min-width:calc(40 * var(--u))}
+.lp-statements span{flex:1}
+.lp-statements i{color:var(--blue);font-style:normal;font-size:calc(16 * var(--u))}
+.lp-note{border:1px solid #d8d8d8;border-top:3px solid var(--blue);padding:calc(26 * var(--u)) calc(34 * var(--u)) calc(26 * var(--u));background:#fff}
+.lp-crumb{font-size:calc(12 * var(--u));font-weight:600}
+.lp-note-title{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:calc(10 * var(--u));margin-top:calc(10 * var(--u))}
+.lp-note-title h3{font-size:calc(34 * var(--u));letter-spacing:-.03em}
+.lp-note-title span{font-size:calc(12 * var(--u));font-weight:700;color:var(--blue)}
+.lp-note-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:calc(32 * var(--u));margin-top:calc(12 * var(--u))}
+.lp-note-grid p{font-size:calc(15 * var(--u));line-height:1.5}
+.lp-formula{border-left:3px solid var(--blue);padding-left:calc(14 * var(--u));margin:calc(32 * var(--u)) 0 calc(24 * var(--u))}
+.lp-formula div{font-size:calc(48 * var(--u));font-weight:700;letter-spacing:-.03em;color:var(--blue);line-height:1.1}
+.lp-formula small{display:block;font-size:calc(13 * var(--u));color:#555;margin-top:calc(5 * var(--u))}
+.lp-italic{font-style:italic;margin-top:calc(6 * var(--u))}
+.lp-trolleys{position:relative;height:calc(84 * var(--u));margin-top:calc(6 * var(--u))}
+.lp-trolley{position:absolute;left:0;bottom:calc(16 * var(--u));width:calc(68 * var(--u));height:calc(26 * var(--u));border:1.5px solid #111;background:#fff;font-size:calc(12 * var(--u));font-weight:700;display:flex;align-items:center;justify-content:center}
+.lp-trolley i{position:absolute;bottom:calc(-7 * var(--u));width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:#111}
+.lp-trolley i:nth-of-type(1){left:calc(8 * var(--u))}.lp-trolley i:nth-of-type(2){right:calc(8 * var(--u))}
+.lp-trolley-s{left:auto;right:0;width:calc(60 * var(--u))}
+.lp-arrow{position:absolute;left:46%;bottom:calc(25 * var(--u));color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-speed{position:absolute;font-size:calc(12 * var(--u));top:calc(16 * var(--u))}
+.lp-speed-a{left:56%;color:var(--blue);font-weight:700}.lp-speed-b{right:2%}
+.lp-track{position:absolute;left:0;right:0;bottom:calc(6 * var(--u));border-top:1px solid #111}
+.lp-working{font-size:calc(14 * var(--u));line-height:1.6}
+.lp-ms{margin-top:calc(22 * var(--u));padding-bottom:calc(5 * var(--u));border-bottom:2px solid #111}
+.lp-mark{width:100%;border-collapse:collapse;font-size:calc(14 * var(--u))}
+.lp-mark th,.lp-mark td{text-align:left;padding:calc(6 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-mark th{color:var(--blue);width:calc(34 * var(--u))}
+.lp-note-foot{display:flex;justify-content:space-between;border-top:1px solid var(--rule);margin-top:calc(28 * var(--u));padding-top:calc(18 * var(--u));font-size:calc(13 * var(--u));font-weight:700;gap:calc(10 * var(--u));flex-wrap:wrap}
+.lp-note-foot span:first-child{color:#444}
+
+/* papers */
+.lp-papers{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,2fr);gap:calc(56 * var(--u));align-items:start}
+.lp-legend{margin-top:calc(32 * var(--u));display:grid;gap:calc(10 * var(--u));font-size:calc(14 * var(--u))}
+.lp-legend li{display:flex;align-items:center;gap:calc(10 * var(--u))}
+.lp-legend i{width:calc(13 * var(--u));height:calc(13 * var(--u));display:block}
+.k-done{background:var(--blue)}.k-started{border:2px solid #111}.k-none{border:1px solid #ccc}
+.lp-papers .lp-sub-caps{margin-top:calc(28 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;font-size:calc(13 * var(--u))}
+.lp-filter{display:flex;justify-content:space-between;font-size:calc(14 * var(--u));padding:calc(12 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-filter i{font-style:normal;color:var(--blue)}
+.lp-grid{display:grid;grid-template-columns:calc(64 * var(--u)) repeat(3,1fr);column-gap:calc(14 * var(--u));row-gap:calc(12 * var(--u));align-items:center}
+.lp-series{display:grid;grid-template-columns:repeat(3,1fr);column-gap:calc(6 * var(--u))}
+.lp-series b{grid-column:1/-1;font-size:calc(13 * var(--u));color:#222;border-bottom:1px solid #111;padding:calc(8 * var(--u)) 0 calc(6 * var(--u));margin-bottom:calc(4 * var(--u))}
+.lp-series span{text-align:center;font-size:calc(12 * var(--u));font-weight:700;color:#555}
+.lp-year{font-size:calc(20 * var(--u));font-weight:700;letter-spacing:-.02em}
+.lp-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(6 * var(--u))}
+.lp-cell{height:calc(46 * var(--u));display:flex;align-items:center;justify-content:center;font-size:calc(14 * var(--u));font-weight:700}
+.c-none{border:1px solid #d6d6d6}
+.c-done{background:var(--blue);color:#fff}
+.c-started{border:2px solid #111;background:#fff}
+.c-new{border:1.5px solid var(--blue);color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-grid-foot{display:flex;justify-content:space-between;gap:calc(16 * var(--u));flex-wrap:wrap;font-size:calc(14 * var(--u));border-top:1px solid #111;margin-top:calc(18 * var(--u));padding-top:calc(12 * var(--u))}
+.lp-grid-wrap .lp-fine{margin-top:calc(22 * var(--u))}
+
+/* quiz */
+.lp-quiz{position:relative;background:var(--blue);color:#fff;min-height:var(--vh);padding:calc(64 * var(--u)) var(--gut);overflow:hidden;display:grid;align-content:center}
+.lp-arcs{position:absolute;left:0;bottom:0;width:calc(560 * var(--u));height:calc(560 * var(--u));pointer-events:none}
+.lp-quiz-in{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(48 * var(--u))}
+.lp-quiz .lp-num{color:#fff}
+.lp-quiz .lp-h2{font-size:calc(46 * var(--u));line-height:1;max-width:calc(540 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-quiz .lp-body{max-width:calc(440 * var(--u));font-size:calc(17 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-quiz-cards{border-top:1px solid rgba(255,255,255,.4);margin-top:calc(40 * var(--u));padding-top:calc(14 * var(--u));max-width:calc(440 * var(--u));font-size:calc(15 * var(--u));font-weight:700;line-height:1.45}
+.lp-q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:calc(20 * var(--u))}
+.lp-q-meta{font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(8 * var(--u))}
+.lp-q-bars{display:flex;gap:calc(6 * var(--u));margin-top:calc(8 * var(--u));max-width:calc(340 * var(--u))}
+.lp-q-bars i{flex:1;height:3px;background:rgba(255,255,255,.28)}
+.lp-q-bars i.on{background:#fff}.lp-q-bars i.cur{background:rgba(255,255,255,.6)}
+.lp-timer{position:relative;width:calc(84 * var(--u));height:calc(84 * var(--u));flex:none}
+.lp-timer svg{position:absolute;inset:0}
+.lp-timer div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lp-timer b{font-size:calc(30 * var(--u));line-height:1;letter-spacing:-.03em}.lp-timer span{font-size:calc(12 * var(--u));font-weight:700}
+.lp-q-text{font-size:calc(28 * var(--u));line-height:1.2;letter-spacing:-.02em;margin-top:calc(28 * var(--u));max-width:calc(540 * var(--u))}
+.lp-opts{margin-top:calc(32 * var(--u));border-top:1px solid rgba(255,255,255,.25)}
+.lp-opts li{display:flex;align-items:center;gap:calc(20 * var(--u));height:calc(56 * var(--u));padding:0 calc(15 * var(--u));font-size:calc(19 * var(--u));font-weight:600;border-bottom:1px solid rgba(255,255,255,.25)}
+.lp-opts b{width:calc(12 * var(--u));font-size:calc(16 * var(--u));opacity:.85}.lp-opts span{flex:1}
+.lp-opts li.right{background:#fff;color:var(--blue)}
+.lp-opts em{font-style:normal;font-size:calc(14 * var(--u));font-weight:700}
+.lp-q-expl{font-size:calc(15 * var(--u));line-height:1.45;margin-top:calc(18 * var(--u));max-width:calc(520 * var(--u))}
+.lp-q-foot{display:flex;justify-content:space-between;font-size:calc(15 * var(--u));margin-top:calc(32 * var(--u))}
+
+/* mock */
+.lp-mock-head{display:flex;justify-content:space-between;gap:calc(30 * var(--u));align-items:flex-start;flex-wrap:wrap}
+.lp-mock-head .lp-body{max-width:calc(520 * var(--u));margin-top:calc(28 * var(--u))}
+.lp-grade{text-align:right}
+.lp-grade div{font-size:calc(150 * var(--u));line-height:.78;font-weight:700;color:var(--blue);letter-spacing:-.04em;margin-top:calc(6 * var(--u))}
+.lp-grade .lp-fine{margin-top:calc(6 * var(--u))}.lp-grade p.lp-caps-blue{margin-top:calc(10 * var(--u))}
+.lp-mock .lp-sub-caps{font-size:calc(13 * var(--u));margin-top:calc(32 * var(--u))}
+.lp-bounds{position:relative;height:calc(110 * var(--u));margin-top:calc(6 * var(--u))}
+.lp-bar{position:absolute;left:0;right:0;top:calc(34 * var(--u));height:calc(24 * var(--u));background:var(--beige)}
+.lp-bar i{display:block;height:100%}
+.lp-tick{position:absolute;top:calc(28 * var(--u));height:calc(32 * var(--u));border-left:1px solid #111}
+.lp-tick small{position:absolute;top:calc(36 * var(--u));left:calc(-12 * var(--u));font-size:calc(12 * var(--u));color:#555}
+.lp-gl{position:absolute;top:calc(60 * var(--u));transform:translateX(-50%);font-size:calc(14 * var(--u));font-weight:700}
+.lp-pin{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:calc(13 * var(--u));font-weight:700;line-height:1.3}
+.lp-pin i{display:block;font-style:normal;font-size:calc(13 * var(--u));margin-top:2px}
+.lp-pin-last{color:#555}.lp-pin-you{color:var(--blue);top:calc(6 * var(--u))}
+.lp-mock-low{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(72 * var(--u));margin-top:calc(20 * var(--u));align-items:start}
+.lp-mock-low>div:first-child .lp-sub-caps{margin-top:0;padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-marks{display:grid;gap:calc(14 * var(--u));margin-top:calc(14 * var(--u))}
+.lp-mrow{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr calc(44 * var(--u));gap:calc(14 * var(--u));align-items:center;font-size:calc(15 * var(--u))}
+.lp-mrow div{height:calc(7 * var(--u));background:var(--beige)}
+.lp-mrow div i{display:block;height:100%;background:#111}
+.lp-mrow b{text-align:right;font-size:calc(15 * var(--u))}
+.lp-mrow.hi{color:var(--blue);font-weight:700}.lp-mrow.hi div i{background:var(--blue)}
+.lp-next{border-left:3px solid var(--blue);padding-left:calc(12 * var(--u))}
+.lp-next h3{font-size:calc(26 * var(--u));line-height:1.15;letter-spacing:-.02em;margin-top:calc(8 * var(--u));max-width:calc(480 * var(--u))}
+.lp-next .lp-fine{max-width:calc(480 * var(--u));margin-top:calc(12 * var(--u));font-size:calc(15 * var(--u))}
+.lp-next .lp-cta-row{margin-top:calc(26 * var(--u))}
+
+/* arena */
+.lp-arena{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:calc(64 * var(--u));align-items:start}
+.lp-arena .lp-body{max-width:calc(440 * var(--u));margin-top:calc(16 * var(--u))}
+.lp-live{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(48 * var(--u))}
+.lp-live i{width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:var(--blue);display:block}
+.lp-1284{font-size:calc(120 * var(--u));line-height:.85;font-weight:700;letter-spacing:-.035em;color:var(--blue);margin:calc(20 * var(--u)) 0 calc(14 * var(--u)) calc(-5 * var(--u));white-space:nowrap}
+.lp-arena .lp-fine{margin:0}
+.lp-board-head,.lp-board-row{display:grid;grid-template-columns:calc(56 * var(--u)) minmax(0,1fr) calc(96 * var(--u)) calc(90 * var(--u)) calc(100 * var(--u));align-items:center;gap:calc(6 * var(--u))}
+.lp-board-head{font-size:calc(13 * var(--u));font-weight:700;color:#444;padding-bottom:calc(6 * var(--u));border-bottom:3px solid #111}
+.lp-board-head span:last-child,.lp-board-row .pts{text-align:right}
+.lp-board-row{padding:calc(11 * var(--u)) 0;border-bottom:1px solid var(--rule);font-size:calc(15 * var(--u))}
+.lp-board-row .rank{font-size:calc(24 * var(--u));letter-spacing:-.03em;font-weight:600;padding-left:2px}
+.lp-board-row .blue{color:var(--blue)}
+.lp-board-row strong{display:block;font-size:calc(17 * var(--u))}
+.lp-board-row small{display:block;font-size:calc(13 * var(--u));color:#555;margin-top:2px}
+.lp-board-row .pts{font-size:calc(20 * var(--u));letter-spacing:-.02em}
+.lp-board-row.you{background:var(--tint)}
+.lp-board-row.you strong,.lp-board-row.you small,.lp-board-row.you .pts,.lp-board-row.you span{color:var(--blue)}
+.lp-board-row.you .pts{font-size:calc(18 * var(--u));padding-right:calc(8 * var(--u))}.lp-board-row.you strong{font-weight:700}
+
+/* pricing */
+.lp-pricing{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:calc(64 * var(--u));align-items:start;position:relative}
+.lp-pricing .lp-h2{max-width:calc(420 * var(--u));line-height:1.02}
+.lp-pricing .lp-body{max-width:calc(420 * var(--u));font-size:calc(17 * var(--u))}
+.lp-pricing .lp-sub-caps{font-size:calc(13 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;margin-top:calc(44 * var(--u))}
+.lp-faq>div{padding:calc(14 * var(--u)) 0 calc(12 * var(--u));border-bottom:1px solid var(--rule)}
+.lp-faq h4{font-size:calc(16 * var(--u))}.lp-faq p{font-size:calc(15 * var(--u));line-height:1.4;color:#444;margin-top:calc(6 * var(--u));max-width:calc(420 * var(--u))}
+.lp-table{position:relative;padding-right:0;display:grid;grid-template-columns:1fr calc(180 * var(--u));grid-template-rows:auto auto auto}
+.lp-price-card{grid-column:2;grid-row:1/4;background:var(--tint);border-top:3px solid var(--blue);padding:calc(16 * var(--u)) calc(14 * var(--u));margin-top:-1px;z-index:0}
+.lp-price{font-size:calc(48 * var(--u));font-weight:700;letter-spacing:-.05em;color:var(--blue);line-height:1.05;margin-top:calc(10 * var(--u))}
+.lp-price-card small{font-size:calc(12 * var(--u));color:#444}
+.lp-incl{grid-column:1;grid-row:1;margin:calc(104 * var(--u)) 0 0!important;border:0!important;font-size:calc(13 * var(--u));align-self:end}
+.lp-rows{grid-column:1/-1;grid-row:2;border-top:3px solid #111;margin-top:calc(6 * var(--u));z-index:1}
+.lp-row{display:grid;grid-template-columns:1fr calc(180 * var(--u));align-items:center;height:calc(46 * var(--u));border-bottom:1px solid var(--rule);font-size:calc(16 * var(--u))}
+.lp-row b{padding-left:calc(14 * var(--u));color:var(--blue);font-size:calc(15 * var(--u))}
+.lp-row b:only-child{font-size:calc(15 * var(--u))}
+.lp-table-cta{grid-column:1;grid-row:3;display:flex;align-items:center;gap:calc(18 * var(--u));margin-top:calc(18 * var(--u));flex-wrap:wrap}
+.lp-table-cta .lp-fine{margin:0;font-size:calc(14 * var(--u))}
+
+/* final cta */
+.lp-last{min-height:var(--vh);display:flex;flex-direction:column}
+.lp-final{flex:1;position:relative;background:var(--blue);color:#fff;padding:calc(56 * var(--u)) var(--gut) calc(28 * var(--u));overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.lp-final .lp-num{color:#fff;position:relative}
+.lp-final-in{position:relative;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);gap:calc(20 * var(--u));align-items:center;margin-top:calc(30 * var(--u))}
+.lp-final-days{font-size:calc(190 * var(--u))}
+.lp-final .lp-h2{font-size:calc(40 * var(--u));line-height:1.02;max-width:calc(520 * var(--u));margin-top:0}
+.lp-final .lp-fine{margin-top:calc(18 * var(--u))}
+.lp-timeline{position:relative;margin-top:calc(36 * var(--u))}
+.lp-timeline i{display:block;height:1px;background:rgba(255,255,255,.7);position:relative}
+.lp-timeline i::before{content:"";position:absolute;left:0;top:calc(-4 * var(--u));width:calc(9 * var(--u));height:calc(9 * var(--u));border-radius:50%;background:#fff}
+.lp-timeline div{display:flex;justify-content:space-between;font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(8 * var(--u));gap:calc(10 * var(--u));flex-wrap:wrap}
+
+/* footer */
+.lp-footer{padding:calc(40 * var(--u)) var(--gut) 0}
+.lp-foot-grid{display:grid;grid-template-columns:1.9fr 1fr 1fr 1fr 1.4fr;gap:calc(20 * var(--u))}
+.lp-foot-grid h5{font-size:calc(13 * var(--u));color:var(--blue);margin-bottom:calc(10 * var(--u))}
+.lp-foot-grid a{display:block;font-size:calc(15 * var(--u));margin-bottom:calc(9 * var(--u))}
+.lp-foot-grid .lp-fine{max-width:calc(280 * var(--u));margin-top:calc(14 * var(--u))}
+.lp-foot-grid>div:last-child .lp-fine{margin:0 0 calc(20 * var(--u))}
+.lp-email{display:flex;border-bottom:1px solid #111;max-width:calc(260 * var(--u))}
+.lp-email input{flex:1;border:0;outline:0;font:inherit;font-size:calc(15 * var(--u));padding:calc(10 * var(--u)) 0;min-width:0;background:none}
+.lp-email button{color:var(--blue);font-size:calc(17 * var(--u));padding:0 calc(4 * var(--u)) 0 calc(12 * var(--u))}
+.lp-legal{display:flex;justify-content:space-between;gap:calc(12 * var(--u));flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:calc(26 * var(--u));padding:calc(14 * var(--u)) 0 calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444}
+.lp-legal b{font-size:calc(13 * var(--u))}
+
+ /* section transitions */
+.lp-rv>*{transition:opacity .9s ease,transform .9s cubic-bezier(.2,.7,.2,1)}
+.lp-rv>*:nth-child(2){transition-delay:.12s}
+.lp-rv>*:nth-child(3){transition-delay:.24s}
+.lp-anim .lp-rv:not(.in)>*{opacity:0;transform:translateY(36px)}
+@media (min-width:1000px){
+  html.lp-snap{scroll-snap-type:y proximity;scroll-behavior:smooth}
+  .lp>section,.lp-last{scroll-snap-align:start}
+}
+
+/* responsive */
+@media (max-width:1000px){
+  .lp-sec,.lp-quiz,.lp-hero,.lp-last{min-height:0}
+  .lp-nav{margin-bottom:calc(40 * var(--u))}.lp-eyebrow{margin-top:0}.lp-hero-lower{margin-bottom:0}
+  .lp-final-days{font-size:calc(130 * var(--u))}.lp-big-days{font-size:calc(130 * var(--u))}.lp-countdown .lp-big-days{font-size:calc(130 * var(--u))}
+  .lp-hero{grid-template-columns:1fr;margin:0}
+  .lp-hero-main{padding:0 var(--pad) calc(32 * var(--u))}
+  .lp-hero-main{max-width:none}
+  .lp-hero-panel{min-height:calc(480 * var(--u))}
+  .lp-desktop-only{display:none}.lp-mobile-only{display:flex}
+  .lp-index,.lp-notes,.lp-papers,.lp-arena,.lp-pricing,.lp-quiz-in,.lp-mock-low,.lp-final-in{grid-template-columns:1fr}
+  .lp-h2-tight{max-width:none}
+  .lp-steps{grid-template-columns:repeat(2,1fr);row-gap:calc(30 * var(--u))}
+  .lp-foot-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .lp{--pad:calc(20 * var(--u))}
+  .lp-h1{font-size:calc(42 * var(--u))}.lp-h2,.lp-quiz .lp-h2,.lp-final .lp-h2{font-size:calc(32 * var(--u))}
+  .lp-eleven{font-size:calc(120 * var(--u))}.lp-1284{font-size:calc(84 * var(--u))}.lp-final-days{font-size:calc(120 * var(--u))}.lp-grade div{font-size:calc(110 * var(--u))}
+  .lp-nav{gap:calc(12 * var(--u))}.lp-nav-r{gap:calc(12 * var(--u))}
+  .lp-sec,.lp-quiz{padding-top:calc(48 * var(--u));padding-bottom:calc(48 * var(--u))}
+  .lp-nav{margin-bottom:calc(40 * var(--u))}
+  .lp-hero-lower{grid-template-columns:1fr}
+  .lp-note{padding:calc(18 * var(--u))}
+  .lp-note-grid{grid-template-columns:1fr}
+  .lp-grid{grid-template-columns:calc(38 * var(--u)) repeat(3,minmax(0,1fr));column-gap:calc(6 * var(--u))}
+  .lp-cell{height:calc(34 * var(--u));font-size:calc(12 * var(--u))}
+  .lp-year{font-size:calc(15 * var(--u))}
+  .lp-board-head,.lp-board-row{grid-template-columns:calc(36 * var(--u)) minmax(0,1fr) calc(64 * var(--u))}
+  .lp-board-head span:nth-child(3),.lp-board-head span:nth-child(4),
+  .lp-board-row>span{display:none}
+  .lp-grade div{font-size:calc(130 * var(--u))}
+  .lp-table,.lp-row{grid-template-columns:1fr calc(112 * var(--u))}
+  .lp-steps{grid-template-columns:1fr}
+}
+`;
