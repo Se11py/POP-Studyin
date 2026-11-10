@@ -21,12 +21,23 @@ const tabs = [
 const blue = "text-[#1c3bff]";
 const eyebrow = `text-[11px] font-bold uppercase tracking-wide ${blue}`;
 
+/** Some notes write maths as $…$ (or bare LaTeX) in plain text rather than as Notion equations. */
+function withMath(text: string): ReactNode {
+  if (!text.includes("$") && /^[^\s]*\\[a-zA-Z]/.test(text.trim()) && !/\s[a-z]{3,}\s/.test(text)) {
+    return <InlineMath math={text.trim()} errorColor="#b3261e" />;
+  }
+  if (!/\$[^$]+\$/.test(text)) return text;
+  return text.split(/(\$[^$]+\$)/g).map((part, i) =>
+    /^\$[^$]+\$$/.test(part) ? <InlineMath key={i} math={part.slice(1, -1)} errorColor="#b3261e" /> : part,
+  );
+}
+
 function RT({ items = [] }: { items?: RichText[] }) {
   return (
     <>
       {items.map((r, i) => {
         if (r.e) return <InlineMath key={i} math={r.x} errorColor="#b3261e" />;
-        let node: ReactNode = r.x;
+        let node: ReactNode = withMath(r.x);
         if (r.c) node = <code className="bg-[#efece2] px-1 text-[0.9em]">{node}</code>;
         if (r.b) node = <strong>{node}</strong>;
         if (r.i) node = <em>{node}</em>;
@@ -77,7 +88,7 @@ function Blocks({ blocks }: { blocks: NoteBlock[] }) {
     const key = i;
     if (b.k === "heading_1" || b.k === "heading_2") {
       section += 1;
-      const text = plain(b.rt);
+      const text = plain(b.rt).replace(/^\d+[.)]\s+/, "");
       out.push(
         <div key={key} className="mt-9 first:mt-0">
           <p className={eyebrow}>

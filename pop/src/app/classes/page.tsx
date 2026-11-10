@@ -13,6 +13,7 @@ const igcseLeft: Group[] = [
     label: "Sciences",
     courses: [
       { name: "Physics", code: "0625", meta: "42 lessons · 610 questions · 58 papers · most picked", href: "/classes/igcse-physics" },
+      { name: "Physics (Triple)", code: "0625", meta: "Core & Extended · 126 topics · 6 units", href: "/classes/igcse-physics-triple" },
       { name: "Chemistry", code: "0620", meta: "38 lessons · 540 questions · 58 papers", href: "/classes/igcse-chemistry" },
       { name: "Biology", code: "0610", meta: "40 lessons · 495 questions · 56 papers", href: "/classes/igcse-biology" },
     ],
@@ -28,6 +29,14 @@ const igcseLeft: Group[] = [
 ];
 
 const igcseRight: Group[] = [
+  {
+    label: "Co-ordinated Sciences",
+    courses: [
+      { name: "Biology", code: "0654", meta: "Core & Extended · 169 topics · 19 units", href: "/classes/igcse-sci-biology" },
+      { name: "Chemistry", code: "0654", meta: "Core & Extended · 55 topics · 12 units", href: "/classes/igcse-sci-chemistry" },
+      { name: "Physics", code: "0654", meta: "Core & Extended · 239 topics · 6 units", href: "/classes/igcse-sci-physics" },
+    ],
+  },
   {
     label: "Computing",
     courses: [{ name: "Computer Science", code: "0478", meta: "33 lessons · 380 questions · 40 papers" }],
@@ -111,7 +120,7 @@ function Groups({ groups }: { groups: Group[] }) {
         <section key={g.label}>
           <h2 className="!mb-0 border-b-2 border-[#111] pb-1.5 text-[11px] font-bold uppercase tracking-wide text-[#1c3bff]">{g.label}</h2>
           {g.courses.map((c) => (
-            <Row key={c.code} course={c} />
+            <Row key={c.href ?? c.code} course={c} />
           ))}
         </section>
       ))}

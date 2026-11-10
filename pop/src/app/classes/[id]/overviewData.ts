@@ -1,5 +1,7 @@
 import { classesData } from "./classesData";
 import { mathTiers } from "./mathSyllabus";
+import { physicsTripleTiers } from "./physicsTripleSyllabus";
+import { sciBiologyTiers, sciChemistryTiers, sciPhysicsTiers } from "./sciSyllabus";
 import { edexcelMathUnits } from "./edexcelMathSyllabus";
 
 export type OverviewTopic = { id: string; title: string; done?: boolean; tag?: string };
@@ -90,12 +92,34 @@ const math: SubjectOverview = {
   tiers: mathTiers,
 };
 
+const physicsTriple: SubjectOverview = {
+  name: "Physics (Triple)",
+  code: "0625",
+  board: "Cambridge",
+  level: "IGCSE",
+  blurb: "Core and Extended, six units each. All topics contain full revision notes, worked examples, and common mistakes.",
+  syllabusLine: "IGCSE · CAMBRIDGE · 0625 PHYSICS",
+  units: physicsTripleTiers[0].units,
+  tiers: physicsTripleTiers,
+};
+
+const coordinated = (name: string, tiers: typeof mathTiers): SubjectOverview => ({
+  name: `${name} (Co-ordinated)`,
+  code: "0654",
+  board: "Cambridge",
+  level: "IGCSE",
+  blurb: "Core and Extended. All topics contain full revision notes, worked examples, and common mistakes.",
+  syllabusLine: "IGCSE · CAMBRIDGE · 0654 CO-ORDINATED SCIENCES",
+  units: tiers[0].units,
+  tiers,
+});
+
 const edexcelMath: SubjectOverview = {
   name: "Mathematics A",
   code: "4MA1",
   board: "Pearson Edexcel",
   level: "IGCSE",
-  blurb: "Organised by grade, from Grade 1 up to Grades 8 & 9. Every topic has full revision notes, worked examples and common mistakes to avoid.",
+  blurb: "From Grades 1 up to 8 & 9. All topics contain full revision notes, worked examples, and common mistakes.",
   syllabusLine: "IGCSE · PEARSON EDEXCEL · 4MA1",
   units: edexcelMathUnits,
 };
@@ -104,6 +128,10 @@ const curated: Record<string, SubjectOverview> = {
   "igcse-physics": physics,
   "igcse-math": math,
   "edexcel-igcse-math": edexcelMath,
+  "igcse-physics-triple": physicsTriple,
+  "igcse-sci-biology": coordinated("Biology", sciBiologyTiers),
+  "igcse-sci-chemistry": coordinated("Chemistry", sciChemistryTiers),
+  "igcse-sci-physics": coordinated("Physics", sciPhysicsTiers),
 };
 
 /** Physics is fully mapped; other subjects are built from whatever syllabus the class data already holds. */

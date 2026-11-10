@@ -116,7 +116,7 @@ export default function SubjectOverviewPage() {
           code={data.code}
           links={sideLinks}
           blurb={`${data.board} ${data.level} ${data.name}. ${
-            units.length ? `${["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][units.length] ?? units.length} units, ${allTopics.length} topics, every one mapped to the syllabus you'll sit.` : "Units are being added."
+            units.length ? `${["Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"][units.length] ?? units.length} units, ${allTopics.length} topics.` : "Units are being added."
           }`}
           progress={{ done, total: allTopics.length, next: next ? `${next.id} ${next.title}` : undefined }}
           footer={data.syllabusLine.replaceAll(" · ", "  ·  ")}
