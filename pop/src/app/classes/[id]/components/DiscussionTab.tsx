@@ -41,12 +41,14 @@ function PostRow({
   post,
   currentUserId,
   onHide,
+  onReport,
   onReply,
   isReply,
 }: {
   post: Post;
   currentUserId: string | undefined;
   onHide: (id: Id<"discussionPosts">) => void;
+  onReport: (id: Id<"discussionPosts">) => void;
   onReply?: (post: Post) => void;
   isReply?: boolean;
 }) {
@@ -75,7 +77,7 @@ function PostRow({
               <Trash2 size={12} /> Delete
             </button>
           ) : (
-            <button onClick={() => onHide(post._id)} className="flex items-center gap-1 hover:text-red-600">
+            <button onClick={() => onReport(post._id)} className="flex items-center gap-1 hover:text-red-600">
               <Flag size={12} /> Report
             </button>
           )}
@@ -98,6 +100,7 @@ export default function DiscussionTab({
   const posts = useQuery(api.discussions.listByLesson, { classId, lessonId });
   const createPost = useMutation(api.discussions.createPost);
   const hidePost = useMutation(api.discussions.hidePost);
+  const reportPost = useMutation(api.discussions.reportPost);
 
   const [draft, setDraft] = useState("");
   const [replyTo, setReplyTo] = useState<Post | null>(null);
@@ -192,6 +195,7 @@ export default function DiscussionTab({
                 post={post}
                 currentUserId={user?.id}
                 onHide={(id) => hidePost({ postId: id })}
+                onReport={(id) => reportPost({ postId: id })}
                 onReply={(p) => {
                   setReplyTo(p);
                   setReplyDraft("");
@@ -200,7 +204,7 @@ export default function DiscussionTab({
 
               {(repliesByParent[post._id] ?? []).map((reply) => (
                 <div key={reply._id} className="ml-11">
-                  <PostRow post={reply} currentUserId={user?.id} onHide={(id) => hidePost({ postId: id })} isReply />
+                  <PostRow post={reply} currentUserId={user?.id} onHide={(id) => hidePost({ postId: id })} onReport={(id) => reportPost({ postId: id })} isReply />
                 </div>
               ))}
 

@@ -48,7 +48,16 @@ export default defineSchema({
     authorName: v.string(),
     body: v.string(),
     hidden: v.optional(v.boolean()),
+    /** Feed questions only: the paper question or syllabus point, e.g. "P42 Q3(b)" or "1.6 Momentum". */
+    reference: v.optional(v.string()),
+    /** Feed questions only: the reply the asker accepted as the answer. */
+    acceptedReplyId: v.optional(v.id("discussionPosts")),
+    /** Feed questions only: how many visible replies it has, kept up to date as replies come and go. */
+    replyCount: v.optional(v.number()),
+    /** Set when another student reports the post. A moderator decides; reporting never hides it. */
+    reported: v.optional(v.boolean()),
   })
   .index("by_lesson", ["classId", "lessonId"])
-  .index("by_parent", ["parentId"]),
+  .index("by_parent", ["parentId"])
+  .index("by_author", ["authorClerkId"]),
 });

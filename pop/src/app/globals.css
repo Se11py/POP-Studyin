@@ -1,6 +1,16 @@
 @import "tailwindcss";
 
 @theme {
+  --color-board-ink: #111111;
+  --color-board-muted: #6b6759;
+  --color-board-accent: #1c3bff;
+  --color-board-tint: #e6e9ff;
+  --color-board-hover: #f4f1e8;
+  --color-board-line: #d9d4c4;
+  --color-board-edge: #857f6d;
+  --color-board-danger: #b3261e;
+  --color-board-body: #2f2e29;
+
   --color-primary: #8B5CF6;
   --color-primary-light: #A78BFA;
   --color-primary-dark: #7B2FF2;

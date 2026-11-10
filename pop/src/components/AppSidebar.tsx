@@ -16,6 +16,7 @@ const navItems = [
   { label: "Interactives", href: "/interactives" },
   { label: "POP Arena", href: "/arena" },
   { label: "Dictionary", href: "/dictionary" },
+  { label: "Discussion", href: "/discussion" },
   { label: "Contribute", href: "/contribute" },
 ];
 
