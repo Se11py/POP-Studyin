@@ -5,6 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Sidebar from "@/components/Sidebar";
+import EmailPrefs from "@/components/EmailPrefs";
 import { AtSign, Check, Save, School, UserRound } from "lucide-react";
 import { requiresCustomSchool, schools, subjects, yearGroups } from "@/lib/onboardingOptions";
 import posthog from "posthog-js";
@@ -100,6 +101,7 @@ export default function ProfilePage() {
           <fieldset><legend className="mb-3 text-sm font-bold text-gray-900">Contributor preference</legend><div className="grid gap-3 sm:grid-cols-2"><button type="button" onClick={() => setWantsToContribute(true)} className={`rounded border p-4 text-left ${wantsToContribute ? "border-blue-700 bg-blue-50" : "border-gray-200"}`}><span className="block text-sm font-bold">Yes, I’d love to help</span><span className="mt-1 block text-xs text-gray-500">Share notes, flashcards, or interactives.</span></button><button type="button" onClick={() => setWantsToContribute(false)} className={`rounded border p-4 text-left ${!wantsToContribute ? "border-blue-700 bg-blue-50" : "border-gray-200"}`}><span className="block text-sm font-bold">Maybe later</span><span className="mt-1 block text-xs text-gray-500">You can change this anytime.</span></button></div></fieldset>
           <div className="flex flex-col justify-between gap-4 border-t border-gray-100 pt-7 sm:flex-row sm:items-center"><p role="status" className={`text-sm font-bold ${status.includes("updated") ? "text-green-600" : "text-red-600"}`}>{status}</p><button type="submit" disabled={isSaving} className="inline-flex items-center justify-center gap-2 rounded bg-blue-700 px-6 py-3 font-bold text-white hover:bg-blue-800 disabled:opacity-60"><Save className="h-4 w-4" />{isSaving ? "Saving..." : "Save changes"}</button></div>
         </form>
+        <EmailPrefs />
       </main>
     </div>
   );

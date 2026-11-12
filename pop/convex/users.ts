@@ -1,5 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { internal } from "./_generated/api";
+import { welcome } from "./emailTemplates";
 
 const profileFields = {
   yearGroup: v.string(),
@@ -41,11 +43,26 @@ export const saveProfile = mutation({
       ...args,
     };
 
-    if (existingUser) {
-      await ctx.db.patch(existingUser._id, profile);
-      return existingUser._id;
-    }
+    const userId = existingUser ? existingUser._id : await ctx.db.insert("users", profile);
+    if (existingUser) await ctx.db.patch(existingUser._id, profile);
 
-    return ctx.db.insert("users", profile);
+    // One welcome email, the first time a profile with an email address is saved
+    if (identity.email && !existingUser?.welcomeSentAt) {
+      await ctx.db.patch(userId, { welcomeSentAt: Date.now() });
+      const mail = welcome(identity.name ?? "");
+      await ctx.scheduler.runAfter(0, internal.emails.send, { to: identity.email, ...mail });
+    }
+    return userId;
+  },
+});
+
+export const setEmailPrefs = mutation({
+  args: { emailReplies: v.boolean(), emailReminders: v.boolean() },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("You must be signed in.");
+    const user = await ctx.db.query("users").withIndex("by_clerkId", (q) => q.eq("clerkId", identity.subject)).unique();
+    if (!user) throw new Error("Finish onboarding first.");
+    await ctx.db.patch(user._id, args);
   },
 });

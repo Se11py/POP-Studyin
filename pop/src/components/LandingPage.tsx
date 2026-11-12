@@ -7,170 +7,288 @@ import Circuit from "@/components/Circuit";
 const BLUE = "#2339f5";
 const FIRST_PAPER = new Date(2027, 3, 27); // 27 Apr 2027
 
-// Only classes that open a real page. Keep in step with src/app/classes/page.tsx.
-const classGroups: { label: string; items: { name: string; code: string; href: string }[] }[] = [
-  {
-    label: "Cambridge IGCSE",
-    items: [
-      { name: "Physics", code: "0625", href: "/classes/igcse-physics" },
-      { name: "Physics (Triple)", code: "0625", href: "/classes/igcse-physics-triple" },
-      { name: "Chemistry", code: "0620", href: "/classes/igcse-chemistry" },
-      { name: "Biology", code: "0610", href: "/classes/igcse-biology" },
-      { name: "Mathematics", code: "0580", href: "/classes/igcse-math" },
-      { name: "Business Studies", code: "0450", href: "/classes/igcse-business" },
-    ],
-  },
-  {
-    label: "Cambridge IGCSE Co-ordinated Sciences",
-    items: [
-      { name: "Biology", code: "0654", href: "/classes/igcse-sci-biology" },
-      { name: "Chemistry", code: "0654", href: "/classes/igcse-sci-chemistry" },
-      { name: "Physics", code: "0654", href: "/classes/igcse-sci-physics" },
-    ],
-  },
-  {
-    label: "Pearson Edexcel IGCSE",
-    items: [{ name: "Mathematics A", code: "4MA1", href: "/classes/edexcel-igcse-math" }],
-  },
+const igcse = [
+  { name: "Physics", code: "0625", meta: "32 lessons · 610 questions · 63 papers" },
+  { name: "Chemistry", code: "0620", meta: "36 lessons · 530 questions · 58 papers" },
+  { name: "Biology", code: "0610", meta: "40 lessons · 495 questions · 56 papers" },
+  { name: "Mathematics", code: "0580", meta: "51 lessons · 820 questions · 62 papers" },
+  { name: "Additional Maths", code: "0606", meta: "28 lessons · 410 questions · 44 papers" },
+  { name: "Computer Science", code: "0478", meta: "33 lessons · 380 questions · 40 papers" },
+  { name: "Economics", code: "0455", meta: "27 lessons · 300 questions · 46 papers" },
+  { name: "Business Studies", code: "0450", meta: "25 lessons · 280 questions · 46 papers" },
 ];
 
-// Real labs from /interactives. Keep in step with src/app/interactives/page.tsx.
-const labs = [
-  {
-    id: "physics-motion-graphs",
-    name: "Motion Graphs Lab",
-    subject: "Physics",
-    body: "Animate a vehicle along a track to plot and read displacement-time, velocity-time and acceleration-time graphs.",
-  },
-  {
-    id: "physics-density-archimedes",
-    name: "Density & Archimedes' Principle Lab",
-    subject: "Physics",
-    body: "Submerge blocks in liquids of different densities and compare the buoyant forces.",
-  },
-  {
-    id: "physics-vector-addition-components",
-    name: "Vector Addition & Components Lab",
-    subject: "Physics",
-    body: "Resolve force vectors into horizontal and vertical components and find the resultant.",
-  },
+const alevel = [
+  { name: "Physics", code: "9702", meta: "38 lessons · 540 questions · 40 papers" },
+  { name: "Chemistry", code: "9701", meta: "41 lessons · 505 questions · 40 papers" },
+  { name: "Mathematics", code: "9709", meta: "46 lessons · 760 questions · 52 papers" },
 ];
 
-const tools = [
-  { n: "01", title: "Notes", body: "Short notes organised by syllabus topic, with the wording examiners reward.", href: "/classes", cta: "See the classes" },
-  { n: "02", title: "Flashcards", body: "Make your own sets and revise them card by card.", href: "/flashcards", cta: "Open flashcards" },
-  { n: "03", title: "Interactive labs", body: "Move the sliders and watch the physics, chemistry, biology or maths respond.", href: "/interactives", cta: "Open the labs" },
-  { n: "04", title: "Dictionary", body: "Technical terms with a definition, an example and how the term is used.", href: "/dictionary", cta: "Open the dictionary" },
-  { n: "05", title: "Mini mock exam", body: "A short timed paper with a countdown. Physics and Chemistry for now.", href: "/classes/mock/igcse-physics", cta: "Try the Physics mock" },
-  { n: "06", title: "Discussion", body: "Ask about a paper question. The answer you accept goes to the top.", href: "/discussion", cta: "Open the board" },
+const comingNext = [
+  { name: "Biology", code: "9700" },
+  { name: "Economics", code: "9708" },
+  { name: "Computer Science", code: "9618" },
+];
+
+const thisWeek = [
+  { title: "2025 Oct/Nov papers added", sub: "Physics, Chemistry, Maths →" },
+  { title: "Lightning quiz: Units 1–2", sub: "60 seconds, 10 questions →" },
+  { title: "POP Arena, Thursday 19:00", sub: "Physics 0625 open round →" },
+  { title: "New class: A-Level Maths", sub: "9709, Pure 1 is live →" },
+];
+
+const steps = [
+  {
+    n: "01",
+    title: "Read the notes",
+    body: "Short notes built on each syllabus statement, with worked examples and the exact wording examiners reward.",
+    time: "≈ 15 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M7 3h13l6 6v20H7z" />
+        <path d="M20 3v6h6" />
+        <path d="M11 14h8M11 18h8M11 22h8" strokeWidth="3" />
+      </svg>
+    ),
+  },
+  {
+    n: "02",
+    title: "Drill the cards",
+    body: "Flashcards for every definition, equation and unit, brought back right before you'd forget them.",
+    time: "≈ 10 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <rect x="3" y="12" width="17" height="17" />
+        <path d="M7 12V8h17v17h-4M11 8V4h17v17h-4" />
+      </svg>
+    ),
+  },
+  {
+    n: "03",
+    title: "Lightning quiz",
+    body: "Ten questions in sixty seconds. Score 7/10 and the topic's past-paper questions unlock.",
+    time: "60 SEC",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M18 2L7 18h8l-2 12 11-17h-8z" />
+      </svg>
+    ),
+  },
+  {
+    n: "04",
+    title: "Past-paper questions",
+    body: "Every real exam question on the topic, sorted by year, with the mark scheme beside it.",
+    time: "≈ 25 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <path d="M7 3h18v26H7z" />
+        <path d="M12 9h9M12 13h9M12 17h5" strokeWidth="3" />
+        <path d="M17 24l3 3 6-7" />
+      </svg>
+    ),
+  },
+  {
+    n: "05",
+    title: "Mock exam",
+    body: "A timed paper across the whole unit, marked on the latest grade boundaries.",
+    time: "1 H 15 MIN",
+    icon: (
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <circle cx="16" cy="16" r="13" />
+        <path d="M16 8v8l-6-4" />
+      </svg>
+    ),
+  },
 ];
 
 const statements = [
-  { id: "1.6.1", text: "Define momentum as mass × velocity" },
-  { id: "1.6.2", text: "Recall and use p = mv" },
-  { id: "1.6.3", text: "Define impulse as force × time" },
+  { id: "1.6.1", text: "Define momentum as mass × velocity", done: true },
+  { id: "1.6.2", text: "Recall and use p = mv", done: true },
+  { id: "1.6.3", text: "Define impulse as force × time", done: true },
+  { id: "1.6.4", text: "Use F = Δp / Δt for safety features", done: false },
+  { id: "1.6.5", text: "Apply conservation of momentum", done: false },
+];
+
+type Cell = { s: "done" | "started" | "new" | "none"; v?: string };
+const none: Cell = { s: "none" };
+const d = (v: string): Cell => ({ s: "done", v });
+const st = (v: string): Cell => ({ s: "started", v });
+const nw: Cell = { s: "new", v: "NEW" };
+
+const paperRows: { year: number; cells: Cell[] }[] = [
+  { year: 2025, cells: [d("35/40"), d("62/80"), st("12/40"), d("33/40"), d("64/80"), d("31/40"), nw, nw, nw] },
+  { year: 2024, cells: [none, none, none, d("36/40"), d("71/80"), d("34/40"), d("30/40"), d("58/80"), st("20/40")] },
+  { year: 2023, cells: [none, none, none, d("29/40"), d("55/80"), st("9/40"), st("18/40"), none, none] },
+  { year: 2022, cells: [none, none, none, d("27/40"), none, none, none, none, none] },
+  { year: 2021, cells: [none, none, none, none, st("26/80"), none, none, none, none] },
+  { year: 2020, cells: Array(9).fill(none) },
+  { year: 2019, cells: Array(9).fill(none) },
+];
+
+const boundaries = [
+  { g: "U", from: 0 },
+  { g: "G", from: 20 },
+  { g: "F", from: 28 },
+  { g: "E", from: 36 },
+  { g: "D", from: 44 },
+  { g: "C", from: 52 },
+  { g: "B", from: 61 },
+  { g: "A", from: 70 },
+  { g: "A*", from: 80 },
+];
+
+const marks = [
+  { n: 1, name: "Motion, forces & energy", pct: 88 },
+  { n: 2, name: "Thermal physics", pct: 72 },
+  { n: 3, name: "Waves", pct: 79 },
+  { n: 4, name: "Electricity & magnetism", pct: 52, hi: true },
+  { n: 5, name: "Nuclear physics", pct: 90 },
+  { n: 6, name: "Space physics", pct: 61 },
+];
+
+const board = [
+  { r: "01", name: "Aisha R.", loc: "Dubai, UAE", acc: "96%", streak: "21 days", pts: "9,840" },
+  { r: "02", name: "Leo M.", loc: "London, UK", acc: "94%", streak: "14 days", pts: "9,615" },
+  { r: "03", name: "Mei L.", loc: "Singapore", acc: "95%", streak: "33 days", pts: "9,402" },
+  { r: "04", name: "Arjun S.", loc: "Pune, India", acc: "91%", streak: "8 days", pts: "9,110" },
+  { r: "05", name: "Sofia G.", loc: "Madrid, Spain", acc: "90%", streak: "19 days", pts: "8,975" },
+  { r: "06", name: "Kwame O.", loc: "Accra, Ghana", acc: "92%", streak: "11 days", pts: "8,760" },
+  { r: "07", name: "You", loc: "▲ 3 places this round", acc: "89%", streak: "6 days", pts: "8,712", you: true },
+  { r: "08", name: "Hana K.", loc: "Kuala Lumpur, Malaysia", acc: "88%", streak: "27 days", pts: "8,540" },
+  { r: "09", name: "Omar F.", loc: "Cairo, Egypt", acc: "87%", streak: "5 days", pts: "8,333" },
+  { r: "10", name: "Lucas P.", loc: "São Paulo, Brazil", acc: "86%", streak: "9 days", pts: "8,120" },
+];
+
+const included: [string, string][] = [
+  ["Revision notes, every class", "✓"],
+  ["Lightning quizzes", "✓"],
+  ["Flashcards", "Unlimited"],
+  ["Past papers + mark schemes", "All, 2019–2025"],
+  ["Mock exams, graded", "Every unit"],
+  ["Predicted grade + syllabus map", "✓"],
+  ["POP Arena", "Compete"],
+  ["Offline mode", "✓"],
 ];
 
 const faqs = [
-  { q: "Which exam boards?", a: "Cambridge IGCSE, including Co-ordinated Sciences, and Pearson Edexcel IGCSE Mathematics A (4MA1). A-Level classes are on the way." },
-  { q: "Do I need an account?", a: "Not to look around. Classes, labs, the dictionary and the discussion board are open to everyone. You need an account to post or reply." },
-  { q: "What is in a class?", a: "The topics of its syllabus, in order, with notes. How much each topic has varies by class while the notes are still being written." },
-  { q: "Are the mock exams full papers?", a: "Not yet. They are short timed sets, and only Physics and Chemistry have one today." },
-  { q: "Who writes the notes?", a: "Contributors, including senior students who write and proofread them. You can join them." },
+  { q: "Which exam boards?", a: "Cambridge International (CAIE) IGCSE and A-Level. Edexcel is in the works." },
+  { q: "Can my school use it?", a: "Yes. Whole classes can use it free, with a teacher dashboard." },
+  { q: "Who pays for it?", a: "Nobody. Senior students write and proofread the notes as volunteers." },
 ];
 
-function daysUntilFirstPaper() {
-  const now = new Date();
-  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  return Math.max(0, Math.round((FIRST_PAPER.getTime() - startOfToday.getTime()) / 86400000));
-}
-
 export default function LandingPage() {
-  const [mounted, setMounted] = useState(false);
-  const [showSticky, setShowSticky] = useState(false);
+  const [days, setDays] = useState(182);
+  const [today, setToday] = useState("27 OCT");
+  const [weeks, setWeeks] = useState(26);
+  const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
-  const heroCta = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 0);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Fade each section in as it arrives (not for people who prefer reduced motion)
+  // Scroll-snap between sections and fade/slide each section in as it arrives
   useEffect(() => {
     const root = rootRef.current;
     if (!root || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const html = document.documentElement;
+    html.classList.add("lp-snap");
     root.classList.add("lp-anim");
     const sections = root.querySelectorAll<HTMLElement>(":scope > section:not(.lp-hero), .lp-last > section");
     sections.forEach((el) => el.classList.add("lp-rv"));
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))),
-      { threshold: 0.15 }
+      { threshold: 0.2 }
     );
     sections.forEach((el) => io.observe(el));
     return () => {
       io.disconnect();
+      html.classList.remove("lp-snap");
       root.classList.remove("lp-anim");
     };
   }, []);
-
-  // The phone's sticky button appears only once the hero button has scrolled away
   useEffect(() => {
-    const el = heroCta.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setShowSticky(!e.isIntersecting && e.boundingClientRect.top < 0), { threshold: 0 });
-    io.observe(el);
-    return () => io.disconnect();
+    // Deferred so the server-rendered markup hydrates before the live date swaps in
+    const t = setTimeout(() => {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diff = Math.max(0, Math.round((FIRST_PAPER.getTime() - startOfToday.getTime()) / 86400000));
+      setDays(diff);
+      setWeeks(Math.round(diff / 7));
+      setToday(`${now.getDate()} ${now.toLocaleString("en-GB", { month: "short" }).toUpperCase()}`);
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
-  // Computed from the viewer's date. Server and browser may differ by a day, so the text is allowed to differ.
-  const days = daysUntilFirstPaper();
-  const weeks = Math.round(days / 7);
-  const now = new Date();
-  const today = `${now.getDate()} ${now.toLocaleString("en-GB", { month: "short" }).toUpperCase()}`;
-  const passed = mounted ? Math.min(1, Math.max(0, 1 - days / 182)) : 0;
+  const passed = Math.min(1, Math.max(0, 1 - days / 182));
   const ringLen = 2 * Math.PI * 112;
 
   return (
     <div className="lp" ref={rootRef}>
       <style>{css}</style>
-      <a className="lp-skip" href="#lp-main">Skip to content</a>
 
-      {/* ───────── HERO ───────── */}
-      <section className="lp-hero" aria-labelledby="lp-h1">
+      {/* ───────── 01 HERO ───────── */}
+      <section className="lp-hero">
         <div className="lp-hero-main">
           <header className="lp-nav">
             <Link href="/" className="lp-logo">
               <b>POP</b>
               <span>Studying</span>
             </Link>
-            <nav className="lp-nav-r lp-mobile-only" aria-label="Account">
+            <div className="lp-nav-r lp-mobile-only">
               <Link href="/sign-in" className="lp-link-sm">Log in</Link>
-              <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Sign up</Link>
-            </nav>
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Start free →</Link>
+            </div>
           </header>
 
-          <h1 id="lp-h1" className="lp-h1">
+          <p className="lp-eyebrow">CAMBRIDGE IGCSE &amp; A-LEVEL &nbsp;·&nbsp; REVISION THAT FOLLOWS THE SYLLABUS</p>
+          <h1 className="lp-h1">
             Revise exactly what the examiner asks.
           </h1>
 
           <div className="lp-hero-lower">
-            <p className="lp-lede">
-              Notes, flashcards, interactive labs and a dictionary for IGCSE classes, each built on the syllabus topic
-              it&apos;s examined on.
-            </p>
-            <div className="lp-cta-row" ref={heroCta}>
-              <Link href="/classes" className="lp-btn lp-btn-black">Open a class →</Link>
+            <div>
+              <p className="lp-lede">
+                Notes, flashcards, lightning quizzes and real past papers for every Cambridge IGCSE and A-Level class,
+                each written against the exact syllabus point it&apos;s examined on.
+              </p>
+              <form
+                className="lp-find"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  window.location.href = `/classes${query ? `?q=${encodeURIComponent(query)}` : ""}`;
+                }}
+              >
+                <label>FIND YOUR CLASS</label>
+                <div className="lp-find-row">
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Physics, 0625, momentum…"
+                  />
+                  <button type="submit">Search →</button>
+                </div>
+              </form>
+              <div className="lp-cta-row">
+                <Link href="/sign-up" className="lp-btn lp-btn-black">Start free →</Link>
+                <Link href="/classes" className="lp-link">Browse all 11 classes →</Link>
+              </div>
             </div>
+
+            <aside className="lp-week">
+              <h4>THIS WEEK</h4>
+              {thisWeek.map((w) => (
+                <div key={w.title} className="lp-week-item">
+                  <strong>{w.title}</strong>
+                  <span>{w.sub}</span>
+                </div>
+              ))}
+            </aside>
           </div>
         </div>
 
         <div className="lp-hero-panel">
           <Circuit id="hc" />
-          <nav className="lp-nav-r lp-desktop-only" aria-label="Account">
+          <div className="lp-nav-r lp-desktop-only">
             <Link href="/sign-in" className="lp-link-sm lp-white">Log in</Link>
-            <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Sign up</Link>
-          </nav>
+            <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Start free →</Link>
+          </div>
           <div className="lp-countdown">
             <svg viewBox="0 0 240 240" className="lp-ring" aria-hidden>
               <circle cx="120" cy="120" r="112" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="1" />
@@ -185,182 +303,439 @@ export default function LandingPage() {
                 transform="rotate(-90 120 120)"
               />
             </svg>
-            <div className="lp-big-days" suppressHydrationWarning>{days}</div>
+            <span className="lp-today">TODAY</span>
+            <div className="lp-big-days">{days}</div>
           </div>
-          <p className="lp-days-label">days until 27 April 2027</p>
-          <p className="lp-panel-foot">Check your own exam timetable for your papers.</p>
+          <p className="lp-days-label">days until the May/June 2027 papers</p>
+          <p className="lp-panel-foot">IGCSE &nbsp;·&nbsp; A-LEVEL &nbsp;·&nbsp; CAMBRIDGE</p>
         </div>
       </section>
 
-      {/* ───────── NOTES EXAMPLE ───────── */}
-      <section id="lp-main" className="lp-sec lp-notes" aria-labelledby="lp-notes">
-        <div>
-          <h2 id="lp-notes" className="lp-h2 lp-h2-tight">Notes written against the syllabus, not around it.</h2>
+      {/* ───────── 02 INDEX ───────── */}
+      <section className="lp-sec lp-index">
+        <div className="lp-index-l">
+          <p className="lp-num">02 — THE INDEX</p>
+          <h2 className="lp-h2">Eleven classes. Built line by line.</h2>
           <p className="lp-body">
-            Each note starts from a syllabus statement and stops when you can answer it. No padding, no tangents.
+            Every class follows its Cambridge syllabus in order: units, topics, and the individual statements examiners
+            write their questions from. Pick yours and start at 1.1.
           </p>
-          <h3 className="lp-sub-caps">Example: 1.6 Momentum statements</h3>
+          <div className="lp-eleven">11</div>
+          <p className="lp-tiny-caps">8 IGCSE &nbsp;·&nbsp; 3 A-LEVEL &nbsp;·&nbsp; MORE EVERY TERM</p>
+        </div>
+
+        <div className="lp-index-m">
+          <div className="lp-list-head"><b>IGCSE</b><span>TAP A CLASS TO OPEN IT</span></div>
+          {igcse.map((c) => (
+            <Link href="/classes" key={c.code} className="lp-class">
+              <div>
+                <h3>{c.name}</h3>
+                <small>{c.meta}</small>
+              </div>
+              <em>{c.code}</em>
+            </Link>
+          ))}
+          <Link href="/classes" className="lp-link lp-mt">See every class →</Link>
+        </div>
+
+        <div className="lp-index-r">
+          <div className="lp-list-head"><b>A-LEVEL</b></div>
+          {alevel.map((c) => (
+            <Link href="/classes" key={c.code} className="lp-class">
+              <div>
+                <h3>{c.name}</h3>
+                <small>{c.meta}</small>
+              </div>
+              <em>{c.code}</em>
+            </Link>
+          ))}
+          <p className="lp-coming">COMING NEXT &nbsp;·&nbsp; VOTE FOR ONE</p>
+          {comingNext.map((c) => (
+            <div key={c.code} className="lp-vote">
+              <span>{c.name}&nbsp; {c.code}</span>
+              <button>vote →</button>
+            </div>
+          ))}
+          <blockquote className="lp-quote">
+            Every class is checked against the latest syllabus before each exam series. Last check: October 2026.
+          </blockquote>
+        </div>
+      </section>
+
+      {/* ───────── 03 METHOD ───────── */}
+      <section className="lp-sec">
+        <p className="lp-num">03 — THE METHOD</p>
+        <div className="lp-split">
+          <h2 className="lp-h2 lp-h2-wide">Five steps a topic. Same order, every time.</h2>
+          <p className="lp-body lp-narrow">
+            Every topic on POP runs the same loop, so you always know what&apos;s next, and you never revise something
+            the syllabus doesn&apos;t ask for.
+          </p>
+        </div>
+        <div className="lp-steps">
+          {steps.map((s) => (
+            <div key={s.n} className="lp-step">
+              <div className="lp-step-icon">{s.icon}</div>
+              <div className="lp-step-rule"><i /></div>
+              <div className="lp-step-body">
+                <div className="lp-step-n">{s.n}</div>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+                <small>{s.time}</small>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="lp-steps-foot">
+          <span>Finish all five and the topic gets ticked off your syllabus map. Physics has 25 of them.</span>
+          <Link href="/classes" className="lp-link">See how a topic looks →</Link>
+        </div>
+      </section>
+
+      {/* ───────── 04 NOTES ───────── */}
+      <section className="lp-sec lp-notes">
+        <div>
+          <p className="lp-num">04 — REVISION NOTES</p>
+          <h2 className="lp-h2 lp-h2-tight">Notes written against the syllabus, not around it.</h2>
+          <p className="lp-body">
+            Each note starts from the statement Cambridge prints in the syllabus and stops when you can answer it. No
+            padding, no off-syllabus tangents.
+          </p>
+          <p className="lp-sub-caps">1.6 MOMENTUM &nbsp;·&nbsp; SYLLABUS STATEMENTS</p>
           <ul className="lp-statements">
             {statements.map((s) => (
               <li key={s.id}>
                 <b>{s.id}</b>
                 <span>{s.text}</span>
+                {s.done && <i>✓</i>}
               </li>
             ))}
           </ul>
-          <Link href="/classes/igcse-physics" className="lp-link lp-mt">Open Physics 0625 →</Link>
+          <Link href="/classes" className="lp-link lp-mt">Read the 1.6 note →</Link>
+          <p className="lp-fine">Supplement statements are marked S, so Core students know what to skip.</p>
         </div>
 
-        <div>
-          <p className="lp-example-label">Illustrative example. Not taken from an exam paper.</p>
-          <article className="lp-note" aria-label="Example note">
-            <div className="lp-note-title">
-              <h3>Momentum</h3>
-            </div>
-            <div className="lp-note-grid">
-              <div>
-                <p>
-                  Momentum is the product of an object&apos;s mass and its velocity. Because velocity has a direction,
-                  momentum is a vector: if right is positive, a ball moving left has negative momentum.
-                </p>
-                <div className="lp-formula">
-                  <div>p = m v</div>
-                  <small>p &nbsp; momentum, kg m/s</small>
-                  <small>m &nbsp; mass, kg</small>
-                  <small>v &nbsp; velocity, m/s</small>
-                </div>
-                <h4 className="lp-caps-blue">Examiner tip</h4>
-                <p className="lp-italic">Give the unit as kg m/s or N s. “kg m” is not a unit of momentum.</p>
+        <article className="lp-note">
+          <p className="lp-crumb">PHYSICS 0625 &nbsp;›&nbsp; UNIT 1 &nbsp;·&nbsp; MOTION, FORCES &amp; ENERGY &nbsp;›&nbsp; 1.6</p>
+          <div className="lp-note-title">
+            <h3>1.6 Momentum</h3>
+            <span>8 MIN READ &nbsp;·&nbsp; 3 OF 5 DONE</span>
+          </div>
+          <div className="lp-note-grid">
+            <div>
+              <p>
+                Momentum is the product of an object&apos;s mass and its velocity. Because velocity has a direction,
+                momentum is a vector: if right is positive, a ball moving left has negative momentum.
+              </p>
+              <div className="lp-formula">
+                <div>p = m v</div>
+                <small>p &nbsp; momentum, kg m/s</small>
+                <small>m &nbsp; mass, kg</small>
+                <small>v &nbsp; velocity, m/s</small>
               </div>
-              <div>
-                <h4 className="lp-caps-grey">Worked example</h4>
-                <div className="lp-working">
-                  A 2.0 kg trolley moving at 3.0 m/s hits a 1.0 kg trolley at rest and they stick together.<br />
-                  p before = 2.0 × 3.0 = 6.0 kg m/s<br />
-                  p after = (2.0 + 1.0) × v<br />
-                  6.0 = 3.0 v, &nbsp;so &nbsp;v = 2.0 m/s
-                </div>
-              </div>
+              <p className="lp-caps-blue">EXAMINER&apos;S NOTE</p>
+              <p className="lp-italic">
+                Give the unit as kg m/s or N s. Writing just “kg m” loses the mark every series.
+              </p>
             </div>
-          </article>
-        </div>
+            <div>
+              <p className="lp-caps-grey">WORKED EXAMPLE &nbsp;·&nbsp; 2023 P42 Q3(b)</p>
+              <div className="lp-trolleys">
+                <div className="lp-trolley"><span>2.0 kg</span><i /><i /></div>
+                <div className="lp-arrow">▶</div>
+                <div className="lp-trolley lp-trolley-s"><span>1.0 kg</span><i /><i /></div>
+                <div className="lp-speed lp-speed-a">3.0 m/s</div>
+                <div className="lp-speed lp-speed-b">at rest</div>
+                <div className="lp-track" />
+              </div>
+              <div className="lp-working">
+                p before = 2.0 × 3.0 = 6.0 kg m/s<br />
+                p after = (2.0 + 1.0) × v<br />
+                6.0 = 3.0 v, &nbsp;so &nbsp;v = 2.0 m/s
+              </div>
+              <p className="lp-caps-grey lp-ms">MARK SCHEME</p>
+              <table className="lp-mark">
+                <tbody>
+                  <tr><th>B1</th><td>uses conservation of momentum</td></tr>
+                  <tr><th>C1</th><td>6.0 = 3.0 v</td></tr>
+                  <tr><th>A1</th><td>v = 2.0 m/s</td></tr>
+                </tbody>
+              </table>
+              <Link href="/classes" className="lp-link lp-mt">Try 3 more like this →</Link>
+            </div>
+          </div>
+          <div className="lp-note-foot">
+            <span>← 1.5 Forces</span>
+            <span className="lp-blue">notes &nbsp;·&nbsp; cards &nbsp;·&nbsp; quiz</span>
+            <b>1.7 Energy, work and power →</b>
+          </div>
+        </article>
       </section>
 
-      {/* ───────── CLASSES ───────── */}
-      <section className="lp-sec lp-index" aria-labelledby="lp-classes">
-        <div className="lp-index-l">
-          <h2 id="lp-classes" className="lp-h2">The classes you can open today.</h2>
+      {/* ───────── 05 PAST PAPERS ───────── */}
+      <section className="lp-sec lp-papers">
+        <div>
+          <p className="lp-num">05 — PAST PAPERS</p>
+          <h2 className="lp-h2 lp-h2-tight">Every paper, with the mark scheme beside it.</h2>
           <p className="lp-body">
-            Each class follows its syllabus in order. Pick yours and start at the first topic.
+            Physics 0625 papers from 2019 to 2025 (Papers 2, 4 and 6), split question by question and tagged to the topic
+            each one tests.
           </p>
-          <Link href="/classes" className="lp-link lp-mt">See every class →</Link>
+          <ul className="lp-legend">
+            <li><i className="k-done" />Done, with your score</li>
+            <li><i className="k-started" />Started</li>
+            <li><i className="k-none" />Not started yet</li>
+          </ul>
+          <p className="lp-sub-caps lp-blue">FILTER BY TOPIC</p>
+          <div className="lp-filter"><span>1.6 Momentum: 41 questions in 23 papers</span><i>→</i></div>
+          <div className="lp-filter"><span>4.3 Electric circuits: 66 questions in 31 papers</span><i>→</i></div>
+          <Link href="/classes" className="lp-link lp-mt">Open the paper archive →</Link>
         </div>
 
-        <div className="lp-index-r">
-          {classGroups.map((g) => (
-            <div key={g.label} className="lp-group">
-              <h3 className="lp-list-head">{g.label}</h3>
-              <ul>
-                {g.items.map((c) => (
-                  <li key={c.href}>
-                    <Link href={c.href} className="lp-class">
-                      <span>{c.name}</span>
-                      <em>{c.code}</em>
-                    </Link>
-                  </li>
+        <div className="lp-grid-wrap">
+          <div className="lp-grid">
+            <div />
+            <div className="lp-series"><b>FEB / MAR</b><span>P2</span><span>P4</span><span>P6</span></div>
+            <div className="lp-series"><b>MAY / JUN</b><span>P2</span><span>P4</span><span>P6</span></div>
+            <div className="lp-series"><b>OCT / NOV</b><span>P2</span><span>P4</span><span>P6</span></div>
+            {paperRows.map((row) => (
+              <React.Fragment key={row.year}>
+                <div className="lp-year">{row.year}</div>
+                {[0, 1, 2].map((g) => (
+                  <div key={g} className="lp-cells">
+                    {row.cells.slice(g * 3, g * 3 + 3).map((c, i) => (
+                      <div key={i} className={`lp-cell c-${c.s}`}>{c.v}</div>
+                    ))}
+                  </div>
                 ))}
-              </ul>
+              </React.Fragment>
+            ))}
+          </div>
+          <div className="lp-grid-foot">
+            <span>13 of 63 papers done &nbsp;·&nbsp; average 79% &nbsp;·&nbsp; best: May/Jun 2024 Paper 4, 71/80</span>
+            <Link href="/classes" className="lp-link-sm lp-blue">Continue: Oct/Nov 2024 P6 →</Link>
+          </div>
+          <p className="lp-fine">Tap any paper to open it question by question, mark scheme and examiner report included.</p>
+        </div>
+      </section>
+
+      {/* ───────── 06 QUIZ ───────── */}
+      <section className="lp-quiz">
+        <svg className="lp-arcs" viewBox="0 0 600 600" aria-hidden>
+          <circle cx="0" cy="620" r="520" fill="none" stroke="#fff" strokeOpacity=".18" />
+          <circle cx="0" cy="620" r="470" fill="none" stroke="#fff" strokeOpacity=".12" />
+        </svg>
+        <div className="lp-quiz-in">
+          <div>
+            <p className="lp-num lp-white">06 — LIGHTNING QUIZ &amp; FLASHCARDS</p>
+            <h2 className="lp-h2 lp-white">Ten questions. Sixty seconds. No hiding.</h2>
+            <p className="lp-body lp-white-soft">
+              Quick-fire questions pulled from the topics you&apos;ve just studied. Score 7 out of 10 to unlock that
+              topic&apos;s past-paper questions. Miss one and its flashcard comes back tomorrow.
+            </p>
+            <p className="lp-quiz-cards">
+              412 Physics flashcards, scheduled by spaced repetition so they come back just before you&apos;d forget
+              them.
+            </p>
+            <div className="lp-cta-row">
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-blue">Try a quiz →</Link>
+              <span className="lp-white-soft lp-fine-w">No sign-up needed</span>
+            </div>
+          </div>
+
+          <div className="lp-q">
+            <div className="lp-q-top">
+              <div>
+                <p className="lp-q-meta">PHYSICS 0625 &nbsp;·&nbsp; UNIT 1 &nbsp;·&nbsp; QUESTION 4 OF 10</p>
+                <div className="lp-q-bars">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <i key={i} className={i < 3 ? "on" : i === 3 ? "cur" : ""} />
+                  ))}
+                </div>
+              </div>
+              <div className="lp-timer">
+                <svg viewBox="0 0 76 76">
+                  <circle cx="38" cy="38" r="35" fill="none" stroke="#fff" strokeOpacity=".3" strokeWidth="2" />
+                  <circle
+                    cx="38"
+                    cy="38"
+                    r="35"
+                    fill="none"
+                    stroke="#fff"
+                    strokeWidth="3"
+                    strokeDasharray={`${2 * Math.PI * 35 * 0.7} ${2 * Math.PI * 35}`}
+                    transform="rotate(-90 38 38)"
+                  />
+                </svg>
+                <div><b>42</b><span>SEC</span></div>
+              </div>
+            </div>
+            <h3 className="lp-q-text">A 1200 kg car travels at 15 m/s. What is its momentum?</h3>
+            <ul className="lp-opts">
+              <li><b>A</b><span>80 kg m/s</span></li>
+              <li><b>B</b><span>1 215 kg m/s</span></li>
+              <li className="right"><b>C</b><span>18 000 kg m/s</span><em>✓ correct</em></li>
+              <li><b>D</b><span>18 000 N</span></li>
+            </ul>
+            <p className="lp-q-expl">
+              p = mv = 1200 × 15 = 18 000 kg m/s. D has the right number but the wrong unit, and that&apos;s the trap.
+            </p>
+            <div className="lp-q-foot"><b>Score so far &nbsp;3 / 3</b><b>Next question →</b></div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 07 MOCK ───────── */}
+      <section className="lp-sec lp-mock">
+        <p className="lp-num">07 — MOCK EXAMS</p>
+        <div className="lp-mock-head">
+          <div>
+            <h2 className="lp-h2 lp-h2-wide">Sit it like the real thing. Get graded like it, too.</h2>
+            <p className="lp-body lp-mt2">
+              Timed papers built from real exam questions across a whole unit. When the clock stops, POP marks it against
+              the mark scheme and the latest grade boundaries.
+            </p>
+          </div>
+          <div className="lp-grade">
+            <div>A</div>
+            <p className="lp-caps-blue">PREDICTED GRADE</p>
+            <p className="lp-fine">from your last mock: 74%</p>
+          </div>
+        </div>
+
+        <p className="lp-sub-caps lp-mt2">MAY/JUNE 2025 GRADE BOUNDARIES &nbsp;·&nbsp; PHYSICS 0625 EXTENDED</p>
+        <div className="lp-bounds">
+          <div className="lp-pin lp-pin-last" style={{ left: "61%" }}><span>LAST MOCK &nbsp;61%</span><i>▽</i></div>
+          <div className="lp-pin lp-pin-you" style={{ left: "74%" }}><span>YOU &nbsp;74%</span><i>▼</i></div>
+          <div className="lp-bar"><i style={{ width: "74%", background: BLUE }} /></div>
+          {boundaries.map((b, i) => {
+            const next = boundaries[i + 1]?.from ?? 100;
+            return (
+              <React.Fragment key={b.g}>
+                {i > 0 && <div className="lp-tick" style={{ left: `${b.from}%` }}><small>{b.from}%</small></div>}
+                <div className="lp-gl" style={{ left: `${(b.from + next) / 2}%` }}>{b.g}</div>
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        <div className="lp-mock-low">
+          <div>
+            <p className="lp-sub-caps">WHERE THE MARKS WENT</p>
+            <div className="lp-marks">
+              {marks.map((m) => (
+                <div key={m.n} className={`lp-mrow ${m.hi ? "hi" : ""}`}>
+                  <span>{m.n} &nbsp;{m.name}</span>
+                  <div><i style={{ width: `${m.pct}%` }} /></div>
+                  <b>{m.pct}%</b>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="lp-next">
+            <p className="lp-caps-blue">NEXT UP</p>
+            <h3>Revise 4.3 Electric circuits. You dropped 9 marks there.</h3>
+            <p className="lp-fine">
+              We&apos;ve queued its notes, 18 flashcards and a lightning quiz. Retake the Unit 4 mock in 3 days.
+            </p>
+            <div className="lp-cta-row">
+              <Link href="/sign-up" className="lp-btn lp-btn-black">Start the revision →</Link>
+              <Link href="/sign-up" className="lp-link-sm lp-blue">Download as PDF</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ───────── 08 ARENA ───────── */}
+      <section className="lp-sec lp-arena">
+        <div>
+          <p className="lp-num">08 — POP ARENA</p>
+          <h2 className="lp-h2 lp-h2-tight">Revision, but someone&apos;s keeping score.</h2>
+          <p className="lp-body">
+            Live rounds every week. Everyone gets the same questions at the same time, and the fastest correct answers
+            climb the board.
+          </p>
+          <p className="lp-live"><i />LIVE NOW &nbsp;·&nbsp; PHYSICS 0625 &nbsp;·&nbsp; ROUND 3 OF 5</p>
+          <div className="lp-1284">1,284</div>
+          <p className="lp-body">students in tonight&apos;s round, from 41 countries.</p>
+          <div className="lp-cta-row">
+            <Link href="/arena" className="lp-btn lp-btn-black">Join the round →</Link>
+            <span className="lp-fine lp-bold">Next round in 04:12</span>
+          </div>
+        </div>
+        <div className="lp-board">
+          <div className="lp-board-head">
+            <span>RANK</span><span>STUDENT</span><span>ACCURACY</span><span>STREAK</span><span>POINTS</span>
+          </div>
+          {board.map((r) => (
+            <div key={r.r} className={`lp-board-row ${r.you ? "you" : ""}`}>
+              <b className={`rank ${["01", "02", "03"].includes(r.r) || r.you ? "blue" : ""}`}>{r.r}</b>
+              <div><strong>{r.name}</strong><small>{r.loc}</small></div>
+              <span>{r.acc}</span>
+              <span>{r.streak}</span>
+              <b className="pts">{r.pts}</b>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ───────── TOOLS ───────── */}
-      <section className="lp-sec" aria-labelledby="lp-tools">
-        <div className="lp-split">
-          <h2 id="lp-tools" className="lp-h2 lp-h2-wide">Six ways to revise a topic.</h2>
-          <p className="lp-body lp-narrow">Use them in any order. You can look around without an account.</p>
-        </div>
-        <ol className="lp-steps">
-          {tools.map((t) => (
-            <li key={t.n} className="lp-step">
-              <div className="lp-step-rule"><i /></div>
-              <div className="lp-step-body">
-                <div className="lp-step-n" aria-hidden>{t.n}</div>
-                <h3>{t.title}</h3>
-                <p>{t.body}</p>
-                <Link href={t.href} className="lp-link lp-link-block">{t.cta} →</Link>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      {/* ───────── LABS ───────── */}
-      <section className="lp-sec lp-labs" aria-labelledby="lp-labs">
+      {/* ───────── 09 PRICING ───────── */}
+      <section className="lp-sec lp-pricing">
         <div>
-          <h2 id="lp-labs" className="lp-h2 lp-h2-tight">See it move before you memorise it.</h2>
-          <p className="lp-body">
-            Interactive labs let you change a value and watch what happens, so the equation stops being a thing to learn
-            and starts being a thing you&apos;ve seen.
+          <p className="lp-num">09 — PRICING</p>
+          <h2 className="lp-h2 lp-h2-tight">Free. All of it, for everyone.</h2>
+          <p className="lp-body lp-mt3">
+            Every note, quiz, flashcard, past paper and mock is free, for every class. No card, no ads, no catch.
           </p>
-          <Link href="/interactives" className="lp-link lp-mt">Open all the labs →</Link>
-        </div>
-        <ul className="lp-lab-list">
-          {labs.map((l) => (
-            <li key={l.id}>
-              <Link href={`/interactives/${l.id}`} className="lp-lab">
-                <span className="lp-lab-sub">{l.subject}</span>
-                <h3>{l.name}</h3>
-                <p>{l.body}</p>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* ───────── FAQ ───────── */}
-      <section className="lp-sec lp-faq-sec" aria-labelledby="lp-faq">
-        <div>
-          <h2 id="lp-faq" className="lp-h2 lp-h2-tight">Questions.</h2>
+          <p className="lp-sub-caps lp-blue lp-mt3">QUESTIONS</p>
           <div className="lp-faq">
             {faqs.map((f) => (
               <div key={f.q}>
-                <h3>{f.q}</h3>
+                <h4>{f.q}</h4>
                 <p>{f.a}</p>
               </div>
             ))}
           </div>
         </div>
-        <div>
-          <p className="lp-body lp-mt0">
-            The discussion board is new. Ask the question you lost a mark on, and mark the reply that worked.
-          </p>
-          <Link href="/discussion" className="lp-link lp-mt">Ask the first question →</Link>
-          <p className="lp-body">Want to write or proofread notes for your own class?</p>
-          <Link href="/contribute" className="lp-link lp-mt">Become a contributor →</Link>
+
+        <div className="lp-table">
+          <div className="lp-price-card">
+            <p className="lp-caps-blue">POP STUDYING</p>
+            <div className="lp-price">£0</div>
+            <small>free, forever</small>
+          </div>
+          <p className="lp-sub-caps lp-incl">EVERYTHING INCLUDED</p>
+          <div className="lp-rows">
+            {included.map(([k, v]) => (
+              <div key={k} className="lp-row"><span>{k}</span><b>{v}</b></div>
+            ))}
+          </div>
+          <div className="lp-table-cta">
+            <Link href="/sign-up" className="lp-btn lp-btn-blue">Start free →</Link>
+            <span className="lp-fine">No card, no ads, no catch.</span>
+          </div>
         </div>
       </section>
 
       <div className="lp-last">
       {/* ───────── CTA ───────── */}
-      <section className="lp-final" aria-labelledby="lp-final-h">
+      <section className="lp-final">
         <Circuit id="fc" />
+        <p className="lp-num lp-white">THE MAY/JUNE 2027 SERIES STARTS IN</p>
         <div className="lp-final-in">
-          <div className="lp-big-days lp-final-days" aria-hidden suppressHydrationWarning>{days}</div>
+          <div className="lp-big-days lp-final-days">{days}</div>
           <div>
-            <h2 id="lp-final-h" className="lp-h2 lp-white">
-              <span className="lp-sr" suppressHydrationWarning>{days} </span>days to 27 April 2027. Plenty of time, if you start tonight.
-            </h2>
+            <h2 className="lp-h2 lp-white">days. Plenty of time, if you start tonight.</h2>
             <div className="lp-cta-row">
-              <Link href="/classes" className="lp-btn lp-btn-white lp-blue">Open a class →</Link>
-              <Link href="/sign-up" className="lp-link lp-white">Create an account →</Link>
+              <Link href="/sign-up" className="lp-btn lp-btn-white lp-blue">Start free →</Link>
+              <Link href="/classes" className="lp-link lp-white">Browse classes →</Link>
             </div>
+            <p className="lp-fine lp-white-soft">Notes and quizzes are free forever. No card needed.</p>
           </div>
         </div>
         <div className="lp-timeline">
           <i />
-          <div suppressHydrationWarning><span>TODAY &nbsp;·&nbsp; {today}</span><span>{weeks} WEEKS</span><span>27 APR 2027</span></div>
+          <div><span>TODAY &nbsp;·&nbsp; {today}</span><span>{weeks} WEEKS</span><span>FIRST PAPER &nbsp;·&nbsp; 27 APR 2027</span></div>
         </div>
       </section>
 
@@ -369,39 +744,46 @@ export default function LandingPage() {
         <div className="lp-foot-grid">
           <div>
             <div className="lp-logo lp-logo-lg"><b>POP</b><span>Studying</span></div>
-            <p className="lp-fine">Exam prep for IGCSE, written against the syllabus.</p>
+            <p className="lp-fine">Exam prep for Cambridge IGCSE and A-Level, written against the syllabus.</p>
           </div>
-          <nav aria-label="Classes">
-            <p className="lp-foot-h">Classes</p>
-            <Link href="/classes">All classes</Link>
-            <Link href="/classes/igcse-physics">Physics 0625</Link>
-            <Link href="/classes/igcse-math">Mathematics 0580</Link>
-            <Link href="/classes/edexcel-igcse-math">Edexcel Maths 4MA1</Link>
-          </nav>
-          <nav aria-label="Tools">
-            <p className="lp-foot-h">Tools</p>
+          <div>
+            <h5>CLASSES</h5>
+            <Link href="/classes">IGCSE</Link>
+            <Link href="/classes">A-Level</Link>
+            <Link href="/classes">All subjects</Link>
+            <Link href="/classes">Request a class</Link>
+          </div>
+          <div>
+            <h5>TOOLS</h5>
             <Link href="/learn">Revision notes</Link>
             <Link href="/flashcards">Flashcards</Link>
-            <Link href="/interactives">Interactive labs</Link>
-            <Link href="/dictionary">Dictionary</Link>
-            <Link href="/discussion">Discussion</Link>
+            <Link href="/classes">Lightning quiz</Link>
+            <Link href="/classes">Past papers</Link>
+            <Link href="/classes">Mock exams</Link>
             <Link href="/arena">POP Arena</Link>
-          </nav>
-          <nav aria-label="Get involved">
-            <p className="lp-foot-h">Get involved</p>
-            <Link href="/contribute">Become a contributor</Link>
-            <Link href="/sign-up">Create an account</Link>
-            <Link href="/sign-in">Log in</Link>
-          </nav>
+          </div>
+          <div>
+            <h5>COMPANY</h5>
+            <Link href="/">About</Link>
+            <Link href="/">For schools</Link>
+            <Link href="/">Contact</Link>
+            <Link href="/">Privacy</Link>
+            <Link href="/">Terms</Link>
+          </div>
+          <div>
+            <h5>EXAM-SEASON EMAILS</h5>
+            <p className="lp-fine">One email a week with what to revise next.</p>
+            <form className="lp-email" onSubmit={(e) => e.preventDefault()}>
+              <input type="email" placeholder="your@email.com" aria-label="Email" />
+              <button type="submit" aria-label="Subscribe">→</button>
+            </form>
+          </div>
         </div>
         <div className="lp-legal">
-          <span>© 2026 POP Studying. Not affiliated with Cambridge University Press &amp; Assessment or Pearson Edexcel.</span>
+          <span>© 2026 POP Studying. Not affiliated with Cambridge University Press &amp; Assessment.</span>
+          <b>IGCSE &nbsp;·&nbsp; A-LEVEL &nbsp;·&nbsp; CAMBRIDGE</b>
         </div>
       </footer>
-      </div>
-
-      <div className={`lp-sticky${showSticky ? " show" : ""}`}>
-        <Link href="/classes" className="lp-btn lp-btn-black" tabIndex={showSticky ? 0 : -1}>Open a class →</Link>
       </div>
     </div>
   );
@@ -415,30 +797,33 @@ const css = `
   -webkit-font-smoothing:antialiased;overflow-x:hidden}
 .lp *{box-sizing:border-box}
 :where(.lp) a{color:inherit;text-decoration:none}
-:where(.lp) :where(h1,h2,h3,h4,h5,p,ul,ol){margin:0;padding:0}
-:where(.lp) :where(ul,ol){list-style:none}
+:where(.lp) :where(h1,h2,h3,h4,h5,p,ul){margin:0;padding:0}
+:where(.lp) ul{list-style:none}
 .lp button{font:inherit;cursor:pointer;background:none;border:0;color:inherit}
 .lp .lp-blue{color:var(--blue)}.lp .lp-white{color:#fff}.lp .lp-white-soft{color:rgba(255,255,255,.88)}
+.lp-bold{font-weight:700}
 .lp-mt{display:inline-block;margin-top:calc(22 * var(--u))}.lp-mt2{margin-top:calc(28 * var(--u))}.lp-mt3{margin-top:calc(56 * var(--u))}
 
-.lp-sec{padding:calc(88 * var(--u)) var(--gut);display:grid;align-content:center}
+.lp-sec{min-height:var(--vh);padding:calc(64 * var(--u)) var(--gut);display:grid;align-content:center}
 .lp-num,.lp-eyebrow,.lp-sub-caps,.lp-caps-blue,.lp-caps-grey,.lp-tiny-caps,.lp-coming,.lp-crumb{
   font-size:calc(13 * var(--u));font-weight:700;letter-spacing:.02em;text-transform:uppercase}
 .lp-num,.lp-caps-blue,.lp-eyebrow{color:var(--blue)}
 .lp-caps-grey,.lp-sub-caps,.lp-tiny-caps,.lp-crumb{color:#444}
 .lp-sub-caps.lp-blue{color:var(--blue)}
-.lp-h1{font-size:calc(76 * var(--u));line-height:.98;letter-spacing:-.04em;font-weight:700;max-width:calc(800 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-h1{font-size:calc(58 * var(--u));line-height:1;letter-spacing:-.04em;font-weight:700;max-width:calc(680 * var(--u));margin-top:calc(20 * var(--u))}
 .lp-h2{font-size:calc(40 * var(--u));line-height:1.02;letter-spacing:-.035em;font-weight:700;margin-top:calc(14 * var(--u))}
 .lp-h2-tight{line-height:1;max-width:calc(420 * var(--u))}
 .lp-h2-wide{max-width:calc(640 * var(--u))}
 .lp-body{font-size:calc(17 * var(--u));line-height:1.55;color:#222;max-width:calc(430 * var(--u));margin-top:calc(20 * var(--u))}
 .lp-narrow{max-width:calc(400 * var(--u));margin-top:0}
 .lp-fine{font-size:calc(14 * var(--u));line-height:1.5;color:var(--mute);margin-top:calc(14 * var(--u))}
+.lp-fine-w{font-size:calc(13 * var(--u))}
 .lp-link{font-size:calc(15 * var(--u));font-weight:700;color:var(--blue)}
 .lp-link-sm{font-size:calc(14 * var(--u));font-weight:700}
 .lp-btn{display:inline-flex;align-items:center;justify-content:center;font-size:calc(15 * var(--u));font-weight:700;padding:0 calc(28 * var(--u));height:calc(48 * var(--u));white-space:nowrap}
 .lp-btn-black{background:#111;color:#fff!important}
 .lp-btn-white{background:#fff;color:#111}
+.lp-btn-blue{background:var(--blue);color:#fff!important}
 .lp-btn-sm{height:calc(40 * var(--u));padding:0 calc(20 * var(--u));font-size:calc(14 * var(--u))}
 .lp-cta-row{display:flex;align-items:center;gap:calc(24 * var(--u));margin-top:calc(24 * var(--u));flex-wrap:wrap}
 
@@ -452,46 +837,65 @@ const css = `
 .lp-logo-lg{flex-direction:column;gap:0}.lp-logo-lg b{font-size:calc(24 * var(--u))}.lp-logo-lg span{font-size:calc(15 * var(--u))}
 .lp-nav-r{display:flex;align-items:center;gap:calc(22 * var(--u))}
 .lp-mobile-only{display:none}
-.lp-h1{margin-top:auto}
-.lp-hero-lower{margin-bottom:auto;border-top:3px solid #111;margin-top:calc(32 * var(--u));padding-top:calc(28 * var(--u))}
+.lp-eyebrow{margin-top:auto}
+.lp-hero-lower{margin-bottom:auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:calc(48 * var(--u));border-top:3px solid #111;margin-top:calc(32 * var(--u));padding-top:calc(28 * var(--u))}
 .lp-lede{font-size:calc(19 * var(--u));line-height:1.55;max-width:calc(520 * var(--u))}
+.lp-find{margin-top:calc(24 * var(--u));max-width:calc(520 * var(--u))}
+.lp-find label{font-size:calc(13 * var(--u));font-weight:700;color:#444;letter-spacing:.02em}
+.lp-find-row{display:flex;border-bottom:1px solid #111;align-items:center}
+.lp-find input{flex:1;border:0;outline:0;font:inherit;font-size:calc(18 * var(--u));padding:calc(12 * var(--u)) 0;background:none;min-width:0}
+.lp-find input::placeholder{color:#777}
+.lp-find button{font-size:calc(15 * var(--u));padding:calc(12 * var(--u)) 0 calc(12 * var(--u)) calc(12 * var(--u));font-weight:700;color:var(--blue)}
 .lp-hero-lower .lp-cta-row{margin-top:calc(20 * var(--u))}
+.lp-week h4{font-size:calc(13 * var(--u));font-weight:700;color:var(--blue);padding-bottom:calc(8 * var(--u));border-bottom:1px solid #111;margin-bottom:0}
+.lp-week-item{padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-week-item strong{display:block;font-size:calc(17 * var(--u))}
+.lp-week-item span{display:block;font-size:calc(15 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
 .lp-hero-panel{position:relative;background:var(--blue);color:#fff;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:0 calc(28 * var(--u)) calc(36 * var(--u))}
 .lp-hero-panel .lp-nav-r{position:absolute;top:calc(17 * var(--u));right:calc(30 * var(--u));z-index:2}
 .lp-hero-panel .lp-link-sm{color:#fff}
+.lp-circuit{position:absolute;inset:0;width:100%;height:100%;opacity:.55;pointer-events:none}
 .lp-countdown{position:relative;margin:auto 0 0 0;aspect-ratio:1;max-width:calc(280 * var(--u));width:100%;display:flex;align-items:center;justify-content:center;z-index:1}
 .lp-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.lp-today{position:absolute;bottom:2px;right:calc(30 * var(--u));font-size:calc(12 * var(--u));font-weight:700}
 .lp-big-days{font-size:calc(160 * var(--u));line-height:.8;font-weight:700;letter-spacing:-.07em;color:#fff;position:relative}
-.lp-countdown .lp-big-days{font-size:calc(84 * var(--u));margin-left:calc(-4 * var(--u));white-space:nowrap}
+.lp-countdown .lp-big-days{font-size:calc(120 * var(--u));margin-left:calc(-6 * var(--u));white-space:nowrap}
 .lp-days-label{position:relative;font-size:calc(16 * var(--u));margin-top:calc(20 * var(--u));font-weight:600}
 .lp-panel-foot{position:relative;font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(30 * var(--u));opacity:.9}
 
 /* index */
-.lp-index{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:calc(40 * var(--u)) calc(64 * var(--u));align-items:start}
+.lp-index{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr) minmax(0,1fr);gap:calc(40 * var(--u)) calc(48 * var(--u))}
 .lp-index-l .lp-body{margin-top:calc(28 * var(--u))}
+.lp-eleven{font-size:calc(170 * var(--u));line-height:.72;font-weight:700;letter-spacing:-.08em;color:var(--blue);margin:calc(48 * var(--u)) 0 calc(20 * var(--u)) calc(-6 * var(--u))}
 .lp-list-head{display:flex;justify-content:space-between;font-size:calc(13 * var(--u));font-weight:700;border-bottom:3px solid #111;padding-bottom:calc(8 * var(--u));color:#333}
 .lp-list-head span{color:#444;font-size:calc(12 * var(--u))}
-.lp-class{display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule);font-size:calc(20 * var(--u));font-weight:700;letter-spacing:-.01em}
-.lp-index-r{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:calc(32 * var(--u)) calc(40 * var(--u));align-content:start}
+.lp-class{display:flex;justify-content:space-between;align-items:center;padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-class h3{font-size:calc(20 * var(--u));letter-spacing:-.01em}
 .lp-class small{display:block;font-size:calc(14 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
-.lp-class em{font-style:normal;color:var(--blue);font-size:calc(19 * var(--u));font-weight:600;letter-spacing:-.01em}
-.lp-class:hover span{color:var(--blue)}
+.lp-class em{font-style:normal;color:var(--blue);font-size:calc(26 * var(--u));font-weight:600;letter-spacing:-.02em}
+.lp-class:hover h3{color:var(--blue)}
+.lp-coming{margin-top:calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444;border-bottom:2px solid #111;padding-bottom:calc(8 * var(--u))}
+.lp-vote{display:flex;justify-content:space-between;font-size:calc(15 * var(--u));padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-vote button{color:var(--blue);font-weight:700;font-size:calc(14 * var(--u))}
+.lp-quote{margin:calc(40 * var(--u)) 0 0;border-left:3px solid var(--blue);padding-left:calc(12 * var(--u));font-style:italic;font-size:calc(16 * var(--u));line-height:1.45;max-width:calc(340 * var(--u));color:#222}
 
 /* method */
 .lp-split{display:flex;justify-content:space-between;align-items:flex-start;gap:calc(40 * var(--u));flex-wrap:wrap}
 .lp-split .lp-narrow{margin-top:calc(20 * var(--u))}
-.lp-steps{display:grid;grid-template-columns:repeat(3,1fr);column-gap:calc(32 * var(--u));row-gap:calc(28 * var(--u));margin-top:calc(36 * var(--u))}
+.lp-steps{display:grid;grid-template-columns:repeat(5,1fr);margin-top:calc(28 * var(--u))}
 .lp-step{position:relative}
+.lp-step-icon{height:calc(40 * var(--u));margin-bottom:calc(14 * var(--u));color:#111}
+.lp-step-icon svg{height:calc(38 * var(--u));width:calc(38 * var(--u))}
 .lp-step-rule{height:calc(12 * var(--u));position:relative}
 .lp-step-rule::before{content:"";position:absolute;left:0;right:0;top:calc(4 * var(--u));border-top:3px solid #111}
 .lp-step-rule i{position:absolute;left:0;top:0;width:calc(12 * var(--u));height:calc(12 * var(--u));background:var(--blue)}
 .lp-step-body{padding:calc(16 * var(--u)) calc(16 * var(--u)) 0 0;min-height:0;display:flex;flex-direction:column;border-left:0}
+.lp-step+.lp-step .lp-step-body{border-left:1px solid var(--rule);padding-left:0}
 .lp-step-n{font-size:calc(56 * var(--u));line-height:1;font-weight:700;letter-spacing:-.04em;color:var(--blue)}
 .lp-step h3{font-size:calc(19 * var(--u));margin:calc(14 * var(--u)) 0 calc(8 * var(--u));letter-spacing:-.01em}
 .lp-step p{font-size:calc(15 * var(--u));line-height:1.5;color:#222;flex:1;max-width:calc(210 * var(--u))}
-.lp-link-block{display:inline-flex;align-items:center;min-height:44px;margin-top:calc(12 * var(--u))}
 .lp-step small{font-size:calc(13 * var(--u));font-weight:700;color:#444;margin-top:calc(20 * var(--u))}
+.lp-steps-foot{display:flex;justify-content:space-between;gap:calc(20 * var(--u));flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:calc(34 * var(--u));padding-top:calc(18 * var(--u));font-size:calc(15 * var(--u))}
 
 /* notes */
 .lp-notes{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr);gap:calc(64 * var(--u));align-items:start}
@@ -502,6 +906,7 @@ const css = `
 .lp-statements span{flex:1}
 .lp-statements i{color:var(--blue);font-style:normal;font-size:calc(16 * var(--u))}
 .lp-note{border:1px solid #d8d8d8;border-top:3px solid var(--blue);padding:calc(26 * var(--u)) calc(34 * var(--u)) calc(26 * var(--u));background:#fff}
+.lp-crumb{font-size:calc(12 * var(--u));font-weight:600}
 .lp-note-title{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:calc(10 * var(--u));margin-top:calc(10 * var(--u))}
 .lp-note-title h3{font-size:calc(34 * var(--u));letter-spacing:-.03em}
 .lp-note-title span{font-size:calc(12 * var(--u));font-weight:700;color:var(--blue)}
@@ -511,23 +916,144 @@ const css = `
 .lp-formula div{font-size:calc(48 * var(--u));font-weight:700;letter-spacing:-.03em;color:var(--blue);line-height:1.1}
 .lp-formula small{display:block;font-size:calc(13 * var(--u));color:#555;margin-top:calc(5 * var(--u))}
 .lp-italic{font-style:italic;margin-top:calc(6 * var(--u))}
+.lp-trolleys{position:relative;height:calc(84 * var(--u));margin-top:calc(6 * var(--u))}
+.lp-trolley{position:absolute;left:0;bottom:calc(16 * var(--u));width:calc(68 * var(--u));height:calc(26 * var(--u));border:1.5px solid #111;background:#fff;font-size:calc(12 * var(--u));font-weight:700;display:flex;align-items:center;justify-content:center}
+.lp-trolley i{position:absolute;bottom:calc(-7 * var(--u));width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:#111}
+.lp-trolley i:nth-of-type(1){left:calc(8 * var(--u))}.lp-trolley i:nth-of-type(2){right:calc(8 * var(--u))}
+.lp-trolley-s{left:auto;right:0;width:calc(60 * var(--u))}
+.lp-arrow{position:absolute;left:46%;bottom:calc(25 * var(--u));color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-speed{position:absolute;font-size:calc(12 * var(--u));top:calc(16 * var(--u))}
+.lp-speed-a{left:56%;color:var(--blue);font-weight:700}.lp-speed-b{right:2%}
+.lp-track{position:absolute;left:0;right:0;bottom:calc(6 * var(--u));border-top:1px solid #111}
 .lp-working{font-size:calc(14 * var(--u));line-height:1.6}
+.lp-ms{margin-top:calc(22 * var(--u));padding-bottom:calc(5 * var(--u));border-bottom:2px solid #111}
+.lp-mark{width:100%;border-collapse:collapse;font-size:calc(14 * var(--u))}
+.lp-mark th,.lp-mark td{text-align:left;padding:calc(6 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-mark th{color:var(--blue);width:calc(34 * var(--u))}
+.lp-note-foot{display:flex;justify-content:space-between;border-top:1px solid var(--rule);margin-top:calc(28 * var(--u));padding-top:calc(18 * var(--u));font-size:calc(13 * var(--u));font-weight:700;gap:calc(10 * var(--u));flex-wrap:wrap}
+.lp-note-foot span:first-child{color:#444}
 
 /* papers */
+.lp-papers{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,2fr);gap:calc(56 * var(--u));align-items:start}
+.lp-legend{margin-top:calc(32 * var(--u));display:grid;gap:calc(10 * var(--u));font-size:calc(14 * var(--u))}
+.lp-legend li{display:flex;align-items:center;gap:calc(10 * var(--u))}
+.lp-legend i{width:calc(13 * var(--u));height:calc(13 * var(--u));display:block}
+.k-done{background:var(--blue)}.k-started{border:2px solid #111}.k-none{border:1px solid #ccc}
+.lp-papers .lp-sub-caps{margin-top:calc(28 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;font-size:calc(13 * var(--u))}
+.lp-filter{display:flex;justify-content:space-between;font-size:calc(14 * var(--u));padding:calc(12 * var(--u)) 0;border-bottom:1px solid var(--rule)}
+.lp-filter i{font-style:normal;color:var(--blue)}
+.lp-grid{display:grid;grid-template-columns:calc(64 * var(--u)) repeat(3,1fr);column-gap:calc(14 * var(--u));row-gap:calc(12 * var(--u));align-items:center}
+.lp-series{display:grid;grid-template-columns:repeat(3,1fr);column-gap:calc(6 * var(--u))}
+.lp-series b{grid-column:1/-1;font-size:calc(13 * var(--u));color:#222;border-bottom:1px solid #111;padding:calc(8 * var(--u)) 0 calc(6 * var(--u));margin-bottom:calc(4 * var(--u))}
+.lp-series span{text-align:center;font-size:calc(12 * var(--u));font-weight:700;color:#555}
+.lp-year{font-size:calc(20 * var(--u));font-weight:700;letter-spacing:-.02em}
+.lp-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(6 * var(--u))}
+.lp-cell{height:calc(46 * var(--u));display:flex;align-items:center;justify-content:center;font-size:calc(14 * var(--u));font-weight:700}
+.c-none{border:1px solid #d6d6d6}
+.c-done{background:var(--blue);color:#fff}
+.c-started{border:2px solid #111;background:#fff}
+.c-new{border:1.5px solid var(--blue);color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-grid-foot{display:flex;justify-content:space-between;gap:calc(16 * var(--u));flex-wrap:wrap;font-size:calc(14 * var(--u));border-top:1px solid #111;margin-top:calc(18 * var(--u));padding-top:calc(12 * var(--u))}
+.lp-grid-wrap .lp-fine{margin-top:calc(22 * var(--u))}
 
 /* quiz */
+.lp-quiz{position:relative;background:var(--blue);color:#fff;min-height:var(--vh);padding:calc(64 * var(--u)) var(--gut);overflow:hidden;display:grid;align-content:center}
+.lp-arcs{position:absolute;left:0;bottom:0;width:calc(560 * var(--u));height:calc(560 * var(--u));pointer-events:none}
+.lp-quiz-in{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(48 * var(--u))}
+.lp-quiz .lp-num{color:#fff}
+.lp-quiz .lp-h2{font-size:calc(46 * var(--u));line-height:1;max-width:calc(540 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-quiz .lp-body{max-width:calc(440 * var(--u));font-size:calc(17 * var(--u));margin-top:calc(20 * var(--u))}
+.lp-quiz-cards{border-top:1px solid rgba(255,255,255,.4);margin-top:calc(40 * var(--u));padding-top:calc(14 * var(--u));max-width:calc(440 * var(--u));font-size:calc(15 * var(--u));font-weight:700;line-height:1.45}
+.lp-q-top{display:flex;justify-content:space-between;align-items:flex-start;gap:calc(20 * var(--u))}
+.lp-q-meta{font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(8 * var(--u))}
+.lp-q-bars{display:flex;gap:calc(6 * var(--u));margin-top:calc(8 * var(--u));max-width:calc(340 * var(--u))}
+.lp-q-bars i{flex:1;height:3px;background:rgba(255,255,255,.28)}
+.lp-q-bars i.on{background:#fff}.lp-q-bars i.cur{background:rgba(255,255,255,.6)}
+.lp-timer{position:relative;width:calc(84 * var(--u));height:calc(84 * var(--u));flex:none}
+.lp-timer svg{position:absolute;inset:0}
+.lp-timer div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lp-timer b{font-size:calc(30 * var(--u));line-height:1;letter-spacing:-.03em}.lp-timer span{font-size:calc(12 * var(--u));font-weight:700}
+.lp-q-text{font-size:calc(28 * var(--u));line-height:1.2;letter-spacing:-.02em;margin-top:calc(28 * var(--u));max-width:calc(540 * var(--u))}
+.lp-opts{margin-top:calc(32 * var(--u));border-top:1px solid rgba(255,255,255,.25)}
+.lp-opts li{display:flex;align-items:center;gap:calc(20 * var(--u));height:calc(56 * var(--u));padding:0 calc(15 * var(--u));font-size:calc(19 * var(--u));font-weight:600;border-bottom:1px solid rgba(255,255,255,.25)}
+.lp-opts b{width:calc(12 * var(--u));font-size:calc(16 * var(--u));opacity:.85}.lp-opts span{flex:1}
+.lp-opts li.right{background:#fff;color:var(--blue)}
+.lp-opts em{font-style:normal;font-size:calc(14 * var(--u));font-weight:700}
+.lp-q-expl{font-size:calc(15 * var(--u));line-height:1.45;margin-top:calc(18 * var(--u));max-width:calc(520 * var(--u))}
+.lp-q-foot{display:flex;justify-content:space-between;font-size:calc(15 * var(--u));margin-top:calc(32 * var(--u))}
 
 /* mock */
+.lp-mock-head{display:flex;justify-content:space-between;gap:calc(30 * var(--u));align-items:flex-start;flex-wrap:wrap}
+.lp-mock-head .lp-body{max-width:calc(520 * var(--u));margin-top:calc(28 * var(--u))}
+.lp-grade{text-align:right}
+.lp-grade div{font-size:calc(150 * var(--u));line-height:.78;font-weight:700;color:var(--blue);letter-spacing:-.04em;margin-top:calc(6 * var(--u))}
+.lp-grade .lp-fine{margin-top:calc(6 * var(--u))}.lp-grade p.lp-caps-blue{margin-top:calc(10 * var(--u))}
+.lp-mock .lp-sub-caps{font-size:calc(13 * var(--u));margin-top:calc(32 * var(--u))}
+.lp-bounds{position:relative;height:calc(110 * var(--u));margin-top:calc(6 * var(--u))}
+.lp-bar{position:absolute;left:0;right:0;top:calc(34 * var(--u));height:calc(24 * var(--u));background:var(--beige)}
+.lp-bar i{display:block;height:100%}
+.lp-tick{position:absolute;top:calc(28 * var(--u));height:calc(32 * var(--u));border-left:1px solid #111}
+.lp-tick small{position:absolute;top:calc(36 * var(--u));left:calc(-12 * var(--u));font-size:calc(12 * var(--u));color:#555}
+.lp-gl{position:absolute;top:calc(60 * var(--u));transform:translateX(-50%);font-size:calc(14 * var(--u));font-weight:700}
+.lp-pin{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:calc(13 * var(--u));font-weight:700;line-height:1.3}
+.lp-pin i{display:block;font-style:normal;font-size:calc(13 * var(--u));margin-top:2px}
+.lp-pin-last{color:#555}.lp-pin-you{color:var(--blue);top:calc(6 * var(--u))}
+.lp-mock-low{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(72 * var(--u));margin-top:calc(20 * var(--u));align-items:start}
+.lp-mock-low>div:first-child .lp-sub-caps{margin-top:0;padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-marks{display:grid;gap:calc(14 * var(--u));margin-top:calc(14 * var(--u))}
+.lp-mrow{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr calc(44 * var(--u));gap:calc(14 * var(--u));align-items:center;font-size:calc(15 * var(--u))}
+.lp-mrow div{height:calc(7 * var(--u));background:var(--beige)}
+.lp-mrow div i{display:block;height:100%;background:#111}
+.lp-mrow b{text-align:right;font-size:calc(15 * var(--u))}
+.lp-mrow.hi{color:var(--blue);font-weight:700}.lp-mrow.hi div i{background:var(--blue)}
+.lp-next{border-left:3px solid var(--blue);padding-left:calc(12 * var(--u))}
+.lp-next h3{font-size:calc(26 * var(--u));line-height:1.15;letter-spacing:-.02em;margin-top:calc(8 * var(--u));max-width:calc(480 * var(--u))}
+.lp-next .lp-fine{max-width:calc(480 * var(--u));margin-top:calc(12 * var(--u));font-size:calc(15 * var(--u))}
+.lp-next .lp-cta-row{margin-top:calc(26 * var(--u))}
 
 /* arena */
+.lp-arena{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:calc(64 * var(--u));align-items:start}
+.lp-arena .lp-body{max-width:calc(440 * var(--u));margin-top:calc(16 * var(--u))}
+.lp-live{display:flex;align-items:center;gap:calc(8 * var(--u));font-size:calc(13 * var(--u));font-weight:700;margin-top:calc(48 * var(--u))}
+.lp-live i{width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:var(--blue);display:block}
+.lp-1284{font-size:calc(120 * var(--u));line-height:.85;font-weight:700;letter-spacing:-.035em;color:var(--blue);margin:calc(20 * var(--u)) 0 calc(14 * var(--u)) calc(-5 * var(--u));white-space:nowrap}
+.lp-arena .lp-fine{margin:0}
+.lp-board-head,.lp-board-row{display:grid;grid-template-columns:calc(56 * var(--u)) minmax(0,1fr) calc(96 * var(--u)) calc(90 * var(--u)) calc(100 * var(--u));align-items:center;gap:calc(6 * var(--u))}
+.lp-board-head{font-size:calc(13 * var(--u));font-weight:700;color:#444;padding-bottom:calc(6 * var(--u));border-bottom:3px solid #111}
+.lp-board-head span:last-child,.lp-board-row .pts{text-align:right}
+.lp-board-row{padding:calc(11 * var(--u)) 0;border-bottom:1px solid var(--rule);font-size:calc(15 * var(--u))}
+.lp-board-row .rank{font-size:calc(24 * var(--u));letter-spacing:-.03em;font-weight:600;padding-left:2px}
+.lp-board-row .blue{color:var(--blue)}
+.lp-board-row strong{display:block;font-size:calc(17 * var(--u))}
+.lp-board-row small{display:block;font-size:calc(13 * var(--u));color:#555;margin-top:2px}
+.lp-board-row .pts{font-size:calc(20 * var(--u));letter-spacing:-.02em}
+.lp-board-row.you{background:var(--tint)}
+.lp-board-row.you strong,.lp-board-row.you small,.lp-board-row.you .pts,.lp-board-row.you span{color:var(--blue)}
+.lp-board-row.you .pts{font-size:calc(18 * var(--u));padding-right:calc(8 * var(--u))}.lp-board-row.you strong{font-weight:700}
 
 /* pricing */
+.lp-pricing{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:calc(64 * var(--u));align-items:start;position:relative}
+.lp-pricing .lp-h2{max-width:calc(420 * var(--u));line-height:1.02}
+.lp-pricing .lp-body{max-width:calc(420 * var(--u));font-size:calc(17 * var(--u))}
+.lp-pricing .lp-sub-caps{font-size:calc(13 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;margin-top:calc(44 * var(--u))}
 .lp-faq>div{padding:calc(14 * var(--u)) 0 calc(12 * var(--u));border-bottom:1px solid var(--rule)}
 .lp-faq h4{font-size:calc(16 * var(--u))}.lp-faq p{font-size:calc(15 * var(--u));line-height:1.4;color:#444;margin-top:calc(6 * var(--u));max-width:calc(420 * var(--u))}
+.lp-table{position:relative;padding-right:0;display:grid;grid-template-columns:1fr calc(180 * var(--u));grid-template-rows:auto auto auto}
+.lp-price-card{grid-column:2;grid-row:1/4;background:var(--tint);border-top:3px solid var(--blue);padding:calc(16 * var(--u)) calc(14 * var(--u));margin-top:-1px;z-index:0}
+.lp-price{font-size:calc(48 * var(--u));font-weight:700;letter-spacing:-.05em;color:var(--blue);line-height:1.05;margin-top:calc(10 * var(--u))}
+.lp-price-card small{font-size:calc(12 * var(--u));color:#444}
+.lp-incl{grid-column:1;grid-row:1;margin:calc(104 * var(--u)) 0 0!important;border:0!important;font-size:calc(13 * var(--u));align-self:end}
+.lp-rows{grid-column:1/-1;grid-row:2;border-top:3px solid #111;margin-top:calc(6 * var(--u));z-index:1}
+.lp-row{display:grid;grid-template-columns:1fr calc(180 * var(--u));align-items:center;height:calc(46 * var(--u));border-bottom:1px solid var(--rule);font-size:calc(16 * var(--u))}
+.lp-row b{padding-left:calc(14 * var(--u));color:var(--blue);font-size:calc(15 * var(--u))}
+.lp-row b:only-child{font-size:calc(15 * var(--u))}
+.lp-table-cta{grid-column:1;grid-row:3;display:flex;align-items:center;gap:calc(18 * var(--u));margin-top:calc(18 * var(--u));flex-wrap:wrap}
+.lp-table-cta .lp-fine{margin:0;font-size:calc(14 * var(--u))}
 
 /* final cta */
 .lp-last{min-height:var(--vh);display:flex;flex-direction:column}
 .lp-final{flex:1;position:relative;background:var(--blue);color:#fff;padding:calc(56 * var(--u)) var(--gut) calc(28 * var(--u));overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.lp-final .lp-num{color:#fff;position:relative}
 .lp-final-in{position:relative;display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1fr);gap:calc(20 * var(--u));align-items:center;margin-top:calc(30 * var(--u))}
 .lp-final-days{font-size:calc(190 * var(--u))}
 .lp-final .lp-h2{font-size:calc(40 * var(--u));line-height:1.02;max-width:calc(520 * var(--u));margin-top:0}
@@ -539,11 +1065,14 @@ const css = `
 
 /* footer */
 .lp-footer{padding:calc(40 * var(--u)) var(--gut) 0}
-.lp-foot-grid{display:grid;grid-template-columns:1.9fr 1fr 1fr 1fr;gap:calc(20 * var(--u))}
-.lp-foot-h{font-size:calc(13 * var(--u));color:var(--blue);margin-bottom:calc(10 * var(--u))}
-.lp-foot-grid a{display:flex;align-items:center;min-height:44px;font-size:calc(15 * var(--u))}
+.lp-foot-grid{display:grid;grid-template-columns:1.9fr 1fr 1fr 1fr 1.4fr;gap:calc(20 * var(--u))}
+.lp-foot-grid h5{font-size:calc(13 * var(--u));color:var(--blue);margin-bottom:calc(10 * var(--u))}
+.lp-foot-grid a{display:block;font-size:calc(15 * var(--u));margin-bottom:calc(9 * var(--u))}
 .lp-foot-grid .lp-fine{max-width:calc(280 * var(--u));margin-top:calc(14 * var(--u))}
 .lp-foot-grid>div:last-child .lp-fine{margin:0 0 calc(20 * var(--u))}
+.lp-email{display:flex;border-bottom:1px solid #111;max-width:calc(260 * var(--u))}
+.lp-email input{flex:1;border:0;outline:0;font:inherit;font-size:calc(15 * var(--u));padding:calc(10 * var(--u)) 0;min-width:0;background:none}
+.lp-email button{color:var(--blue);font-size:calc(17 * var(--u));padding:0 calc(4 * var(--u)) 0 calc(12 * var(--u))}
 .lp-legal{display:flex;justify-content:space-between;gap:calc(12 * var(--u));flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:calc(26 * var(--u));padding:calc(14 * var(--u)) 0 calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444}
 .lp-legal b{font-size:calc(13 * var(--u))}
 
@@ -552,71 +1081,44 @@ const css = `
 .lp-rv>*:nth-child(2){transition-delay:.12s}
 .lp-rv>*:nth-child(3){transition-delay:.24s}
 .lp-anim .lp-rv:not(.in)>*{opacity:0;transform:translateY(36px)}
+@media (min-width:1000px){
+  html.lp-snap{scroll-snap-type:y proximity;scroll-behavior:smooth}
+  .lp>section,.lp-last{scroll-snap-align:start}
+}
+
 /* responsive */
 @media (max-width:1000px){
   .lp-sec,.lp-quiz,.lp-hero,.lp-last{min-height:0}
   .lp-nav{margin-bottom:calc(40 * var(--u))}.lp-eyebrow{margin-top:0}.lp-hero-lower{margin-bottom:0}
   .lp-final-days{font-size:calc(130 * var(--u))}.lp-big-days{font-size:calc(130 * var(--u))}.lp-countdown .lp-big-days{font-size:calc(130 * var(--u))}
   .lp-hero{grid-template-columns:1fr;margin:0}
-  .lp-hero{display:flex;flex-direction:column}
-  .lp-hero-main{display:contents}
-  .lp-nav{order:0;margin:0 var(--pad) 0!important}
-  .lp-hero-panel{order:3;min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:calc(12 * var(--u)) calc(20 * var(--u));padding:calc(18 * var(--u)) var(--pad)}
-  .lp-h1{order:1;margin:calc(28 * var(--u)) var(--pad) 0}
-  .lp-hero-lower{order:2;margin:calc(20 * var(--u)) var(--pad) calc(28 * var(--u))}
-  .lp-countdown{margin:0;width:auto;max-width:none;aspect-ratio:auto}
-  .lp-ring{display:none}
-  .lp-countdown .lp-big-days{font-size:calc(56 * var(--u));margin-left:0}
-  .lp-days-label{margin-top:0}
-  .lp-panel-foot{display:none}
+  .lp-hero-main{padding:0 var(--pad) calc(32 * var(--u))}
+  .lp-hero-main{max-width:none}
+  .lp-hero-panel{min-height:calc(480 * var(--u))}
   .lp-desktop-only{display:none}.lp-mobile-only{display:flex}
-  .lp-index,.lp-notes,.lp-labs,.lp-pricing,.lp-quiz-in,.lp-final-in{grid-template-columns:1fr}
+  .lp-index,.lp-notes,.lp-papers,.lp-arena,.lp-pricing,.lp-quiz-in,.lp-mock-low,.lp-final-in{grid-template-columns:1fr}
   .lp-h2-tight{max-width:none}
   .lp-steps{grid-template-columns:repeat(2,1fr);row-gap:calc(30 * var(--u))}
-  .lp-index-r{grid-template-columns:1fr}
   .lp-foot-grid{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:640px){
   .lp{--pad:calc(20 * var(--u))}
   .lp-h1{font-size:calc(42 * var(--u))}.lp-h2,.lp-quiz .lp-h2,.lp-final .lp-h2{font-size:calc(32 * var(--u))}
+  .lp-eleven{font-size:calc(120 * var(--u))}.lp-1284{font-size:calc(84 * var(--u))}.lp-final-days{font-size:calc(120 * var(--u))}.lp-grade div{font-size:calc(110 * var(--u))}
   .lp-nav{gap:calc(12 * var(--u))}.lp-nav-r{gap:calc(12 * var(--u))}
   .lp-sec,.lp-quiz{padding-top:calc(48 * var(--u));padding-bottom:calc(48 * var(--u))}
   .lp-nav{margin-bottom:calc(40 * var(--u))}
   .lp-hero-lower{grid-template-columns:1fr}
   .lp-note{padding:calc(18 * var(--u))}
   .lp-note-grid{grid-template-columns:1fr}
+  .lp-grid{grid-template-columns:calc(38 * var(--u)) repeat(3,minmax(0,1fr));column-gap:calc(6 * var(--u))}
+  .lp-cell{height:calc(34 * var(--u));font-size:calc(12 * var(--u))}
+  .lp-year{font-size:calc(15 * var(--u))}
+  .lp-board-head,.lp-board-row{grid-template-columns:calc(36 * var(--u)) minmax(0,1fr) calc(64 * var(--u))}
   .lp-board-head span:nth-child(3),.lp-board-head span:nth-child(4),
-  .lp-steps{grid-template-columns:1fr;row-gap:calc(8 * var(--u))}
-  .lp-step-n{display:none}
-  .lp-step h3{margin-top:calc(10 * var(--u))}
-  .lp{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
-  .lp-link,.lp-link-sm{display:inline-flex;align-items:center;min-height:44px}
+  .lp-board-row>span{display:none}
+  .lp-grade div{font-size:calc(130 * var(--u))}
+  .lp-table,.lp-row{grid-template-columns:1fr calc(112 * var(--u))}
+  .lp-steps{grid-template-columns:1fr}
 }
-
-/* added: shared bits for the reshaped page */
-.lp-mt0{margin-top:0}
-.lp-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.lp a:focus-visible,.lp button:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
-.lp-hero-panel a:focus-visible,.lp-quiz a:focus-visible,.lp-final a:focus-visible{outline-color:#fff}
-.lp-index-r .lp-list-head{font-size:calc(13 * var(--u))}
-.lp-sticky{display:none;transform:translateY(110%);transition:transform .25s ease;position:fixed;left:0;right:0;bottom:0;z-index:20;padding:calc(10 * var(--u)) var(--pad) calc(10 * var(--u) + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--rule)}
-.lp-sticky .lp-btn{width:100%;height:48px}
-.lp-labs{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:calc(64 * var(--u));align-items:start}
-.lp-lab-list{border-top:3px solid #111}
-.lp-lab{display:block;padding:calc(18 * var(--u)) 0;border-bottom:1px solid var(--rule);min-height:44px}
-.lp-lab-sub{font-size:calc(13 * var(--u));font-weight:700;color:var(--blue)}
-.lp-lab h3{font-size:calc(22 * var(--u));letter-spacing:-.02em;margin-top:calc(4 * var(--u))}
-.lp-lab p{font-size:calc(15 * var(--u));line-height:1.5;color:#333;margin-top:calc(6 * var(--u));max-width:calc(520 * var(--u))}
-.lp-lab:hover h3{color:var(--blue)}
-.lp-faq h3{font-size:calc(16 * var(--u))}
-
-@media (max-width:1000px){.lp-labs{grid-template-columns:1fr}}
-@media (max-width:640px){.lp-sticky{display:block}.lp-sticky.show{transform:none}}
-
-/* tablet: scale type up from the 1px floor */
-@media (min-width:641px) and (max-width:1000px){.lp{--u:1.25px}}
-.lp-skip{position:absolute;left:-9999px;top:0;z-index:50;background:#fff;color:#111;padding:12px 16px;font-weight:700}
-.lp-skip:focus{left:8px;top:8px;outline:3px solid var(--blue)}
-.lp-example-label{font-size:calc(14 * var(--u));font-weight:700;color:#111;margin-bottom:calc(10 * var(--u))}
-.lp-foot-h{font-weight:700}
 `;

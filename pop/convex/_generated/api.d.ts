@@ -8,7 +8,13 @@
  * @module
  */
 
+import type * as applications from "../applications.js";
+import type * as crons from "../crons.js";
 import type * as discussions from "../discussions.js";
+import type * as emailTemplates from "../emailTemplates.js";
+import type * as emails from "../emails.js";
+import type * as exams from "../exams.js";
+import type * as plans from "../plans.js";
 import type * as users from "../users.js";
 
 import type {
@@ -18,7 +24,13 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  applications: typeof applications;
+  crons: typeof crons;
   discussions: typeof discussions;
+  emailTemplates: typeof emailTemplates;
+  emails: typeof emails;
+  exams: typeof exams;
+  plans: typeof plans;
   users: typeof users;
 }>;
 

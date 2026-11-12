@@ -12,7 +12,51 @@ export default defineSchema({
     instagram: v.optional(v.string()),
     wantsToContribute: v.optional(v.boolean()),
     onboardingCompleted: v.optional(v.boolean()),
+    /** Email when someone replies to your question. On unless the student turns it off. */
+    emailReplies: v.optional(v.boolean()),
+    /** Exam reminder emails. Off unless the student turns it on. */
+    emailReminders: v.optional(v.boolean()),
+    welcomeSentAt: v.optional(v.number()),
   }).index("by_clerkId", ["clerkId"]),
+
+  /** One plan per student. Topic ticks live in the study page's own per-browser store, not here. */
+  studyPlans: defineTable({
+    clerkId: v.string(),
+    classId: v.string(),
+    tier: v.optional(v.string()),
+    targetGrade: v.string(),
+    /** Free text, e.g. "Imperial, Physics". Shown only to the student. */
+    university: v.optional(v.string()),
+    /** YYYY-MM-DD, entered by the student */
+    examDate: v.string(),
+  }).index("by_clerkId", ["clerkId"]),
+
+  contributorApplications: defineTable({
+    clerkId: v.string(),
+    name: v.string(),
+    email: v.optional(v.string()),
+    yearGroup: v.string(),
+    instagram: v.optional(v.string()),
+    subjects: v.array(v.string()),
+    types: v.array(v.string()),
+    why: v.string(),
+    sample: v.optional(v.string()),
+  }).index("by_clerkId", ["clerkId"]),
+
+  /** Added by a maintainer with `npx convex run exams:add`. Nothing is shown or emailed that isn't in here. */
+  examSessions: defineTable({
+    label: v.string(),
+    /** YYYY-MM-DD, Bangkok date */
+    date: v.string(),
+    /** Matches the subject names students pick at onboarding */
+    subjects: v.array(v.string()),
+  }).index("by_date", ["date"]),
+
+  reminderSends: defineTable({
+    userId: v.id("users"),
+    examId: v.id("examSessions"),
+    daysBefore: v.number(),
+  }).index("by_user_exam", ["userId", "examId", "daysBefore"]),
   
   subjects: defineTable({
     slug: v.string(),

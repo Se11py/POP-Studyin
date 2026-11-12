@@ -160,3 +160,6 @@ export function getOverview(classId: string): SubjectOverview | null {
       })),
   };
 }
+
+/** Every class that has a syllabus map, for pickers. */
+export const overviewClassIds = [...new Set([...Object.keys(curated), ...Object.keys(classesData)])].filter((id) => getOverview(id)?.units.length);

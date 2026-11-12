@@ -1,6 +1,8 @@
 import { internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc } from "./_generated/dataModel";
+import { internal } from "./_generated/api";
+import { reply as replyEmail } from "./emailTemplates";
 
 /** Keep in step with the subject list on /discussion. */
 const SUBJECT_IDS = ["physics", "chemistry", "biology", "maths", "alevel-physics", "alevel-maths", "tips", "examday"];
@@ -68,7 +70,16 @@ export const createPost = mutation({
       authorName: identity.name?.trim() || "Student",
       body: trimmed,
     });
-    if (question) await ctx.db.patch(question._id, { replyCount: (question.replyCount ?? 0) + 1 });
+    if (question) {
+      await ctx.db.patch(question._id, { replyCount: (question.replyCount ?? 0) + 1 });
+      if (question.authorClerkId !== identity.subject) {
+        const asker = await ctx.db.query("users").withIndex("by_clerkId", (q) => q.eq("clerkId", question.authorClerkId)).unique();
+        if (asker?.email && asker.emailReplies !== false) {
+          const mail = replyEmail(identity.name?.trim() || "A student", question.reference, trimmed, question._id);
+          await ctx.scheduler.runAfter(0, internal.emails.send, { to: asker.email, ...mail });
+        }
+      }
+    }
     return postId;
   },
 });

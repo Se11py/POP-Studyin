@@ -2,6 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import PageShell from "@/components/PageShell";
 import { subjects as allSubjects, yearGroups } from "@/lib/onboardingOptions";
 import posthog from "posthog-js";
@@ -60,17 +62,27 @@ function ApplyForm() {
   const [sample, setSample] = useState("");
   const [error, setError] = useState("");
   const [sent, setSent] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const apply = useMutation(api.applications.submit);
 
   const toggle = (list: string[], set: (v: string[]) => void, item: string) =>
     set(list.includes(item) ? list.filter((i) => i !== item) : [...list, item]);
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (!yearGroup || picked.length === 0 || types.length === 0 || why.trim().length < 20) {
       setError("Please choose a year, at least one subject and one contribution type, and tell us a bit more about why.");
       return;
     }
     setError("");
+    setBusy(true);
+    try {
+      await apply({ yearGroup, instagram: instagram.trim() || undefined, subjects: picked, types, why: why.trim(), sample: sample.trim() || undefined });
+    } catch (err) {
+      setBusy(false);
+      setError(err instanceof Error && err.message.includes("already applied") ? "You've already applied. We'll be in touch." : "We couldn't send your application. Please try again.");
+      return;
+    }
     if (posthogConfigured) {
       posthog.capture("contribution_application_submitted", {
         subject_count: picked.length,
@@ -134,7 +146,7 @@ function ApplyForm() {
           <input value={sample} onChange={(e) => setSample(e.target.value)} placeholder="https://" className={inputCls} />
         </label>
         {error && <p role="alert" className="border-l-4 border-[#1c3bff] pl-3 text-sm font-bold">{error}</p>}
-        <button type="submit" className="h-11 bg-[#111] px-8 text-sm font-bold text-white hover:bg-[#1c3bff]">
+        <button type="submit" disabled={busy} className="h-11 bg-[#111] px-8 text-sm font-bold text-white hover:bg-[#1c3bff]">
           Send application →
         </button>
       </div>

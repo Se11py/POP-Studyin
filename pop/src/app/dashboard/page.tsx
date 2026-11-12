@@ -4,6 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import PageShell from "@/components/PageShell";
+import PlanCard from "@/components/PlanCard";
 
 type Tab = "overview" | "courses" | "flashcards" | "arena";
 
@@ -174,6 +175,7 @@ export default function DashboardPage() {
         </div>
 
         <aside>
+          <div className="mb-8"><PlanCard /></div>
           <Label>Timetable &amp; clinics</Label>
           {timetable.map((e) => (
             <div key={e.title} className="flex items-start gap-4 border-b border-[#d9d4c4] py-[clamp(10px,1.6vh,18px)]">
