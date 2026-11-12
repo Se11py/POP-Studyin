@@ -1,8 +1,11 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import Circuit from "@/components/Circuit";
+import CatFace, { PawTrail } from "@/components/CatFace";
+import { useCatMode } from "@/hooks/useCatMode";
 
 const BLUE = "#2339f5";
 const FIRST_PAPER = new Date(2027, 3, 27); // 27 Apr 2027
@@ -54,7 +57,7 @@ const steps = [
   {
     n: "02",
     title: "Drill the cards",
-    body: "Flashcards for every definition, equation and unit, brought back right before you'd forget them.",
+    body: "Definitions, equations and units. Cards you get wrong come back sooner.",
     time: "≈ 10 MIN",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -77,7 +80,7 @@ const steps = [
   {
     n: "04",
     title: "Past-paper questions",
-    body: "Every real exam question on the topic, sorted by year, with the mark scheme beside it.",
+    body: "Questions on the topic from past papers, with mark schemes.",
     time: "≈ 25 MIN",
     icon: (
       <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -173,10 +176,11 @@ const included: [string, string][] = [
 const faqs = [
   { q: "Which exam boards?", a: "Cambridge International (CAIE) IGCSE and A-Level. Edexcel is in the works." },
   { q: "Can my school use it?", a: "Yes. Whole classes can use it free, with a teacher dashboard." },
-  { q: "Who pays for it?", a: "Nobody. Senior students write and proofread the notes as volunteers." },
+  { q: "Who pays for it?", a: "Nothing to pay. The notes are written by volunteer students." },
 ];
 
 export default function LandingPage() {
+  const cat = useCatMode();
   const [days, setDays] = useState(182);
   const [today, setToday] = useState("27 OCT");
   const [weeks, setWeeks] = useState(26);
@@ -228,8 +232,7 @@ export default function LandingPage() {
         <div className="lp-hero-main">
           <header className="lp-nav">
             <Link href="/" className="lp-logo">
-              <b>POP</b>
-              <span>Studying</span>
+              <Logo variant="black" priority />
             </Link>
             <div className="lp-nav-r lp-mobile-only">
               <Link href="/sign-in" className="lp-link-sm">Log in</Link>
@@ -237,16 +240,15 @@ export default function LandingPage() {
             </div>
           </header>
 
-          <p className="lp-eyebrow">CAMBRIDGE IGCSE &amp; A-LEVEL &nbsp;·&nbsp; REVISION THAT FOLLOWS THE SYLLABUS</p>
+          <p className="lp-eyebrow">Free revision for Cambridge IGCSE and A-Level</p>
           <h1 className="lp-h1">
-            Revise exactly what the examiner asks.
+            Free revision notes, quizzes and past papers for Cambridge IGCSE and A-Level.
           </h1>
 
           <div className="lp-hero-lower">
             <div>
               <p className="lp-lede">
-                Notes, flashcards, lightning quizzes and real past papers for every Cambridge IGCSE and A-Level class,
-                each written against the exact syllabus point it&apos;s examined on.
+                Each note follows the syllabus point by point, so you can see what you&apos;ve covered and what&apos;s left.
               </p>
               <form
                 className="lp-find"
@@ -255,7 +257,7 @@ export default function LandingPage() {
                   window.location.href = `/classes${query ? `?q=${encodeURIComponent(query)}` : ""}`;
                 }}
               >
-                <label>FIND YOUR CLASS</label>
+                <label>{cat ? "SNIFF OUT YOUR CLASS" : "FIND YOUR CLASS"}</label>
                 <div className="lp-find-row">
                   <input
                     value={query}
@@ -284,11 +286,24 @@ export default function LandingPage() {
         </div>
 
         <div className="lp-hero-panel">
-          <Circuit id="hc" />
+          {cat ? (
+            <svg className="lp-slashes" viewBox="0 0 90 120" aria-hidden>
+              {[0, 16, 32].map((x) => <line key={x} x1={x + 20} y1="2" x2={x} y2="118" stroke="#d9692e" strokeWidth="2" />)}
+            </svg>
+          ) : (
+            <Circuit id="hc" />
+          )}
           <div className="lp-nav-r lp-desktop-only">
             <Link href="/sign-in" className="lp-link-sm lp-white">Log in</Link>
             <Link href="/sign-up" className="lp-btn lp-btn-white lp-btn-sm">Start free →</Link>
           </div>
+          {cat ? (
+            <div className="lp-cat-cd">
+              <CatFace className="lp-cat-face" />
+              <div className="lp-big-days">{days}</div>
+              <PawTrail className="lp-paws" />
+            </div>
+          ) : (
           <div className="lp-countdown">
             <svg viewBox="0 0 240 240" className="lp-ring" aria-hidden>
               <circle cx="120" cy="120" r="112" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="1" />
@@ -306,7 +321,8 @@ export default function LandingPage() {
             <span className="lp-today">TODAY</span>
             <div className="lp-big-days">{days}</div>
           </div>
-          <p className="lp-days-label">days until the May/June 2027 papers</p>
+          )}
+          <p className="lp-days-label">{cat ? "naps" : "days"} until May/June 2027 exams</p>
           <p className="lp-panel-foot">IGCSE &nbsp;·&nbsp; A-LEVEL &nbsp;·&nbsp; CAMBRIDGE</p>
         </div>
       </section>
@@ -314,11 +330,10 @@ export default function LandingPage() {
       {/* ───────── 02 INDEX ───────── */}
       <section className="lp-sec lp-index">
         <div className="lp-index-l">
-          <p className="lp-num">02 — THE INDEX</p>
-          <h2 className="lp-h2">Eleven classes. Built line by line.</h2>
+          <p className="lp-num">02 — {cat ? "THE CAT-ALOGUE" : "THE INDEX"}</p>
+          <h2 className="lp-h2">11 classes</h2>
           <p className="lp-body">
-            Every class follows its Cambridge syllabus in order: units, topics, and the individual statements examiners
-            write their questions from. Pick yours and start at 1.1.
+            Each class follows the syllabus order. Pick one and start at 1.1.
           </p>
           <div className="lp-eleven">11</div>
           <p className="lp-tiny-caps">8 IGCSE &nbsp;·&nbsp; 3 A-LEVEL &nbsp;·&nbsp; MORE EVERY TERM</p>
@@ -366,10 +381,9 @@ export default function LandingPage() {
       <section className="lp-sec">
         <p className="lp-num">03 — THE METHOD</p>
         <div className="lp-split">
-          <h2 className="lp-h2 lp-h2-wide">Five steps a topic. Same order, every time.</h2>
+          <h2 className="lp-h2 lp-h2-wide">How each topic works</h2>
           <p className="lp-body lp-narrow">
-            Every topic on POP runs the same loop, so you always know what&apos;s next, and you never revise something
-            the syllabus doesn&apos;t ask for.
+            Every topic goes: notes, flashcards, a quick quiz, past-paper questions, then a mock.
           </p>
         </div>
         <div className="lp-steps">
@@ -396,10 +410,9 @@ export default function LandingPage() {
       <section className="lp-sec lp-notes">
         <div>
           <p className="lp-num">04 — REVISION NOTES</p>
-          <h2 className="lp-h2 lp-h2-tight">Notes written against the syllabus, not around it.</h2>
+          <h2 className="lp-h2 lp-h2-tight">Notes that follow the syllabus</h2>
           <p className="lp-body">
-            Each note starts from the statement Cambridge prints in the syllabus and stops when you can answer it. No
-            padding, no off-syllabus tangents.
+            Each note covers one syllabus statement at a time. Supplement-only points are marked S.
           </p>
           <p className="lp-sub-caps">1.6 MOMENTUM &nbsp;·&nbsp; SYLLABUS STATEMENTS</p>
           <ul className="lp-statements">
@@ -476,10 +489,9 @@ export default function LandingPage() {
       <section className="lp-sec lp-papers">
         <div>
           <p className="lp-num">05 — PAST PAPERS</p>
-          <h2 className="lp-h2 lp-h2-tight">Every paper, with the mark scheme beside it.</h2>
+          <h2 className="lp-h2 lp-h2-tight">Past papers, split by question</h2>
           <p className="lp-body">
-            Physics 0625 papers from 2019 to 2025 (Papers 2, 4 and 6), split question by question and tagged to the topic
-            each one tests.
+            Physics 0625 papers from 2019 to 2025, one question at a time, tagged by topic, with mark schemes.
           </p>
           <ul className="lp-legend">
             <li><i className="k-done" />Done, with your score</li>
@@ -528,10 +540,9 @@ export default function LandingPage() {
         <div className="lp-quiz-in">
           <div>
             <p className="lp-num lp-white">06 — LIGHTNING QUIZ &amp; FLASHCARDS</p>
-            <h2 className="lp-h2 lp-white">Ten questions. Sixty seconds. No hiding.</h2>
+            <h2 className="lp-h2 lp-white">10-question quiz</h2>
             <p className="lp-body lp-white-soft">
-              Quick-fire questions pulled from the topics you&apos;ve just studied. Score 7 out of 10 to unlock that
-              topic&apos;s past-paper questions. Miss one and its flashcard comes back tomorrow.
+              Ten questions, 60 seconds. Score 7/10 to unlock that topic&apos;s past-paper questions. Questions you miss go into your flashcards.
             </p>
             <p className="lp-quiz-cards">
               412 Physics flashcards, scheduled by spaced repetition so they come back just before you&apos;d forget
@@ -590,10 +601,9 @@ export default function LandingPage() {
         <p className="lp-num">07 — MOCK EXAMS</p>
         <div className="lp-mock-head">
           <div>
-            <h2 className="lp-h2 lp-h2-wide">Sit it like the real thing. Get graded like it, too.</h2>
+            <h2 className="lp-h2 lp-h2-wide">Timed mock exams</h2>
             <p className="lp-body lp-mt2">
-              Timed papers built from real exam questions across a whole unit. When the clock stops, POP marks it against
-              the mark scheme and the latest grade boundaries.
+              Timed papers for a whole unit, marked against the mark scheme and the latest grade boundaries. Afterwards you see which topics lost you marks.
             </p>
           </div>
           <div className="lp-grade">
@@ -635,9 +645,6 @@ export default function LandingPage() {
           <div className="lp-next">
             <p className="lp-caps-blue">NEXT UP</p>
             <h3>Revise 4.3 Electric circuits. You dropped 9 marks there.</h3>
-            <p className="lp-fine">
-              We&apos;ve queued its notes, 18 flashcards and a lightning quiz. Retake the Unit 4 mock in 3 days.
-            </p>
             <div className="lp-cta-row">
               <Link href="/sign-up" className="lp-btn lp-btn-black">Start the revision →</Link>
               <Link href="/sign-up" className="lp-link-sm lp-blue">Download as PDF</Link>
@@ -650,10 +657,9 @@ export default function LandingPage() {
       <section className="lp-sec lp-arena">
         <div>
           <p className="lp-num">08 — POP ARENA</p>
-          <h2 className="lp-h2 lp-h2-tight">Revision, but someone&apos;s keeping score.</h2>
+          <h2 className="lp-h2 lp-h2-tight">POP Arena</h2>
           <p className="lp-body">
-            Live rounds every week. Everyone gets the same questions at the same time, and the fastest correct answers
-            climb the board.
+            A weekly live quiz. Everyone gets the same questions at the same time, and faster correct answers score more.
           </p>
           <p className="lp-live"><i />LIVE NOW &nbsp;·&nbsp; PHYSICS 0625 &nbsp;·&nbsp; ROUND 3 OF 5</p>
           <div className="lp-1284">1,284</div>
@@ -683,9 +689,9 @@ export default function LandingPage() {
       <section className="lp-sec lp-pricing">
         <div>
           <p className="lp-num">09 — PRICING</p>
-          <h2 className="lp-h2 lp-h2-tight">Free. All of it, for everyone.</h2>
+          <h2 className="lp-h2 lp-h2-tight">It&apos;s free</h2>
           <p className="lp-body lp-mt3">
-            Every note, quiz, flashcard, past paper and mock is free, for every class. No card, no ads, no catch.
+            No account fees and no ads. Senior students write the notes (see below).
           </p>
           <p className="lp-sub-caps lp-blue lp-mt3">QUESTIONS</p>
           <div className="lp-faq">
@@ -717,20 +723,79 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ───────── 10 CONTRIBUTORS ───────── */}
+      <section id="contributors" className="lp-sec lp-contrib">
+        <div>
+          <p className="lp-num">10 — CONTRIBUTORS</p>
+          <h2 className="lp-h2 lp-h2-tight">Written by students who sat these exams</h2>
+          <p className="lp-body lp-mt3">
+            Students who got an A or A* write and check the notes. You can too, and you get a certificate you can put on a university or job application.
+          </p>
+          <p className="lp-sub-caps lp-blue">WAYS TO HELP</p>
+          <div className="lp-faq">
+            {[
+              ["01", "Donate a note", "Write up a topic you aced, against the syllabus statements."],
+              ["02", "Review a note", "Check the maths, the units and the examiner's wording."],
+              ["03", "Proofread", "Catch typos and unclear wording before a note publishes."],
+            ].map(([n, t, d]) => (
+              <div key={n} className="lp-way">
+                <span>{n}</span>
+                <div><h4>{t}</h4><p>{d}</p></div>
+              </div>
+            ))}
+          </div>
+          <div className="lp-cta-row lp-mt2">
+            <Link href="/contribute" className="lp-btn lp-btn-black">Apply to contribute →</Link>
+            <Link href="/contribute" className="lp-link">Read the guidelines</Link>
+          </div>
+        </div>
+
+        <div>
+          <div className="lp-cert" role="img" aria-label="Example certificate of contribution">
+            <p className="lp-caps-blue">POP STUDYING &nbsp;·&nbsp; CERTIFICATE OF CONTRIBUTION</p>
+            <p className="lp-cert-small">Awarded to</p>
+            <p className="lp-cert-name">Your Name</p>
+            <p className="lp-cert-small">for writing and proofreading revision notes for</p>
+            <p className="lp-cert-sub">IGCSE Physics 0625</p>
+            <div className="lp-cert-foot"><span>Example certificate</span><span className="lp-cert-seal">POP</span></div>
+          </div>
+          <p className="lp-sub-caps lp-blue">WHO CAN APPLY</p>
+          <div className="lp-rows">
+            {[
+              "In Year 11–13, or finished school within the last year",
+              "Scored an A or A* in the subject you review",
+              "About two hours a week, whenever suits you",
+            ].map((t) => (
+              <div key={t} className="lp-row"><span>{t}</span><b>✓</b></div>
+            ))}
+          </div>
+          <p className="lp-fine">Certificates are issued after 10 approved contributions and can be verified online.</p>
+        </div>
+      </section>
+
       <div className="lp-last">
       {/* ───────── CTA ───────── */}
       <section className="lp-final">
-        <Circuit id="fc" />
+        {cat ? (
+          <>
+            <svg className="lp-slashes lp-slashes-final" viewBox="0 0 90 120" aria-hidden>
+              {[0, 16, 32].map((x) => <line key={x} x1={x + 20} y1="2" x2={x} y2="118" stroke="#d9692e" strokeWidth="2" />)}
+            </svg>
+            <CatFace className="lp-cat-final" />
+          </>
+        ) : (
+          <Circuit id="fc" />
+        )}
         <p className="lp-num lp-white">THE MAY/JUNE 2027 SERIES STARTS IN</p>
         <div className="lp-final-in">
           <div className="lp-big-days lp-final-days">{days}</div>
           <div>
-            <h2 className="lp-h2 lp-white">days. Plenty of time, if you start tonight.</h2>
+            <h2 className="lp-h2 lp-white">days until the first paper.</h2>
             <div className="lp-cta-row">
               <Link href="/sign-up" className="lp-btn lp-btn-white lp-blue">Start free →</Link>
               <Link href="/classes" className="lp-link lp-white">Browse classes →</Link>
             </div>
-            <p className="lp-fine lp-white-soft">Notes and quizzes are free forever. No card needed.</p>
+            <p className="lp-fine lp-white-soft">Free to use. No card needed.</p>
           </div>
         </div>
         <div className="lp-timeline">
@@ -743,8 +808,8 @@ export default function LandingPage() {
       <footer className="lp-footer">
         <div className="lp-foot-grid">
           <div>
-            <div className="lp-logo lp-logo-lg"><b>POP</b><span>Studying</span></div>
-            <p className="lp-fine">Exam prep for Cambridge IGCSE and A-Level, written against the syllabus.</p>
+            <div className="lp-logo lp-logo-lg"><Logo variant="black" /></div>
+            <p className="lp-fine">Free revision for Cambridge IGCSE and A-Level.</p>
           </div>
           <div>
             <h5>CLASSES</h5>
@@ -821,8 +886,8 @@ const css = `
 .lp-link{font-size:calc(15 * var(--u));font-weight:700;color:var(--blue)}
 .lp-link-sm{font-size:calc(14 * var(--u));font-weight:700}
 .lp-btn{display:inline-flex;align-items:center;justify-content:center;font-size:calc(15 * var(--u));font-weight:700;padding:0 calc(28 * var(--u));height:calc(48 * var(--u));white-space:nowrap}
-.lp-btn-black{background:#111;color:#fff!important}
-.lp-btn-white{background:#fff;color:#111}
+.lp-btn-black{background:var(--ink);color:#fff!important}
+.lp-btn-white{background:#fff;color:var(--ink)}
 .lp-btn-blue{background:var(--blue);color:#fff!important}
 .lp-btn-sm{height:calc(40 * var(--u));padding:0 calc(20 * var(--u));font-size:calc(14 * var(--u))}
 .lp-cta-row{display:flex;align-items:center;gap:calc(24 * var(--u));margin-top:calc(24 * var(--u));flex-wrap:wrap}
@@ -832,22 +897,21 @@ const css = `
 .lp-hero-main{padding:0 calc(56 * var(--u)) calc(40 * var(--u)) var(--pad);display:flex;flex-direction:column}
 .lp-nav{display:flex;justify-content:space-between;align-items:center;padding:calc(20 * var(--u)) 0 calc(16 * var(--u));border-bottom:1px solid #eee}
 .lp-logo{display:inline-flex;align-items:baseline;gap:calc(5 * var(--u));color:var(--blue)}
-.lp-logo b{font-size:calc(24 * var(--u));letter-spacing:-.02em}
-.lp-logo span{font-size:calc(14 * var(--u));color:#111}
-.lp-logo-lg{flex-direction:column;gap:0}.lp-logo-lg b{font-size:calc(24 * var(--u))}.lp-logo-lg span{font-size:calc(15 * var(--u))}
+.lp-logo img{height:calc(68 * var(--u));width:auto}
+.lp-logo-lg{flex-direction:column;gap:0}.lp-logo-lg img{height:calc(72 * var(--u))}
 .lp-nav-r{display:flex;align-items:center;gap:calc(22 * var(--u))}
 .lp-mobile-only{display:none}
 .lp-eyebrow{margin-top:auto}
-.lp-hero-lower{margin-bottom:auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:calc(48 * var(--u));border-top:3px solid #111;margin-top:calc(32 * var(--u));padding-top:calc(28 * var(--u))}
+.lp-hero-lower{margin-bottom:auto;display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:calc(48 * var(--u));border-top:3px solid var(--ink);margin-top:calc(32 * var(--u));padding-top:calc(28 * var(--u))}
 .lp-lede{font-size:calc(19 * var(--u));line-height:1.55;max-width:calc(520 * var(--u))}
 .lp-find{margin-top:calc(24 * var(--u));max-width:calc(520 * var(--u))}
 .lp-find label{font-size:calc(13 * var(--u));font-weight:700;color:#444;letter-spacing:.02em}
-.lp-find-row{display:flex;border-bottom:1px solid #111;align-items:center}
+.lp-find-row{display:flex;border-bottom:1px solid var(--ink);align-items:center}
 .lp-find input{flex:1;border:0;outline:0;font:inherit;font-size:calc(18 * var(--u));padding:calc(12 * var(--u)) 0;background:none;min-width:0}
 .lp-find input::placeholder{color:#777}
 .lp-find button{font-size:calc(15 * var(--u));padding:calc(12 * var(--u)) 0 calc(12 * var(--u)) calc(12 * var(--u));font-weight:700;color:var(--blue)}
 .lp-hero-lower .lp-cta-row{margin-top:calc(20 * var(--u))}
-.lp-week h4{font-size:calc(13 * var(--u));font-weight:700;color:var(--blue);padding-bottom:calc(8 * var(--u));border-bottom:1px solid #111;margin-bottom:0}
+.lp-week h4{font-size:calc(13 * var(--u));font-weight:700;color:var(--blue);padding-bottom:calc(8 * var(--u));border-bottom:1px solid var(--ink);margin-bottom:0}
 .lp-week-item{padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-week-item strong{display:block;font-size:calc(17 * var(--u))}
 .lp-week-item span{display:block;font-size:calc(15 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
@@ -867,14 +931,14 @@ const css = `
 .lp-index{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.3fr) minmax(0,1fr);gap:calc(40 * var(--u)) calc(48 * var(--u))}
 .lp-index-l .lp-body{margin-top:calc(28 * var(--u))}
 .lp-eleven{font-size:calc(170 * var(--u));line-height:.72;font-weight:700;letter-spacing:-.08em;color:var(--blue);margin:calc(48 * var(--u)) 0 calc(20 * var(--u)) calc(-6 * var(--u))}
-.lp-list-head{display:flex;justify-content:space-between;font-size:calc(13 * var(--u));font-weight:700;border-bottom:3px solid #111;padding-bottom:calc(8 * var(--u));color:#333}
+.lp-list-head{display:flex;justify-content:space-between;font-size:calc(13 * var(--u));font-weight:700;border-bottom:3px solid var(--ink);padding-bottom:calc(8 * var(--u));color:#333}
 .lp-list-head span{color:#444;font-size:calc(12 * var(--u))}
 .lp-class{display:flex;justify-content:space-between;align-items:center;padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-class h3{font-size:calc(20 * var(--u));letter-spacing:-.01em}
 .lp-class small{display:block;font-size:calc(14 * var(--u));color:var(--mute);margin-top:calc(4 * var(--u))}
 .lp-class em{font-style:normal;color:var(--blue);font-size:calc(26 * var(--u));font-weight:600;letter-spacing:-.02em}
 .lp-class:hover h3{color:var(--blue)}
-.lp-coming{margin-top:calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444;border-bottom:2px solid #111;padding-bottom:calc(8 * var(--u))}
+.lp-coming{margin-top:calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444;border-bottom:2px solid var(--ink);padding-bottom:calc(8 * var(--u))}
 .lp-vote{display:flex;justify-content:space-between;font-size:calc(15 * var(--u));padding:calc(13 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-vote button{color:var(--blue);font-weight:700;font-size:calc(14 * var(--u))}
 .lp-quote{margin:calc(40 * var(--u)) 0 0;border-left:3px solid var(--blue);padding-left:calc(12 * var(--u));font-style:italic;font-size:calc(16 * var(--u));line-height:1.45;max-width:calc(340 * var(--u));color:#222}
@@ -884,10 +948,10 @@ const css = `
 .lp-split .lp-narrow{margin-top:calc(20 * var(--u))}
 .lp-steps{display:grid;grid-template-columns:repeat(5,1fr);margin-top:calc(28 * var(--u))}
 .lp-step{position:relative}
-.lp-step-icon{height:calc(40 * var(--u));margin-bottom:calc(14 * var(--u));color:#111}
+.lp-step-icon{height:calc(40 * var(--u));margin-bottom:calc(14 * var(--u));color:var(--ink)}
 .lp-step-icon svg{height:calc(38 * var(--u));width:calc(38 * var(--u))}
 .lp-step-rule{height:calc(12 * var(--u));position:relative}
-.lp-step-rule::before{content:"";position:absolute;left:0;right:0;top:calc(4 * var(--u));border-top:3px solid #111}
+.lp-step-rule::before{content:"";position:absolute;left:0;right:0;top:calc(4 * var(--u));border-top:3px solid var(--ink)}
 .lp-step-rule i{position:absolute;left:0;top:0;width:calc(12 * var(--u));height:calc(12 * var(--u));background:var(--blue)}
 .lp-step-body{padding:calc(16 * var(--u)) calc(16 * var(--u)) 0 0;min-height:0;display:flex;flex-direction:column;border-left:0}
 .lp-step+.lp-step .lp-step-body{border-left:1px solid var(--rule);padding-left:0}
@@ -900,14 +964,14 @@ const css = `
 /* notes */
 .lp-notes{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr);gap:calc(64 * var(--u));align-items:start}
 .lp-sub-caps{margin-top:calc(56 * var(--u));margin-bottom:calc(6 * var(--u))}
-.lp-notes .lp-sub-caps{margin-top:calc(32 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;font-size:calc(13 * var(--u));color:var(--blue)}
+.lp-notes .lp-sub-caps{margin-top:calc(32 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid var(--ink);font-size:calc(13 * var(--u));color:var(--blue)}
 .lp-statements li{display:flex;gap:calc(14 * var(--u));font-size:calc(15 * var(--u));padding:calc(10 * var(--u)) 0;border-bottom:1px solid var(--rule);align-items:center}
 .lp-statements b{color:var(--blue);font-size:calc(14 * var(--u));min-width:calc(40 * var(--u))}
 .lp-statements span{flex:1}
 .lp-statements i{color:var(--blue);font-style:normal;font-size:calc(16 * var(--u))}
 .lp-note{border:1px solid #d8d8d8;border-top:3px solid var(--blue);padding:calc(26 * var(--u)) calc(34 * var(--u)) calc(26 * var(--u));background:#fff}
 .lp-crumb{font-size:calc(12 * var(--u));font-weight:600}
-.lp-note-title{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #111;padding-bottom:calc(10 * var(--u));margin-top:calc(10 * var(--u))}
+.lp-note-title{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:calc(10 * var(--u));margin-top:calc(10 * var(--u))}
 .lp-note-title h3{font-size:calc(34 * var(--u));letter-spacing:-.03em}
 .lp-note-title span{font-size:calc(12 * var(--u));font-weight:700;color:var(--blue)}
 .lp-note-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:calc(32 * var(--u));margin-top:calc(12 * var(--u))}
@@ -917,16 +981,16 @@ const css = `
 .lp-formula small{display:block;font-size:calc(13 * var(--u));color:#555;margin-top:calc(5 * var(--u))}
 .lp-italic{font-style:italic;margin-top:calc(6 * var(--u))}
 .lp-trolleys{position:relative;height:calc(84 * var(--u));margin-top:calc(6 * var(--u))}
-.lp-trolley{position:absolute;left:0;bottom:calc(16 * var(--u));width:calc(68 * var(--u));height:calc(26 * var(--u));border:1.5px solid #111;background:#fff;font-size:calc(12 * var(--u));font-weight:700;display:flex;align-items:center;justify-content:center}
-.lp-trolley i{position:absolute;bottom:calc(-7 * var(--u));width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:#111}
+.lp-trolley{position:absolute;left:0;bottom:calc(16 * var(--u));width:calc(68 * var(--u));height:calc(26 * var(--u));border:1.5px solid var(--ink);background:#fff;font-size:calc(12 * var(--u));font-weight:700;display:flex;align-items:center;justify-content:center}
+.lp-trolley i{position:absolute;bottom:calc(-7 * var(--u));width:calc(10 * var(--u));height:calc(10 * var(--u));border-radius:50%;background:var(--ink)}
 .lp-trolley i:nth-of-type(1){left:calc(8 * var(--u))}.lp-trolley i:nth-of-type(2){right:calc(8 * var(--u))}
 .lp-trolley-s{left:auto;right:0;width:calc(60 * var(--u))}
 .lp-arrow{position:absolute;left:46%;bottom:calc(25 * var(--u));color:var(--blue);font-size:calc(12 * var(--u))}
 .lp-speed{position:absolute;font-size:calc(12 * var(--u));top:calc(16 * var(--u))}
 .lp-speed-a{left:56%;color:var(--blue);font-weight:700}.lp-speed-b{right:2%}
-.lp-track{position:absolute;left:0;right:0;bottom:calc(6 * var(--u));border-top:1px solid #111}
+.lp-track{position:absolute;left:0;right:0;bottom:calc(6 * var(--u));border-top:1px solid var(--ink)}
 .lp-working{font-size:calc(14 * var(--u));line-height:1.6}
-.lp-ms{margin-top:calc(22 * var(--u));padding-bottom:calc(5 * var(--u));border-bottom:2px solid #111}
+.lp-ms{margin-top:calc(22 * var(--u));padding-bottom:calc(5 * var(--u));border-bottom:2px solid var(--ink)}
 .lp-mark{width:100%;border-collapse:collapse;font-size:calc(14 * var(--u))}
 .lp-mark th,.lp-mark td{text-align:left;padding:calc(6 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-mark th{color:var(--blue);width:calc(34 * var(--u))}
@@ -938,22 +1002,22 @@ const css = `
 .lp-legend{margin-top:calc(32 * var(--u));display:grid;gap:calc(10 * var(--u));font-size:calc(14 * var(--u))}
 .lp-legend li{display:flex;align-items:center;gap:calc(10 * var(--u))}
 .lp-legend i{width:calc(13 * var(--u));height:calc(13 * var(--u));display:block}
-.k-done{background:var(--blue)}.k-started{border:2px solid #111}.k-none{border:1px solid #ccc}
-.lp-papers .lp-sub-caps{margin-top:calc(28 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;font-size:calc(13 * var(--u))}
+.k-done{background:var(--blue)}.k-started{border:2px solid var(--ink)}.k-none{border:1px solid #ccc}
+.lp-papers .lp-sub-caps{margin-top:calc(28 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid var(--ink);font-size:calc(13 * var(--u))}
 .lp-filter{display:flex;justify-content:space-between;font-size:calc(14 * var(--u));padding:calc(12 * var(--u)) 0;border-bottom:1px solid var(--rule)}
 .lp-filter i{font-style:normal;color:var(--blue)}
 .lp-grid{display:grid;grid-template-columns:calc(64 * var(--u)) repeat(3,1fr);column-gap:calc(14 * var(--u));row-gap:calc(12 * var(--u));align-items:center}
 .lp-series{display:grid;grid-template-columns:repeat(3,1fr);column-gap:calc(6 * var(--u))}
-.lp-series b{grid-column:1/-1;font-size:calc(13 * var(--u));color:#222;border-bottom:1px solid #111;padding:calc(8 * var(--u)) 0 calc(6 * var(--u));margin-bottom:calc(4 * var(--u))}
+.lp-series b{grid-column:1/-1;font-size:calc(13 * var(--u));color:#222;border-bottom:1px solid var(--ink);padding:calc(8 * var(--u)) 0 calc(6 * var(--u));margin-bottom:calc(4 * var(--u))}
 .lp-series span{text-align:center;font-size:calc(12 * var(--u));font-weight:700;color:#555}
 .lp-year{font-size:calc(20 * var(--u));font-weight:700;letter-spacing:-.02em}
 .lp-cells{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(6 * var(--u))}
 .lp-cell{height:calc(46 * var(--u));display:flex;align-items:center;justify-content:center;font-size:calc(14 * var(--u));font-weight:700}
 .c-none{border:1px solid #d6d6d6}
 .c-done{background:var(--blue);color:#fff}
-.c-started{border:2px solid #111;background:#fff}
+.c-started{border:2px solid var(--ink);background:#fff}
 .c-new{border:1.5px solid var(--blue);color:var(--blue);font-size:calc(12 * var(--u))}
-.lp-grid-foot{display:flex;justify-content:space-between;gap:calc(16 * var(--u));flex-wrap:wrap;font-size:calc(14 * var(--u));border-top:1px solid #111;margin-top:calc(18 * var(--u));padding-top:calc(12 * var(--u))}
+.lp-grid-foot{display:flex;justify-content:space-between;gap:calc(16 * var(--u));flex-wrap:wrap;font-size:calc(14 * var(--u));border-top:1px solid var(--ink);margin-top:calc(18 * var(--u));padding-top:calc(12 * var(--u))}
 .lp-grid-wrap .lp-fine{margin-top:calc(22 * var(--u))}
 
 /* quiz */
@@ -992,18 +1056,18 @@ const css = `
 .lp-bounds{position:relative;height:calc(110 * var(--u));margin-top:calc(6 * var(--u))}
 .lp-bar{position:absolute;left:0;right:0;top:calc(34 * var(--u));height:calc(24 * var(--u));background:var(--beige)}
 .lp-bar i{display:block;height:100%}
-.lp-tick{position:absolute;top:calc(28 * var(--u));height:calc(32 * var(--u));border-left:1px solid #111}
+.lp-tick{position:absolute;top:calc(28 * var(--u));height:calc(32 * var(--u));border-left:1px solid var(--ink)}
 .lp-tick small{position:absolute;top:calc(36 * var(--u));left:calc(-12 * var(--u));font-size:calc(12 * var(--u));color:#555}
 .lp-gl{position:absolute;top:calc(60 * var(--u));transform:translateX(-50%);font-size:calc(14 * var(--u));font-weight:700}
 .lp-pin{position:absolute;top:0;transform:translateX(-50%);text-align:center;font-size:calc(13 * var(--u));font-weight:700;line-height:1.3}
 .lp-pin i{display:block;font-style:normal;font-size:calc(13 * var(--u));margin-top:2px}
 .lp-pin-last{color:#555}.lp-pin-you{color:var(--blue);top:calc(6 * var(--u))}
 .lp-mock-low{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(72 * var(--u));margin-top:calc(20 * var(--u));align-items:start}
-.lp-mock-low>div:first-child .lp-sub-caps{margin-top:0;padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;color:var(--blue);font-size:calc(12 * var(--u))}
+.lp-mock-low>div:first-child .lp-sub-caps{margin-top:0;padding-bottom:calc(6 * var(--u));border-bottom:2px solid var(--ink);color:var(--blue);font-size:calc(12 * var(--u))}
 .lp-marks{display:grid;gap:calc(14 * var(--u));margin-top:calc(14 * var(--u))}
 .lp-mrow{display:grid;grid-template-columns:minmax(0,1.3fr) 1fr calc(44 * var(--u));gap:calc(14 * var(--u));align-items:center;font-size:calc(15 * var(--u))}
 .lp-mrow div{height:calc(7 * var(--u));background:var(--beige)}
-.lp-mrow div i{display:block;height:100%;background:#111}
+.lp-mrow div i{display:block;height:100%;background:var(--ink)}
 .lp-mrow b{text-align:right;font-size:calc(15 * var(--u))}
 .lp-mrow.hi{color:var(--blue);font-weight:700}.lp-mrow.hi div i{background:var(--blue)}
 .lp-next{border-left:3px solid var(--blue);padding-left:calc(12 * var(--u))}
@@ -1019,7 +1083,7 @@ const css = `
 .lp-1284{font-size:calc(120 * var(--u));line-height:.85;font-weight:700;letter-spacing:-.035em;color:var(--blue);margin:calc(20 * var(--u)) 0 calc(14 * var(--u)) calc(-5 * var(--u));white-space:nowrap}
 .lp-arena .lp-fine{margin:0}
 .lp-board-head,.lp-board-row{display:grid;grid-template-columns:calc(56 * var(--u)) minmax(0,1fr) calc(96 * var(--u)) calc(90 * var(--u)) calc(100 * var(--u));align-items:center;gap:calc(6 * var(--u))}
-.lp-board-head{font-size:calc(13 * var(--u));font-weight:700;color:#444;padding-bottom:calc(6 * var(--u));border-bottom:3px solid #111}
+.lp-board-head{font-size:calc(13 * var(--u));font-weight:700;color:#444;padding-bottom:calc(6 * var(--u));border-bottom:3px solid var(--ink)}
 .lp-board-head span:last-child,.lp-board-row .pts{text-align:right}
 .lp-board-row{padding:calc(11 * var(--u)) 0;border-bottom:1px solid var(--rule);font-size:calc(15 * var(--u))}
 .lp-board-row .rank{font-size:calc(24 * var(--u));letter-spacing:-.03em;font-weight:600;padding-left:2px}
@@ -1035,7 +1099,7 @@ const css = `
 .lp-pricing{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.6fr);gap:calc(64 * var(--u));align-items:start;position:relative}
 .lp-pricing .lp-h2{max-width:calc(420 * var(--u));line-height:1.02}
 .lp-pricing .lp-body{max-width:calc(420 * var(--u));font-size:calc(17 * var(--u))}
-.lp-pricing .lp-sub-caps{font-size:calc(13 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid #111;margin-top:calc(44 * var(--u))}
+.lp-pricing .lp-sub-caps{font-size:calc(13 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid var(--ink);margin-top:calc(44 * var(--u))}
 .lp-faq>div{padding:calc(14 * var(--u)) 0 calc(12 * var(--u));border-bottom:1px solid var(--rule)}
 .lp-faq h4{font-size:calc(16 * var(--u))}.lp-faq p{font-size:calc(15 * var(--u));line-height:1.4;color:#444;margin-top:calc(6 * var(--u));max-width:calc(420 * var(--u))}
 .lp-table{position:relative;padding-right:0;display:grid;grid-template-columns:1fr calc(180 * var(--u));grid-template-rows:auto auto auto}
@@ -1043,7 +1107,7 @@ const css = `
 .lp-price{font-size:calc(48 * var(--u));font-weight:700;letter-spacing:-.05em;color:var(--blue);line-height:1.05;margin-top:calc(10 * var(--u))}
 .lp-price-card small{font-size:calc(12 * var(--u));color:#444}
 .lp-incl{grid-column:1;grid-row:1;margin:calc(104 * var(--u)) 0 0!important;border:0!important;font-size:calc(13 * var(--u));align-self:end}
-.lp-rows{grid-column:1/-1;grid-row:2;border-top:3px solid #111;margin-top:calc(6 * var(--u));z-index:1}
+.lp-rows{grid-column:1/-1;grid-row:2;border-top:3px solid var(--ink);margin-top:calc(6 * var(--u));z-index:1}
 .lp-row{display:grid;grid-template-columns:1fr calc(180 * var(--u));align-items:center;height:calc(46 * var(--u));border-bottom:1px solid var(--rule);font-size:calc(16 * var(--u))}
 .lp-row b{padding-left:calc(14 * var(--u));color:var(--blue);font-size:calc(15 * var(--u))}
 .lp-row b:only-child{font-size:calc(15 * var(--u))}
@@ -1070,7 +1134,7 @@ const css = `
 .lp-foot-grid a{display:block;font-size:calc(15 * var(--u));margin-bottom:calc(9 * var(--u))}
 .lp-foot-grid .lp-fine{max-width:calc(280 * var(--u));margin-top:calc(14 * var(--u))}
 .lp-foot-grid>div:last-child .lp-fine{margin:0 0 calc(20 * var(--u))}
-.lp-email{display:flex;border-bottom:1px solid #111;max-width:calc(260 * var(--u))}
+.lp-email{display:flex;border-bottom:1px solid var(--ink);max-width:calc(260 * var(--u))}
 .lp-email input{flex:1;border:0;outline:0;font:inherit;font-size:calc(15 * var(--u));padding:calc(10 * var(--u)) 0;min-width:0;background:none}
 .lp-email button{color:var(--blue);font-size:calc(17 * var(--u));padding:0 calc(4 * var(--u)) 0 calc(12 * var(--u))}
 .lp-legal{display:flex;justify-content:space-between;gap:calc(12 * var(--u));flex-wrap:wrap;border-top:1px solid var(--rule);margin-top:calc(26 * var(--u));padding:calc(14 * var(--u)) 0 calc(26 * var(--u));font-size:calc(13 * var(--u));color:#444}
@@ -1087,6 +1151,20 @@ const css = `
 }
 
 /* responsive */
+/* contributors */
+.lp-contrib{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:calc(64 * var(--u));align-items:start}
+.lp-contrib .lp-h2{max-width:calc(520 * var(--u))}
+.lp-contrib .lp-body{max-width:calc(480 * var(--u))}
+.lp-contrib .lp-sub-caps{font-size:calc(13 * var(--u));padding-bottom:calc(6 * var(--u));border-bottom:2px solid var(--ink);margin-top:calc(36 * var(--u))}
+.lp-contrib .lp-sub-caps+.lp-rows{border-top:0;margin-top:0}
+.lp-way{display:grid;grid-template-columns:calc(44 * var(--u)) 1fr;align-items:start}
+.lp-way>span{font-size:calc(15 * var(--u));font-weight:700;color:var(--blue);padding-top:calc(2 * var(--u))}
+.lp-cert{border:2px solid var(--ink);background:#fff;padding:calc(32 * var(--u));text-align:center}
+.lp-cert-small{font-size:calc(14 * var(--u));color:var(--mute);margin-top:calc(18 * var(--u))}
+.lp-cert-name{font-size:calc(44 * var(--u));font-weight:700;letter-spacing:-.03em;line-height:1.1;margin-top:calc(6 * var(--u))}
+.lp-cert-sub{font-size:calc(22 * var(--u));font-weight:700;color:var(--blue);margin-top:calc(6 * var(--u))}
+.lp-cert-foot{display:flex;justify-content:space-between;align-items:center;margin-top:calc(28 * var(--u));padding-top:calc(14 * var(--u));border-top:1px solid var(--rule);font-size:calc(13 * var(--u));color:var(--mute)}
+.lp-cert-seal{width:calc(44 * var(--u));height:calc(44 * var(--u));border-radius:50%;background:var(--blue);color:#fff;font-weight:700;display:grid;place-items:center;font-size:calc(12 * var(--u))}
 @media (max-width:1000px){
   .lp-sec,.lp-quiz,.lp-hero,.lp-last{min-height:0}
   .lp-nav{margin-bottom:calc(40 * var(--u))}.lp-eyebrow{margin-top:0}.lp-hero-lower{margin-bottom:0}
@@ -1096,7 +1174,7 @@ const css = `
   .lp-hero-main{max-width:none}
   .lp-hero-panel{min-height:calc(480 * var(--u))}
   .lp-desktop-only{display:none}.lp-mobile-only{display:flex}
-  .lp-index,.lp-notes,.lp-papers,.lp-arena,.lp-pricing,.lp-quiz-in,.lp-mock-low,.lp-final-in{grid-template-columns:1fr}
+  .lp-index,.lp-notes,.lp-papers,.lp-arena,.lp-pricing,.lp-contrib,.lp-quiz-in,.lp-mock-low,.lp-final-in{grid-template-columns:1fr}
   .lp-h2-tight{max-width:none}
   .lp-steps{grid-template-columns:repeat(2,1fr);row-gap:calc(30 * var(--u))}
   .lp-foot-grid{grid-template-columns:repeat(2,1fr)}
@@ -1121,4 +1199,28 @@ const css = `
   .lp-table,.lp-row{grid-template-columns:1fr calc(112 * var(--u))}
   .lp-steps{grid-template-columns:1fr}
 }
+
+/* cat mode: cream page, brown panels, orange accents */
+html[data-cat="on"] .lp{--blue:#c4501b;--ink:#2a2420;--mute:#6b5e52;--rule:#ecd9bd;--beige:#ecd9bd;--tint:#fbe3c2;background:#fdf3e1}
+html[data-cat="on"] .lp .lp-white{color:#fff1dc}
+html[data-cat="on"] .lp .lp-white-soft{color:rgba(255,241,220,.88)}
+html[data-cat="on"] .lp-hero-panel,html[data-cat="on"] .lp-quiz,html[data-cat="on"] .lp-final{background:#2a2420;color:#fff1dc}
+html[data-cat="on"] .lp-hero-panel .lp-link-sm{color:#fff1dc}
+html[data-cat="on"] .lp-big-days{color:#e8a05c}
+html[data-cat="on"] .lp-btn-white{background:#fff1dc;color:#c4501b}
+html[data-cat="on"] .lp-btn-blue,html[data-cat="on"] .k-done,html[data-cat="on"] .c-done,html[data-cat="on"] .lp-cert-seal{background:#d9692e;color:#fff1dc}
+html[data-cat="on"] .lp-note,html[data-cat="on"] .lp-cert,html[data-cat="on"] .c-started,html[data-cat="on"] .lp-trolley{background:#fffaf0}
+html[data-cat="on"] .lp-note{border-color:#ecd9bd;border-top-color:#d9692e}
+html[data-cat="on"] .lp-opts li.right{background:#fff1dc;color:#c4501b}
+html[data-cat="on"] .lp-q-bars i.on{background:#fff1dc}
+html[data-cat="on"] .lp-bar i{background:#d9692e!important}
+html[data-cat="on"] .lp-timeline i::before{background:#fff1dc}
+.lp-slashes{position:absolute;top:0;left:calc(28 * var(--u));width:calc(90 * var(--u));height:calc(120 * var(--u));z-index:1;pointer-events:none}
+.lp-slashes-final{top:calc(24 * var(--u));left:auto;right:calc(110 * var(--u));height:calc(140 * var(--u))}
+.lp-cat-cd{position:relative;margin:auto 0 0;z-index:1;display:flex;flex-direction:column;align-items:flex-start}
+.lp-cat-face{width:calc(240 * var(--u));max-width:100%;height:auto;align-self:center}
+.lp-cat-cd .lp-big-days{font-size:calc(150 * var(--u));margin-top:calc(14 * var(--u));margin-left:calc(-6 * var(--u));white-space:nowrap}
+.lp-paws{width:calc(150 * var(--u));height:auto;margin-top:calc(24 * var(--u));opacity:.9}
+.lp-cat-final{position:absolute;right:calc(56 * var(--u));bottom:calc(136 * var(--u));width:calc(240 * var(--u));height:auto;z-index:0;pointer-events:none}
+@media (max-width:640px){.lp-cat-final{display:none}.lp-cat-face{width:calc(150 * var(--u))}.lp-slashes-final{display:none}}
 `;

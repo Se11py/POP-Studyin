@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
 import OnboardingGuard from "@/components/OnboardingGuard";
 import StartupScreen from "@/components/StartupScreen";
+import CatMode from "@/components/CatMode";
 
 export const metadata: Metadata = {
   title: "POP",
@@ -34,13 +35,15 @@ export default function RootLayout({
 }>) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
         <head>
+          <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem("pop-cat-mode")==="1")document.documentElement.dataset.cat="on"}catch(e){}` }} />
           <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
           <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet" />
         </head>
         <body className="font-sans antialiased">
           <StartupScreen />
+          <CatMode />
           <ConvexClientProvider><OnboardingGuard>{children}</OnboardingGuard></ConvexClientProvider>
         </body>
       </html>

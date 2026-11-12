@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { useUser, UserButton } from "@clerk/nextjs";
+import { useCatMode } from "@/hooks/useCatMode";
 import AppSidebar, { SIDEBAR_WIDTH } from "@/components/AppSidebar";
 
 /**
@@ -28,6 +29,7 @@ export default function PageShell({
   titleAside?: ReactNode;
 }) {
   const { isLoaded, isSignedIn } = useUser();
+  const cat = useCatMode();
 
   return (
     <div
@@ -59,6 +61,19 @@ export default function PageShell({
         <p className="mt-4 text-[12px] font-bold uppercase tracking-wide text-[#1c3bff] md:mt-[clamp(16px,3vh,32px)]">{eyebrow}</p>
         <div className="mt-1 flex flex-wrap items-end justify-between gap-x-12 gap-y-3">
           <h1 className="text-[clamp(52px,5.4vw,104px)] font-bold leading-[1] tracking-[-0.04em]">{title}</h1>
+          {cat && (
+            <svg className="pointer-events-none ml-auto hidden h-[64px] w-[170px] lg:block" viewBox="0 0 170 64" aria-hidden fill="#e8742a">
+              {[[18, 36, -14], [78, 48, 8], [138, 22, -6]].map(([x, y, r]) => (
+                <g key={x} transform={`translate(${x} ${y}) rotate(${r})`}>
+                  <ellipse cx="0" cy="6" rx="9" ry="7" />
+                  <ellipse cx="-11" cy="-5" rx="3.6" ry="4.6" />
+                  <ellipse cx="-4" cy="-11" rx="3.6" ry="4.6" />
+                  <ellipse cx="4" cy="-11" rx="3.6" ry="4.6" />
+                  <ellipse cx="11" cy="-5" rx="3.6" ry="4.6" />
+                </g>
+              ))}
+            </svg>
+          )}
           {titleAside && <div className="max-w-[clamp(280px,30vw,460px)] pb-2 text-[clamp(14px,1.1vw,17px)] leading-snug text-[#4a4a44]">{titleAside}</div>}
         </div>
         <div className="mt-2 border-t-[4px] border-[#111]" />

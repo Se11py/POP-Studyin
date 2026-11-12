@@ -156,3 +156,36 @@
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.6);
   }
 }
+
+/* ---- Cat mode: toggle, Prof Meow, and a navy re-skin (html[data-cat="on"]) ---- */
+.cat-ui { position: fixed; right: 16px; bottom: 16px; z-index: 60; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; pointer-events: none; }
+.cat-ui > * { pointer-events: auto; }
+.cat-toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 14px; font: 700 13px/1 "Helvetica Neue", Helvetica, Arial, sans-serif; color: #111; background: #fff; border: 2px solid #111; cursor: pointer; }
+.cat-toggle:focus-visible { outline: 3px solid #111; outline-offset: 2px; }
+.cat-track { width: 34px; height: 18px; border: 2px solid #111; padding: 1px; display: inline-flex; }
+.cat-knob { width: 12px; height: 12px; background: #111; transition: transform 0.15s; }
+
+.cat-toggle[aria-checked="true"] .cat-knob { transform: translateX(16px); background: #fff; }
+.cat-mascot { display: flex; flex-direction: column; align-items: flex-end; }
+.cat-bubble { max-width: 220px; margin: 0 8px -6px 0; padding: 10px 12px; font: 600 13px/1.35 "Helvetica Neue", Helvetica, Arial, sans-serif; color: #111; background: #fff; border: 2px solid #2c2b6b; position: relative; z-index: 1; }
+.cat-prof { display: block; width: clamp(110px, 14vw, 190px); padding: 0; background: none; border: 0; cursor: pointer; transform-origin: 50% 100%; transition: transform 0.2s; }
+.cat-prof:hover { transform: rotate(-3deg) scale(1.03); }
+.cat-prof:focus-visible { outline: 3px solid #2c2b6b; outline-offset: 2px; }
+.cat-prof img { width: 100%; height: auto; display: block; }
+@media (prefers-reduced-motion: reduce) { .cat-prof, .cat-knob { transition: none; } }
+
+/* Cat mode palette: warm cream page, brown ink and sidebar, orange accents.
+   Whole-token class matches skip hover:/md: variants. */
+html[data-cat="on"] [class~="bg-[#0056D2]"], html[data-cat="on"] [class~="bg-[#1c3bff]"] { background-color: #d4601f; }
+html[data-cat="on"] [class~="text-[#0056D2]"], html[data-cat="on"] [class~="text-[#1c3bff]"] { color: #c4501b; }
+html[data-cat="on"] [class~="border-[#0056D2]"], html[data-cat="on"] [class~="border-[#1c3bff]"] { border-color: #c4501b; }
+html[data-cat="on"] aside[data-sidebar] { background-color: #2a2420; }
+html[data-cat="on"] [class~="bg-[#f4f1e8]"] { background-color: #fff1dc; }
+html[data-cat="on"] [class~="bg-[#111]"] { background-color: #d4601f; }
+html[data-cat="on"] [class~="text-[#111]"] { color: #2a2420; }
+html[data-cat="on"] [class~="border-[#111]"], html[data-cat="on"] [class~="border-t-[4px]"] { border-color: #2a2420; }
+html[data-cat="on"] [class~="border-[#d9d4c4]"] { border-color: #ecd9bd; }
+html[data-cat="on"] { --color-board-accent: #c4501b; --color-board-tint: #fde4c4; --color-board-hover: #fff1dc; --color-board-ink: #2a2420; --color-board-line: #ecd9bd; }
+html[data-cat="on"] .cat-track { background: #d4601f; border-color: #d4601f; }
+html[data-cat="on"] .cat-bubble { border-color: #d4601f; }
+html[data-cat="on"] .cat-toggle[aria-checked="true"] .cat-track { background: #d4601f; border-color: #d4601f; }

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
-import Image from "next/image";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
 import { Grip, ArrowRight, Pin, BookOpen } from "lucide-react";
@@ -226,7 +226,7 @@ export default function StudyRail({ classId }: { classId?: string }) {
 
       <div className="relative flex items-center gap-2 px-3 py-2 overflow-x-auto lg:overflow-visible lg:flex-col lg:h-full lg:px-0 lg:pt-5 lg:pb-4 lg:gap-0">
         <Link href="/dashboard" title="POP home" className="shrink-0 px-1 lg:mb-6 transition-transform hover:-rotate-3">
-          <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-7 w-auto lg:h-auto lg:w-[52px] mix-blend-multiply" priority />
+          <Logo variant="pop" className="h-7 w-auto lg:h-auto lg:w-[52px]" priority />
         </Link>
 
         {/* Current subject (or the subject picker) — the one big tile on the rail */}

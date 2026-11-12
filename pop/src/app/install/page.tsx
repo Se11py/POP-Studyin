@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft, CheckCircle2, Laptop, Share, Smartphone, TabletSmartphone } from "lucide-react";
 import { useIsStandalone } from "@/hooks/useIsStandalone";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
@@ -26,7 +26,7 @@ export default function InstallPage() {
       <header className="border-b border-gray-200 bg-white">
         <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center">
-            <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-8 w-auto" priority />
+            <Logo variant="black" className="h-8 w-auto" priority />
           </Link>
           <Link href="/landing" className="flex items-center gap-1.5 text-sm font-bold text-gray-500 hover:text-blue-700 transition-colors">
             <ArrowLeft size={16} />

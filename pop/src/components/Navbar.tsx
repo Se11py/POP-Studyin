@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useUser, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -85,7 +85,7 @@ export default function Navbar() {
     <header className="fixed top-0 inset-x-0 z-40 bg-white border-b border-gray-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <Link href="/" className="flex items-center shrink-0">
-          <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-8 w-auto" priority />
+          <Logo variant="black" className="h-8 w-auto" priority />
         </Link>
 
         {/* Desktop nav links */}

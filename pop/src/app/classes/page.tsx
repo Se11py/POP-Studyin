@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
+import { useCatMode } from "@/hooks/useCatMode";
 
 type Course = { name: string; code: string; meta: string; href?: string };
 type Group = { label: string; courses: Course[] };
@@ -77,11 +78,12 @@ const comingNext: Course[] = [
 ];
 
 function Row({ course }: { course: Course }) {
+  const cat = useCatMode();
   const inner = (
     <>
       <div className="min-w-0">
         <h3 className="!mb-0 text-[clamp(20px,1.75vw,28px)] font-bold leading-[1.1] tracking-[-0.02em]">{course.name}</h3>
-        <p className="!mb-0 mt-0.5 text-[clamp(11px,0.85vw,13px)] text-[#4a4a44]">{course.meta}</p>
+        <p className="!mb-0 mt-0.5 text-[clamp(11px,0.85vw,13px)] text-[#4a4a44]">{cat ? course.meta.replace("most picked", "the cat's pick") : course.meta}</p>
       </div>
       <span className="shrink-0 pl-4 text-[clamp(22px,1.9vw,30px)] font-bold tracking-[-0.02em] text-[#1c3bff]">{course.code}</span>
     </>
@@ -129,8 +131,17 @@ function Groups({ groups }: { groups: Group[] }) {
 }
 
 export default function ClassesPage() {
+  const cat = useCatMode();
   const [level, setLevel] = useState<"IGCSE" | "A-Level">("IGCSE");
   const [query, setQuery] = useState("");
+
+  // The landing page's search sends people here as /classes?q=...
+  useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("q");
+    if (!fromUrl) return;
+    const t = setTimeout(() => setQuery(fromUrl), 0);
+    return () => clearTimeout(t);
+  }, []);
 
   const q = query.trim().toLowerCase();
   const match = (c: Course) => !q || c.name.toLowerCase().includes(q) || c.code.includes(q);
@@ -143,7 +154,7 @@ export default function ClassesPage() {
   const nothing = left.length === 0 && right.length === 0 && sideList.length === 0;
 
   return (
-    <PageShell eyebrow="Classes — the 2026/27 index" title="The index.">
+    <PageShell eyebrow={cat ? "Classes — the 2026/27 cat-alogue" : "Classes — the 2026/27 index"} title={cat ? "The cat-alogue." : "The index."}>
       {/* Level tabs + search */}
       <div className="flex flex-wrap items-end justify-between gap-4 pt-2">
         <div className="flex gap-7" role="tablist">
@@ -164,7 +175,7 @@ export default function ClassesPage() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search a subject or code"
+          placeholder={cat ? "Sniff out a subject or code" : "Search a subject or code"}
           aria-label="Search a subject or code"
           className="w-full border-b border-[#111] bg-transparent py-2 text-[clamp(14px,1.1vw,17px)] outline-none placeholder:text-[#8d8978] sm:w-[min(100%,320px)]"
         />
@@ -191,7 +202,7 @@ export default function ClassesPage() {
 
       <div className="mt-auto border-t border-[#111] pt-4 text-[clamp(14px,1.1vw,17px)]">
         <p className="!mb-0">
-          Can&apos;t find your subject? New classes are added every term. Tell us which one you need{" "}
+          {cat ? "Can't find your subject? Tell us and we'll hunt it down" : "Can't find your subject? New classes are added every term. Tell us which one you need"}{" "}
           <Link href="/" className="font-bold">→</Link>
         </p>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SignInButton, useUser } from "@clerk/nextjs";
@@ -498,8 +499,7 @@ function Board() {
       </p>
       <header className="flex shrink-0 items-center justify-between gap-4 px-5 py-4 md:px-8">
         <Link href="/" className={`text-[clamp(26px,2.2vw,34px)] font-bold leading-none tracking-tight ${focus}`}>
-          <span className={blue}>POP</span>
-          <span className="text-[15px] font-normal text-board-ink">Studying</span>
+          <Logo variant="black" className="h-12 w-auto" priority />
         </Link>
         <Link href="/contribute" className={`text-sm font-bold ${blue} ${focus}`}>
           Become a contributor →

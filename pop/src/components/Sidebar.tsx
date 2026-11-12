@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useUser, UserButton, SignInButton, SignUpButton } from "@clerk/nextjs";
 import { motion, AnimatePresence } from "framer-motion";
@@ -29,7 +29,7 @@ function SidebarNavContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex flex-col h-full">
       <Link href="/" onClick={onNavigate} className="flex items-center px-5 h-20 shrink-0 border-b border-gray-100">
-        <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-9 w-auto" priority />
+        <Logo variant="black" className="h-9 w-auto" priority />
       </Link>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
@@ -203,7 +203,7 @@ export default function Sidebar() {
       {/* Mobile top bar */}
       <header className="md:hidden fixed top-0 inset-x-0 z-40 h-16 bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-4">
         <Link href="/" className="flex items-center">
-          <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-8 w-auto" priority />
+          <Logo variant="black" className="h-8 w-auto" priority />
         </Link>
         <button
           onClick={() => setDrawerOpen(true)}

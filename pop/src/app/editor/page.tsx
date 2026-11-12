@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Logo from "@/components/Logo";
 import Link from "next/link";
-import Image from "next/image";
 import { useUser, UserButton } from "@clerk/nextjs";
 import { motion } from "framer-motion";
 import {
@@ -60,7 +60,7 @@ export default function CourseraContentLibraryEditor() {
           {/* Left: Brand logo & Subtitle */}
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="flex items-center">
-              <Image src="/pop-logo.png" alt="POP Studying" width={1869} height={967} className="h-10 w-auto" priority />
+              <Logo variant="black" className="h-10 w-auto" priority />
             </Link>
 
             <div className="hidden md:flex items-center gap-2 pl-6 border-l border-gray-200">
